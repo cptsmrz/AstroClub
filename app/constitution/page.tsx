@@ -7,35 +7,32 @@ import remarkGfm from "remark-gfm";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import { CONSTITUTION_TEXT } from "@/lib/constitutionText";
 
-const CONSTITUTION_SUMMARY = `# EXECUTIVE SUMMARY
+const CONSTITUTION_SUMMARY = `# EXECUTIVE CHARTER & VISION
 
-AstroClub is a student-run, non-profit observational astronomy organization operating under the official guidance of the **Center for Cosmology, Astrophysics & Space Science (CCASS)** at GLA University, Mathura. Guided by the core tenet of *"members first"*, the Club aims to foster a dedicated community of astronomy enthusiasts, telescope builders, and student researchers. 
+We aren't just looking at coordinates; we are building the lenses. AstroClub is a student-first collective bridging deep-space exploration with hands-on optical engineering. Operating under the official wing of the **Center for Cosmology, Astrophysics & Space Science (CCASS)** at GLA University, Mathura, our vision is built on pure curiosity and peer-to-peer mentoring. 
 
-The Club is structured around an Executive Council, Specialized Officers, and Faculty Mentors. It administers its own hands-on telescope training, schedules weekly observation campaigns (Stella Nocturna), and manages its assets and finances with strict accountability to CCASS.
+Whether we are tracking satellite trains or grinding optical mirrors, we work as one crew. Our constitution exists to protect this culture, keep our resources secure, and hand down a lasting legacy of stellar observations to the classes that follow.
 
 ---
 
 # THE HEART OF THE CONSTITUTION
 
-### Member-First Principle
-Every person in AstroClub — from the new recruit to the veteran officer — holds the same fundamental identity: **Club Member**. Leadership roles (President, VP, General Secretary) represent temporary functional responsibilities, not hierarchy or rank.
+### Member-First Tenet
+Rank is temporary; membership is permanent. In AstroClub, every officer, lead, and founder is a **Club Member** first. Ranks are functional roles for coordination, not a hierarchy of status or authority.
 
-### Academic Excellence
-All position holders must maintain strict academic standards throughout their tenure:
+### Academic Guardrails
+To lead the club, officers must demonstrate personal discipline in their studies:
 * **President:** Minimum CGPA of **7.0**.
-* **Other Officers:** Minimum CGPA of **6.5**.
+* **Council Officers:** Minimum CGPA of **6.5**.
 
-### Equipment & Instrument Accountability
-All optical instruments, telescopes, mounts and learning material are the property of CCASS, GLA University. Using them follows the given protocols:
-* Standard check-outs require formal written approval from an **Authorized Approver**.
-* Independent access is restricted to approved **Members** and **Core Members**.
-* Active use is audited daily via the physical **Equipment Log (Telescope Diary)**.
+### Instrument Integrity & Ownership
+All telescopes, specialized mounts, and learning resources are CCASS university property. Access is governed by simple, strict protocols:
+* Standard check-outs require formal written permission from an **Authorized Approver**.
+* Independent telescope operation is restricted to verified **Members** and **Core Members**.
+* Every observation session must be logged in the physical **Equipment Log (Telescope Diary)**.
 
-### Attendance & Participation
-The club enforces strict active participation guidelines:
-* Attendance is mandatory for all formal calls for club work (meetings, newsletters, event setups).
-* **Three consecutive unexcused absences** result in immediate termination of membership.
-* Terminated members are barred from reinstatement for the current and subsequent semesters.
+### Active Engagement & Absence
+We value commitment. If a member misses **three consecutive formal sessions** (weekly observation runs, setups, or meetings) without a valid pre-approved excuse, their membership is immediately revoked for the semester.
 `;
 
 export default function ConstitutionPage() {

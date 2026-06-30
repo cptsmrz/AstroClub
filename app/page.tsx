@@ -24,19 +24,19 @@ interface Telescope {
 const CLUB_ROLES = [
   {
     title: "Super Admin",
-    description: "Oversees all club operations, manages core permissions, and acts as the primary liaison with the university."
+    description: "Oversees club operations, manages core permissions, and coordinates with GLA administration."
   },
   {
     title: "Tech Head",
-    description: "Maintains all observatory equipment, handles telescope calibration, and leads technical workshops."
+    description: "Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
   },
   {
     title: "Vice President",
-    description: "Coordinates event logistics, manages sponsorships, and steps in to lead during the President's absence."
+    description: "Coordinates event logistics, manages sponsorships, and handles external relations."
   },
   {
     title: "General Secretary",
-    description: "Handles documentation, meeting minutes, membership drives, and internal communications."
+    description: "Manages club records, schedules observation logs, and directs internal communications."
   }
 ];
 
@@ -59,16 +59,44 @@ export default function HomePage() {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Fetch NASA APOD
+    // Fetch NASA APOD with localStorage caching
     const fetchApod = async () => {
       try {
+        const today = new Date().toISOString().split("T")[0];
+
+        // Try to load from localStorage cache first
+        if (typeof window !== "undefined") {
+          const cached = localStorage.getItem("astroclub_apod_cache");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed.date === today) {
+              setApod(parsed);
+              setApodLoading(false);
+              return;
+            }
+          }
+        }
+
         const apiKey = process.env.NEXT_PUBLIC_NASA_API_KEY || "DEMO_KEY";
         const res = await fetch(
           `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`
         );
         if (!res.ok) throw new Error("Failed to fetch APOD");
         const data = await res.json();
-        setApod(data);
+        
+        const payload = {
+          date: today,
+          title: data.title,
+          url: data.url,
+          explanation: data.explanation
+        };
+
+        setApod(payload);
+
+        // Save to cache
+        if (typeof window !== "undefined") {
+          localStorage.setItem("astroclub_apod_cache", JSON.stringify(payload));
+        }
       } catch (error) {
         console.error("NASA APOD Error:", error);
         setApod({
@@ -106,199 +134,199 @@ export default function HomePage() {
   }, []);
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="text-3xl font-bold tracking-tight text-white mb-10">
+    <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
+      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
       {children}
     </h2>
   );
 
   const SkeletonCard = () => (
-    <div className="animate-pulse rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
-      <div className="h-40 rounded-lg bg-slate-800 mb-4" />
-      <div className="h-4 bg-slate-800 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-slate-800 rounded w-1/2" />
+    <div className="animate-pulse rounded-2xl border border-slate-900 bg-slate-900/30 p-6">
+      <div className="h-44 rounded-lg bg-slate-900 mb-4" />
+      <div className="h-4 bg-slate-900 rounded w-3/4 mb-2" />
+      <div className="h-3 bg-slate-900 rounded w-1/2" />
     </div>
   );
 
   return (
     <>
-      {/* Option B: Dynamic Zooming Starfield Wrapper */}
+      {/* Option B: Dynamic Zooming Starfield Wrapper with 15% Edge Buffer */}
       <div 
         className="fixed inset-0 pointer-events-none z-0 transition-transform duration-75 ease-out"
         style={{ 
-          transform: `scale(${1 + Math.min(scrollOffset * 0.0015, 0.6)})`,
-          opacity: Math.max(0.25, 1 - scrollOffset * 0.0008)
+          transform: `scale(${1.15 + Math.min(scrollOffset * 0.0004, 0.5)})`,
+          opacity: Math.max(0.25, 1 - scrollOffset * 0.0006)
         }}
       >
         <StarfieldCanvas />
       </div>
 
-      {/* SECTION 1: Integrated Hero Parallax (Option B zoom/fade transitions + Option C 3D Saturn Canvas) */}
-      <section className="relative w-full min-h-[90vh] py-12 md:py-16 overflow-hidden flex items-center border-b border-slate-900/50">
+      {/* SECTION 1: Integrated Hero Parallax (Restructured split layout) */}
+      <section className="relative w-full min-h-[85vh] py-8 md:py-12 overflow-hidden flex items-center border-b border-slate-900/40">
         
         <div 
-          className="relative w-full max-w-7xl mx-auto px-4 md:px-8 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 transition-all duration-75 ease-out"
+          className="relative w-full max-w-7xl mx-auto px-4 md:px-6 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-10 transition-all duration-75 ease-out"
           style={{ 
-            transform: `translateY(${scrollOffset * 0.25}px) scale(${Math.max(0.88, 1 - scrollOffset * 0.0008)})`,
-            opacity: Math.max(0, 1 - scrollOffset * 0.0018)
+            transform: `translateY(${scrollOffset * 0.22}px) scale(${Math.max(0.9, 1 - scrollOffset * 0.0006)})`,
+            opacity: Math.max(0, 1 - scrollOffset * 0.0016)
           }}
         >
           {/* Hero Landing Text */}
           <div className="w-full lg:max-w-2xl text-left">
-            <span className="text-xs font-bold tracking-[0.3em] text-cyan-400 uppercase block mb-3">
+            <span className="text-[10px] font-bold tracking-[0.4em] text-cyan-400 uppercase block mb-3">
               Center for Cosmology, Astrophysics & Space Science
             </span>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.15]">
               Witness the Unseen.<br />
-              <span className="bg-gradient-to-r from-slate-400 via-slate-200 to-slate-500 bg-clip-text text-transparent">Beyond the Stars.</span>
+              <span className="bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 bg-clip-text text-transparent">Beyond the Stars.</span>
             </h1>
-            <p className="text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl mb-8">
-              Welcome to the official portal of **AstroClub at GLA University, Mathura**. 
-              We are a community of stargazers, telescope designers, and student researchers. 
-              We custom-build high-precision optical instruments to bring the deep cosmos closer to home.
+            <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl mb-8">
+              Official portal of **AstroClub at GLA University, Mathura**. 
+              We are a community of student researchers, engineers, and stargazers building our own optical telescopes to bring deep-space observation closer to Earth.
             </p>
             
             <div className="flex flex-wrap gap-4">
               <Link 
                 href="/request"
-                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] shadow-lg shadow-white/5 active:scale-[0.98]"
+                className="rounded-lg bg-white px-5 py-3 text-xs font-semibold text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] shadow-lg shadow-white/5 active:scale-[0.98]"
               >
-                Request Observation Session
+                Request Observation
               </Link>
               <Link 
                 href="/about"
-                className="rounded-lg border border-slate-800 bg-slate-950/55 px-6 py-3 text-sm font-semibold text-slate-300 backdrop-blur-sm transition-all hover:border-slate-700 hover:text-white active:scale-[0.98]"
+                className="rounded-lg border border-slate-800 bg-slate-950/50 px-5 py-3 text-xs font-semibold text-slate-300 backdrop-blur-sm transition-all hover:border-slate-700 hover:text-white active:scale-[0.98]"
               >
                 Meet the Crew
               </Link>
             </div>
           </div>
 
-          {/* Option C: 3D Holographic Projected Saturn & Moons */}
+          {/* Option C: Clean Saturn Image Card */}
           <div className="w-full lg:w-auto flex justify-center">
             <OrbitingPlanetCanvas />
           </div>
 
         </div>
 
-        {/* Bottom Fade Gradient to blend with content background */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-950 to-transparent z-10 pointer-events-none" />
+        {/* Bottom Fade Gradient */}
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 to-transparent z-10 pointer-events-none" />
       </section>
 
-      {/* Main Page Content Wrapper */}
-      <div className="flex flex-col gap-24 pb-24 relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Main Page Content Wrapper (Restructured into Telemetry Dashboard Grid) */}
+      <div className="flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto">
         
-        {/* NASA APOD Section */}
-        <section>
-          <div className="mb-8">
-            <span className="text-xs font-bold tracking-[0.25em] text-slate-500 uppercase">Daily Cosmic Focus</span>
-            <h2 className="text-3xl font-bold tracking-tight text-white mt-2">
-              Astronomy Picture of the Day
-            </h2>
-          </div>
+        {/* TWO-COLUMN TELEMETRY GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* COLUMN 1: NASA APOD (7 Cols) */}
+          <section className="lg:col-span-7 flex flex-col">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                Daily Cosmic Focus
+              </h2>
+              <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800">
+                NASA APOD
+              </span>
+            </div>
 
-          {apodLoading ? (
-            <SkeletonCard />
-          ) : apod ? (
-            <div className="max-w-4xl rounded-2xl border border-slate-800/80 bg-slate-900/45 overflow-hidden shadow-2xl shadow-black/35 backdrop-blur-sm">
-              <div className="relative h-72 md:h-96 w-full bg-slate-900">
-                <img
-                  src={apod.url}
-                  alt={apod.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-6 md:p-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold text-white">
+            {apodLoading ? (
+              <SkeletonCard />
+            ) : apod ? (
+              <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
+                <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
+                  <img
+                    src={apod.url}
+                    alt={apod.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-5 md:p-6">
+                  <h3 className="text-lg font-semibold text-white mb-3">
                     {apod.title}
                   </h3>
-                  <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700/50">
-                    NASA APOD
-                  </span>
-                </div>
-                <div className="relative">
-                  <p
-                    className={`text-slate-400 leading-relaxed transition-all duration-300 ${
-                      !isExpanded ? "line-clamp-3" : ""
-                    }`}
-                  >
-                    {apod.explanation}
-                  </p>
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-3 text-sm font-semibold text-white hover:text-slate-300 transition-colors flex items-center gap-1"
-                  >
-                    {isExpanded ? "Show less" : "Read more"}
-                    <span>{isExpanded ? "↑" : "↓"}</span>
-                  </button>
+                  <div className="relative">
+                    <p
+                      className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${
+                        !isExpanded ? "line-clamp-3" : ""
+                      }`}
+                    >
+                      {apod.explanation}
+                    </p>
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+                    >
+                      {isExpanded ? "Show less" : "Read more"}
+                      <span>{isExpanded ? "↑" : "↓"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <p className="text-slate-500">Failed to load Astronomy Picture of the Day.</p>
-          )}
-        </section>
+            ) : (
+              <p className="text-slate-500 text-xs">Failed to load Astronomy Picture of the Day.</p>
+            )}
+          </section>
 
-        {/* SECTION 2: Stargazing Sessions (Stella Nocturna) */}
-        <section className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/35 p-8 md:p-10 backdrop-blur-sm">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800/10 rounded-full blur-3xl -z-10 pointer-events-none" />
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold tracking-[0.25em] text-slate-500 uppercase">Weekly Observation Sessions</span>
-            <h2 className="text-3xl font-bold tracking-tight text-white mt-2 mb-4">
-              Stella Nocturna
+          {/* COLUMN 2: Stella Nocturna & Session Request (5 Cols) */}
+          <section className="lg:col-span-5 flex flex-col h-full">
+            <h2 className="text-xl font-bold tracking-tight text-white mb-6 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+              Observation Deck
             </h2>
-            <p className="text-slate-400 leading-relaxed mb-6">
-              Join us every weekend on the university premises for celestial tracking. Witness satellites transit, spot bright constellations, and view deep-sky objects up close. 
-            </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 text-sm">
-              <div className="flex items-start gap-3">
-                <span className="text-xl select-none">📍</span>
-                <div>
-                  <h4 className="font-semibold text-white">Location</h4>
-                  <p className="text-slate-400">Basketball Ground, GLA University Campus</p>
+            <div className="rounded-xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-md shadow-xl shadow-black/20 flex flex-col justify-between flex-grow min-h-[340px] transition-all hover:border-slate-800/80">
+              <div>
+                <span className="text-[10px] font-bold tracking-[0.25em] text-slate-500 uppercase">Weekend Sessions</span>
+                <h3 className="text-lg font-bold text-white mt-1 mb-4">
+                  Stella Nocturna
+                </h3>
+                <p className="text-xs md:text-sm text-slate-400 leading-relaxed mb-6">
+                  Join us every weekend for celestial tracking. Observe satellites, map constellations, and view deep-sky bodies up close.
+                </p>
+
+                <div className="space-y-4 text-xs md:text-sm mb-8">
+                  <div className="flex items-start gap-3">
+                    <span className="text-base select-none">📍</span>
+                    <div>
+                      <h4 className="font-semibold text-slate-300">Location</h4>
+                      <p className="text-slate-400">Basketball Ground, GLA University Campus</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="text-base select-none">⏰</span>
+                    <div>
+                      <h4 className="font-semibold text-slate-300">Schedule</h4>
+                      <p className="text-slate-400">Fridays & Saturdays, 5:00 PM onwards</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-xl select-none">⏰</span>
-                <div>
-                  <h4 className="font-semibold text-white">Schedule</h4>
-                  <p className="text-slate-400">Fridays & Saturdays, 5:00 PM onwards</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 sm:col-span-2">
-                <span className="text-xl select-none">✨</span>
-                <div>
-                  <h4 className="font-semibold text-white">Observation Scope</h4>
-                  <p className="text-slate-400">
-                    Starlink satellite trains, meteor showers, seasonal constellations, Venus, Jupiter, and Saturn.
-                  </p>
-                </div>
-              </div>
+
+              <Link
+                href="/request"
+                className="w-full text-center rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition-colors hover:bg-slate-200 active:scale-[0.99]"
+              >
+                Book Session Ticket
+              </Link>
             </div>
+          </section>
 
-            <Link
-              href="/request"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-200"
-            >
-              Book Observation Session
-            </Link>
-          </div>
-        </section>
+        </div>
 
-        {/* SECTION 3: About Us & Club Roles */}
+        {/* SECTION 2: Core Leadership */}
         <section>
           <SectionTitle>Core Leadership</SectionTitle>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {CLUB_ROLES.map((role) => (
               <div
                 key={role.title}
-                className="group rounded-2xl border border-slate-800 bg-slate-900/35 p-6 transition-all hover:border-slate-700 hover:bg-slate-900/60 backdrop-blur-sm"
+                className="group rounded-xl border border-slate-900 bg-slate-950/40 p-5 transition-all hover:border-slate-800/80 hover:bg-slate-900/30 backdrop-blur-md"
               >
-                <h3 className="text-lg font-semibold text-white mb-3">
+                <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">
                   {role.title}
                 </h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed">
                   {role.description}
                 </p>
               </div>
@@ -306,22 +334,23 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* SECTION 4: Telescope Inventory */}
+        {/* SECTION 3: Telescope Inventory */}
         <section>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-white mb-2">
-                Handcrafted Instrument Catalog
+              <h2 className="text-xl font-bold tracking-tight text-white mb-1 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                Handcrafted Instruments
               </h2>
-              <p className="text-slate-400 text-lg">
+              <p className="text-slate-400 text-xs md:text-sm">
                 AstroClub members custom-make our own high-precision telescopes and optical rigs.
               </p>
             </div>
             <Link
               href="/equipment"
-              className="text-sm font-semibold text-slate-400 hover:text-white transition-colors self-start md:self-auto"
+              className="text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors self-start md:self-auto"
             >
-              Explore full catalog →
+              Full Catalog →
             </Link>
           </div>
 
@@ -332,38 +361,37 @@ export default function HomePage() {
               <SkeletonCard />
             </div>
           ) : telescopes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-800 bg-slate-900/20 py-16 text-center px-4">
-              <span className="text-4xl mb-3 select-none">🛠️</span>
-              <p className="text-slate-400 text-lg font-medium">Custom instruments cataloguing in progress</p>
-              <p className="text-slate-600 text-sm mt-1">Our engineering team is actively measuring optical tolerances.</p>
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-900 bg-slate-950/20 py-12 text-center px-4">
+              <span className="text-3xl mb-2 select-none">🔭</span>
+              <p className="text-slate-400 text-sm font-medium">Instruments inventory cataloguing in progress</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {telescopes.map((tele) => (
                 <div
                   key={tele.id}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/35 overflow-hidden transition-all hover:border-slate-700 backdrop-blur-sm"
+                  className="group rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden transition-all hover:border-slate-800/80 backdrop-blur-md"
                 >
-                  <div className="h-48 w-full bg-slate-900">
+                  <div className="h-44 w-full bg-slate-900/40 overflow-hidden">
                     {tele.image_url ? (
                       <img
                         src={tele.image_url}
                         alt={tele.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-700 bg-slate-950/40">
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-800 bg-slate-950/50">
                         <span className="text-3xl select-none">🔭</span>
-                        <span className="text-xs uppercase tracking-widest font-medium text-slate-500">Handcrafted</span>
+                        <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-600">Handcrafted</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-6">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">GLA Custom Rig</span>
-                    <h3 className="text-lg font-semibold text-white mt-1 mb-2">
+                  <div className="p-5">
+                    <span className="text-[9px] font-bold tracking-[0.2em] text-slate-500 uppercase">GLA Custom Rig</span>
+                    <h3 className="text-sm font-bold text-white mt-1 mb-2">
                       {tele.name}
                     </h3>
-                    <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">
                       {typeof tele.specs === 'object' 
                         ? Object.entries(tele.specs || {}).map(([k, v]) => `${k}: ${v}`).join(', ') 
                         : tele.specs}
