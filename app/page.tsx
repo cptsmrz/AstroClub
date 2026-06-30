@@ -23,11 +23,11 @@ interface Telescope {
 // --- Static Data ---
 const CLUB_ROLES = [
   {
-    title: "Super Admin",
+    title: "President",
     description: "Oversees club operations, manages core permissions, and coordinates with GLA administration."
   },
   {
-    title: "Tech Head",
+    title: "Technical Head",
     description: "Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
   },
   {
@@ -77,13 +77,10 @@ export default function HomePage() {
           }
         }
 
-        const apiKey = process.env.NEXT_PUBLIC_NASA_API_KEY || "DEMO_KEY";
-        const res = await fetch(
-          `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`
-        );
+        const res = await fetch("/api/apod");
         if (!res.ok) throw new Error("Failed to fetch APOD");
         const data = await res.json();
-        
+
         const payload = {
           date: today,
           title: data.title,
@@ -151,9 +148,9 @@ export default function HomePage() {
   return (
     <>
       {/* Option B: Dynamic Zooming Starfield Wrapper with 15% Edge Buffer */}
-      <div 
+      <div
         className="fixed inset-0 pointer-events-none z-0 transition-transform duration-75 ease-out"
-        style={{ 
+        style={{
           transform: `scale(${1.15 + Math.min(scrollOffset * 0.0004, 0.5)})`,
           opacity: Math.max(0.25, 1 - scrollOffset * 0.0006)
         }}
@@ -163,10 +160,10 @@ export default function HomePage() {
 
       {/* SECTION 1: Integrated Hero Parallax (Restructured split layout) */}
       <section className="relative w-full min-h-[85vh] py-8 md:py-12 overflow-hidden flex items-center border-b border-slate-900/40">
-        
-        <div 
+
+        <div
           className="relative w-full max-w-7xl mx-auto px-4 md:px-6 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-10 transition-all duration-75 ease-out"
-          style={{ 
+          style={{
             transform: `translateY(${scrollOffset * 0.22}px) scale(${Math.max(0.9, 1 - scrollOffset * 0.0006)})`,
             opacity: Math.max(0, 1 - scrollOffset * 0.0016)
           }}
@@ -181,22 +178,22 @@ export default function HomePage() {
               <span className="bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 bg-clip-text text-transparent">Beyond the Stars.</span>
             </h1>
             <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl mb-8">
-              Official portal of **AstroClub at GLA University, Mathura**. 
+              Welcome to AstroClub, GLA University, Mathura.
               We are a community of student researchers, engineers, and stargazers building our own optical telescopes to bring deep-space observation closer to Earth.
             </p>
-            
+
             <div className="flex flex-wrap gap-4">
-              <Link 
+              <Link
                 href="/request"
                 className="rounded-lg bg-white px-5 py-3 text-xs font-semibold text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] shadow-lg shadow-white/5 active:scale-[0.98]"
               >
                 Request Observation
               </Link>
-              <Link 
+              <Link
                 href="/about"
                 className="rounded-lg border border-slate-800 bg-slate-950/50 px-5 py-3 text-xs font-semibold text-slate-300 backdrop-blur-sm transition-all hover:border-slate-700 hover:text-white active:scale-[0.98]"
               >
-                Meet the Crew
+                Meet The Crew
               </Link>
             </div>
           </div>
@@ -214,10 +211,10 @@ export default function HomePage() {
 
       {/* Main Page Content Wrapper (Restructured into Telemetry Dashboard Grid) */}
       <div className="flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto">
-        
+
         {/* TWO-COLUMN TELEMETRY GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* COLUMN 1: NASA APOD (7 Cols) */}
           <section className="lg:col-span-7 flex flex-col">
             <div className="mb-6 flex items-center justify-between">
@@ -247,9 +244,8 @@ export default function HomePage() {
                   </h3>
                   <div className="relative">
                     <p
-                      className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${
-                        !isExpanded ? "line-clamp-3" : ""
-                      }`}
+                      className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${!isExpanded ? "line-clamp-3" : ""
+                        }`}
                     >
                       {apod.explanation}
                     </p>
@@ -392,8 +388,8 @@ export default function HomePage() {
                       {tele.name}
                     </h3>
                     <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">
-                      {typeof tele.specs === 'object' 
-                        ? Object.entries(tele.specs || {}).map(([k, v]) => `${k}: ${v}`).join(', ') 
+                      {typeof tele.specs === 'object'
+                        ? Object.entries(tele.specs || {}).map(([k, v]) => `${k}: ${v}`).join(', ')
                         : tele.specs}
                     </p>
                   </div>
