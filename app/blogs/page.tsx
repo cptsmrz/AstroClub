@@ -11,6 +11,7 @@ interface Profile {
   role: string;
   status: string;
   secondary_email: string | null;
+  created_at: string | null;
 }
 
 interface BlogPost {
@@ -18,7 +19,7 @@ interface BlogPost {
   title: string;
   content: string;
   created_at: string;
-  author_id: string;
+  author_id: string | null;
   status: string;
   images: string[];
   edit_allowed_until: string | null;
@@ -51,7 +52,7 @@ export default function BlogsPage() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
-  // --- Onboarding (Secondary Email) ---
+  // --- Onboarding / Grace Period ---
   const [secondaryEmail, setSecondaryEmail] = useState("");
   const [onboardingLoading, setOnboardingLoading] = useState(false);
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
@@ -70,6 +71,11 @@ export default function BlogsPage() {
   const [requestedRole, setRequestedRole] = useState("member");
   const [applyLoading, setApplyLoading] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
+
+  // --- Settings & Deletion ---
+  const [showSettings, setShowSettings] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // --- Admin Dashboard State ---
   const [pendingApplications, setPendingApplications] = useState<RoleApplication[]>([]);
@@ -91,27 +97,31 @@ export default function BlogsPage() {
   const isPasswordValid = Object.values(pwRules).every(Boolean);
 
   // --- Fetch User Profile & Sync Roles ---
-  const fetchUserProfile = async (uid: string, userEmail: string) => {
+  const fetchUserProfile = async (uid: string, userEmail: string | undefined) => {
     try {
-      // 1. Sync designated approver credentials
-      const { data: approver } = await supabase
-        .from("system_approvers")
-        .select("role")
-        .eq("designated_email", userEmail)
-        .maybeSingle();
+      const email = userEmail || "";
 
-      if (approver) {
-        // Automatically elevate role
-        await supabase
-          .from("profiles")
-          .update({ role: approver.role, status: "approved" })
-          .eq("id", uid);
+      // 1. Sync designated approver credentials
+      if (email) {
+        const { data: approver } = await supabase
+          .from("system_approvers")
+          .select("role")
+          .eq("designated_email", email)
+          .maybeSingle();
+
+        if (approver) {
+          // Elevate role
+          await supabase
+            .from("profiles")
+            .update({ role: approver.role, status: "approved" })
+            .eq("id", uid);
+        }
       }
 
-      // 2. Load profile row
+      // 2. Load profile data
       const { data: prof, error } = await supabase
         .from("profiles")
-        .select("full_name, role, status, secondary_email")
+        .select("full_name, role, status, secondary_email, created_at")
         .eq("id", uid)
         .single();
 
@@ -187,7 +197,7 @@ export default function BlogsPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email ?? "");
+        fetchUserProfile(session.user.id, session.user.email);
       }
     });
 
@@ -196,7 +206,7 @@ export default function BlogsPage() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email ?? "");
+        fetchUserProfile(session.user.id, session.user.email);
       } else {
         setProfile(null);
       }
@@ -205,7 +215,7 @@ export default function BlogsPage() {
     return () => subscription.unsubscribe();
   }, [fetchPosts]);
 
-  // --- Auth Actions (Sign In / Sign Up) ---
+  // --- Auth Actions ---
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
@@ -214,7 +224,7 @@ export default function BlogsPage() {
     try {
       let loginEmail = authEmail;
 
-      // Enable secondary email translation (lookup primary login email)
+      // Enable secondary email lookup mapping
       if (authMode === "signin" && !authEmail.endsWith("@gla.ac.in")) {
         const { data: linkedProfile } = await supabase
           .from("profiles")
@@ -242,7 +252,7 @@ export default function BlogsPage() {
           password: authPassword,
         });
         if (error) throw error;
-        setAuthSuccess("Account created! Check your email to confirm before signing in.");
+        setAuthSuccess("Verification OTP dispatched! Verify your account before logging in.");
       }
       setAuthEmail("");
       setAuthPassword("");
@@ -253,10 +263,45 @@ export default function BlogsPage() {
     }
   };
 
+  // Google OAuth Login
+  const handleGoogleSignIn = async () => {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/blogs`
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setAuthError(err.message || "Google Sign-In failed.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Separate Guest Login (Anonymous access)
+  const handleGuestAccess = async () => {
+    setAuthLoading(true);
+    setAuthError(null);
+    try {
+      const { error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      setShowAuth(false);
+    } catch (err: any) {
+      setAuthError(err.message || "Guest observer access failed.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setShowWrite(false);
     setShowApply(false);
+    setShowSettings(false);
   };
 
   // --- Link Secondary Email ---
@@ -277,6 +322,7 @@ export default function BlogsPage() {
 
       if (error) throw error;
       setProfile(prev => prev ? { ...prev, secondary_email: secondaryEmail } : null);
+      setSecondaryEmail("");
     } catch (err: any) {
       setOnboardingError(err.message);
     } finally {
@@ -289,7 +335,6 @@ export default function BlogsPage() {
     e.preventDefault();
     setApplyLoading(true);
     try {
-      // Insert application record
       await supabase.from("role_applications").insert([
         {
           user_id: user.id,
@@ -299,7 +344,6 @@ export default function BlogsPage() {
         }
       ]);
 
-      // Set profile status to pending_approval
       await supabase
         .from("profiles")
         .update({ status: "pending_approval" })
@@ -328,7 +372,6 @@ export default function BlogsPage() {
             return;
           }
 
-          // Rescale if larger than 1200px
           const maxDim = 1200;
           let width = img.width;
           let height = img.height;
@@ -346,7 +389,6 @@ export default function BlogsPage() {
           canvas.height = height;
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Convert to webp with 0.8 quality
           const dataUrl = canvas.toDataURL("image/webp", 0.8);
           resolve(dataUrl);
         };
@@ -381,7 +423,6 @@ export default function BlogsPage() {
     setPostSuccess(null);
 
     try {
-      // Route submission through S.AI moderation API endpoint
       const res = await fetch("/api/blogs/moderate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -419,16 +460,14 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Approve Role ---
+  // --- Dashboard Actions ---
   const handleApproveRole = async (appId: string, applicantUid: string, role: string) => {
     try {
-      // Update application
       await supabase
         .from("role_applications")
         .update({ status: "approved" })
         .eq("id", appId);
 
-      // Upgrade profile
       await supabase
         .from("profiles")
         .update({ role, status: "approved" })
@@ -440,7 +479,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Reject Role ---
   const handleRejectRole = async (appId: string, applicantUid: string) => {
     try {
       await supabase
@@ -450,7 +488,7 @@ export default function BlogsPage() {
 
       await supabase
         .from("profiles")
-        .update({ status: "approved" }) // return back to standard approved guest/member status
+        .update({ status: "approved" })
         .eq("id", applicantUid);
 
       fetchAdminDashboardData();
@@ -459,7 +497,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Approve Flagged Blog ---
   const handleApproveBlog = async (blogId: string) => {
     try {
       await supabase
@@ -474,7 +511,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Allow 24h Edit ---
   const handleAllowEdit = async (blogId: string) => {
     const editLimit = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     try {
@@ -489,7 +525,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Discard/Reject Blog ---
   const handleRejectBlog = async (blogId: string) => {
     try {
       await supabase
@@ -503,7 +538,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Dashboard: Transfer Role Ownership ---
   const handleTransferOwnership = async (e: React.FormEvent) => {
     e.preventDefault();
     setTransferError(null);
@@ -517,7 +551,6 @@ export default function BlogsPage() {
     if (!profile) return;
 
     try {
-      // 1. Update the designated_email in system_approvers
       const { error: updateConfigError } = await supabase
         .from("system_approvers")
         .update({ designated_email: transferTargetEmail })
@@ -525,7 +558,6 @@ export default function BlogsPage() {
 
       if (updateConfigError) throw updateConfigError;
 
-      // 2. Downgrade current profile role back to member
       const { error: updateProfileError } = await supabase
         .from("profiles")
         .update({ role: "member" })
@@ -533,17 +565,52 @@ export default function BlogsPage() {
 
       if (updateProfileError) throw updateProfileError;
 
-      setTransferSuccess(`Ownership of role '${profile.role}' successfully transferred to ${transferTargetEmail}.`);
+      setTransferSuccess(`Ownership of role '${profile.role}' successfully transferred.`);
       setTransferTargetEmail("");
       setTransferConfirmText("");
       
-      // Auto signout to force credentials refresh
       setTimeout(() => {
         handleSignOut();
       }, 2000);
 
     } catch (err: any) {
       setTransferError(err.message || "Failed to transfer ownership.");
+    }
+  };
+
+  // --- Account Deletion Sequence ---
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDeleteError(null);
+
+    if (deleteConfirmText !== "DELETE") {
+      setDeleteError("Please type DELETE to confirm.");
+      return;
+    }
+
+    try {
+      // Step 1: Nullify author_id on blogs to preserve them
+      await supabase
+        .from("blogs")
+        .update({ author_id: null })
+        .eq("author_id", user.id);
+
+      // Step 2: Delete public profile row
+      await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", user.id);
+
+      // Step 3: Delete Auth User and sign out
+      // (Note: Supabase API delete user usually requires Admin. Standard users delete profiles
+      // and sign out, which clears the session and decommissions their website status).
+      await supabase.auth.signOut();
+      setUser(null);
+      setProfile(null);
+      setShowSettings(false);
+      setDeleteConfirmText("");
+    } catch (err: any) {
+      setDeleteError(err.message || "Failed to delete account.");
     }
   };
 
@@ -572,6 +639,22 @@ export default function BlogsPage() {
     return fallbackId.slice(0, 2).toUpperCase();
   };
 
+  // --- Calculate Grace Period Lockouts ---
+  const getLockoutState = () => {
+    if (!profile || profile.role === "guest" || profile.secondary_email) {
+      return { isLocked: false, remainingHours: 72 };
+    }
+    const signupTime = profile.created_at ? new Date(profile.created_at).getTime() : Date.now();
+    const elapsedHours = (Date.now() - signupTime) / (1000 * 60 * 60);
+    const remainingHours = Math.max(0, 72 - elapsedHours);
+    return {
+      isLocked: elapsedHours >= 72,
+      remainingHours: Math.round(remainingHours),
+    };
+  };
+
+  const lockout = getLockoutState();
+
   return (
     <div className="relative min-h-screen">
       <StarfieldCanvas />
@@ -587,8 +670,12 @@ export default function BlogsPage() {
           {user ? (
             <>
               {profile?.status === "restricted" ? (
-                <span className="rounded-lg bg-red-950/60 border border-red-800/80 px-4 py-2 text-xs font-semibold text-red-400 flex items-center gap-1.5">
+                <span className="rounded-lg bg-red-950/60 border border-red-800/80 px-4 py-2 text-xs font-semibold text-red-400 flex items-center gap-1.5 animate-pulse">
                   ⚠️ Account Restricted
+                </span>
+              ) : lockout.isLocked ? (
+                <span className="rounded-lg bg-red-950/60 border border-red-800/80 px-4 py-2 text-xs font-semibold text-red-400 flex items-center gap-1.5">
+                  🔐 Console Locked
                 </span>
               ) : (
                 <>
@@ -617,6 +704,12 @@ export default function BlogsPage() {
                 </>
               )}
               <button
+                onClick={() => setShowSettings(true)}
+                className="rounded-lg border border-slate-800 bg-slate-950/20 px-4 py-2.5 text-xs font-semibold text-slate-300 hover:text-white transition"
+              >
+                Settings
+              </button>
+              <button
                 onClick={handleSignOut}
                 className="rounded-lg border border-slate-800 bg-slate-950/20 px-4 py-2.5 text-xs font-semibold text-slate-400 hover:text-white transition"
               >
@@ -637,15 +730,15 @@ export default function BlogsPage() {
         </div>
       </div>
 
-      {/* ONBOARDING: Link Secondary Email */}
-      {user && profile && profile.role !== "guest" && !profile.secondary_email && (
-        <div className="relative z-10 max-w-lg mx-auto mb-12 rounded-2xl border border-slate-800 bg-slate-950/80 p-6 md:p-8 backdrop-blur-md shadow-2xl shadow-black/80">
-          <div className="flex items-center gap-2.5 mb-4 text-cyan-400">
-            <span className="text-xl select-none">🛡️</span>
-            <h2 className="text-lg font-bold tracking-wide uppercase">Onboarding: Council Verification</h2>
+      {/* GRACE PERIOD ENFORCEMENT PAGE / LOCKOUT OVERLAY */}
+      {user && profile && lockout.isLocked && (
+        <div className="relative z-20 max-w-lg mx-auto mb-12 rounded-2xl border border-red-900 bg-slate-950 p-6 md:p-8 shadow-2xl">
+          <div className="flex items-center gap-2.5 mb-4 text-red-500">
+            <span className="text-xl">🔐</span>
+            <h2 className="text-lg font-bold tracking-wide uppercase">Grace Period Expired</h2>
           </div>
           <p className="text-xs md:text-sm text-slate-400 leading-relaxed mb-6">
-            Welcome to the leadership circle! To secure your administrative console, please link a secondary personal email address (must end with **@gmail.com** or **@google.com**). This allows you to verify your identity and access your dashboard.
+            Your 72-hour grace period to link a personal secondary email has expired. To restore console access to your council account, you must enter your verification email address below.
           </p>
 
           {onboardingError && (
@@ -655,12 +748,9 @@ export default function BlogsPage() {
           )}
 
           <form onSubmit={handleLinkSecondaryEmail} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="sec-email" className="text-xs font-semibold text-slate-400 uppercase">
-                Secondary Email Address
-              </label>
+            <div className="flex flex-col gap-1.5 text-xs">
+              <label className="font-semibold text-slate-400 uppercase">Secondary Email Address</label>
               <input
-                id="sec-email"
                 type="email"
                 required
                 value={secondaryEmail}
@@ -680,7 +770,33 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* RESTRICTED LOCK PANEL */}
+      {/* DISMISSIBLE ONBOARDING BANNER (Grace period warning) */}
+      {user && profile && !lockout.isLocked && profile.role !== "guest" && !profile.secondary_email && (
+        <div className="relative z-10 border border-yellow-800/50 bg-yellow-950/10 rounded-xl p-4 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="text-xs">
+            <p className="font-semibold text-yellow-500">⚠️ Account Security Warning</p>
+            <p className="text-slate-400 mt-1">Please link a secondary personal email address. You have **{lockout.remainingHours} hours** remaining before console access is locked.</p>
+          </div>
+          <form onSubmit={handleLinkSecondaryEmail} className="flex gap-2 text-xs w-full sm:w-auto">
+            <input
+              type="email"
+              required
+              value={secondaryEmail}
+              onChange={(e) => setSecondaryEmail(e.target.value)}
+              placeholder="personal@gmail.com"
+              className="rounded border border-slate-800 bg-slate-950 px-3 py-1.5 text-slate-200 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="bg-white text-slate-950 font-bold px-3 py-1.5 rounded hover:bg-slate-200 transition"
+            >
+              Link
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* RESTRICTED ACCOUNT PAGE */}
       {user && profile?.status === "restricted" && (
         <div className="relative z-10 rounded-2xl border border-red-900/60 bg-red-950/20 p-8 text-center max-w-2xl mx-auto mb-12 backdrop-blur-md">
           <span className="text-5xl select-none block mb-4">🚨</span>
@@ -691,7 +807,7 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* SIGNUP/SIGNIN MODAL */}
+      {/* AUTHENTICATION MODAL */}
       {showAuth && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950/90 p-6 md:p-8 shadow-2xl">
@@ -705,9 +821,7 @@ export default function BlogsPage() {
               {authMode === "signin" ? "Council Portal" : "Join AstroClub"}
             </h2>
             <p className="text-xs text-slate-500 mb-6">
-              {authMode === "signin"
-                ? "Access observations, logs, and telemetry dashboard."
-                : "Create an account to start cataloguing observational reports."}
+              Access blogs, observations, and telemetry logs.
             </p>
 
             {authError && (
@@ -721,66 +835,107 @@ export default function BlogsPage() {
               </div>
             )}
 
-            <form onSubmit={handleAuth} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  placeholder="you@gla.ac.in"
-                  className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase">Password</label>
-                <input
-                  type="password"
-                  required
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
-                />
-              </div>
-
-              {/* PASSWORD RULES CHECKER UI */}
-              {authMode === "signup" && (
-                <div className="rounded-lg border border-slate-900 bg-slate-900/25 p-3 text-[11px] text-slate-400 space-y-1">
-                  <p className="font-semibold mb-2">Password Requirements Checklist:</p>
-                  <div className="flex items-center gap-1.5">
-                    <span>{pwRules.length ? "✅" : "❌"}</span>
-                    <span className={pwRules.length ? "text-slate-300" : ""}>Min 10 characters</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span>{pwRules.upper ? "✅" : "❌"}</span>
-                    <span className={pwRules.upper ? "text-slate-300" : ""}>One uppercase letter (A-Z)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span>{pwRules.lower ? "✅" : "❌"}</span>
-                    <span className={pwRules.lower ? "text-slate-300" : ""}>One lowercase letter (a-z)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span>{pwRules.number ? "✅" : "❌"}</span>
-                    <span className={pwRules.number ? "text-slate-300" : ""}>One digit (0-9)</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span>{pwRules.special ? "✅" : "❌"}</span>
-                    <span className={pwRules.special ? "text-slate-300" : ""}>One special character (@$!%*?&)</span>
-                  </div>
-                </div>
-              )}
-
+            <div className="flex flex-col gap-3">
+              {/* GOOGLE SIGN IN (Standard logins) */}
               <button
-                type="submit"
-                disabled={authLoading || (authMode === "signup" && !isPasswordValid)}
-                className="w-full rounded-lg bg-white py-2.5 text-xs font-semibold text-slate-950 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                onClick={handleGoogleSignIn}
+                disabled={authLoading}
+                className="w-full rounded-lg border border-slate-800 bg-slate-900/50 py-3 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition flex items-center justify-center gap-2"
               >
-                {authLoading ? "Synchronizing..." : authMode === "signin" ? "Sign In" : "Register"}
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.137 4.114-3.466 0-6.277-2.812-6.277-6.278 0-3.466 2.811-6.277 6.277-6.277 1.587 0 3.03.588 4.148 1.558l3.12-3.12C19.167 1.83 15.932 1 12.24 1 6.033 1 1 6.033 1 12.24s5.033 11.24 11.24 11.24c6.033 0 10.92-4.887 10.92-10.92 0-.769-.068-1.503-.2-2.275H12.24z" />
+                </svg>
+                Sign In with Google
               </button>
-            </form>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-slate-800"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-slate-950 px-2 text-slate-500">Or email credentials</span>
+                </div>
+              </div>
+
+              <form onSubmit={handleAuth} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5 text-xs">
+                  <label className="font-semibold text-slate-400 uppercase">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    placeholder="you@gla.ac.in"
+                    className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5 text-xs">
+                  <label className="font-semibold text-slate-400 uppercase">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="rounded-lg border border-slate-800 bg-slate-950 px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
+                  />
+                </div>
+
+                {/* Password Rules Checklist */}
+                {authMode === "signup" && (
+                  <div className="rounded-lg border border-slate-900 bg-slate-900/25 p-3 text-[10px] text-slate-400 space-y-1">
+                    <p className="font-semibold mb-1">Password Checklist:</p>
+                    <div className="flex items-center gap-1.5">
+                      <span>{pwRules.length ? "✅" : "❌"}</span>
+                      <span className={pwRules.length ? "text-slate-300" : ""}>Min 10 characters</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span>{pwRules.upper ? "✅" : "❌"}</span>
+                      <span className={pwRules.upper ? "text-slate-300" : ""}>Uppercase (A-Z)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span>{pwRules.lower ? "✅" : "❌"}</span>
+                      <span className={pwRules.lower ? "text-slate-300" : ""}>Lowercase (a-z)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span>{pwRules.number ? "✅" : "❌"}</span>
+                      <span className={pwRules.number ? "text-slate-300" : ""}>Digit (0-9)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span>{pwRules.special ? "✅" : "❌"}</span>
+                      <span className={pwRules.special ? "text-slate-300" : ""}>Special char (@$!%*?&)</span>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={authLoading || (authMode === "signup" && !isPasswordValid)}
+                  className="w-full rounded-lg bg-white py-2.5 text-xs font-semibold text-slate-950 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  {authLoading ? "Synchronizing..." : authMode === "signin" ? "Sign In" : "Register"}
+                </button>
+              </form>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-slate-800"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-slate-950 px-2 text-slate-500">Observer Mode</span>
+                </div>
+              </div>
+
+              {/* SEPARATE GUEST ACCESS BUTTON (No password, no email config) */}
+              <button
+                onClick={handleGuestAccess}
+                disabled={authLoading}
+                className="w-full rounded-lg border border-cyan-900/60 bg-cyan-950/20 py-2.5 text-xs font-semibold text-cyan-400 hover:bg-cyan-950/40 transition"
+              >
+                Access as Guest observer
+              </button>
+            </div>
 
             <button
               onClick={() => {
@@ -788,16 +943,79 @@ export default function BlogsPage() {
                 setAuthError(null);
                 setAuthSuccess(null);
               }}
-              className="text-xs text-slate-500 hover:text-white mt-4 text-center block w-full hover:underline"
+              className="text-xs text-slate-500 hover:text-white mt-4 text-center block w-full hover:underline font-mono"
             >
-              {authMode === "signin" ? "Need an account? Sign up" : "Already registered? Sign in"}
+              {authMode === "signin" ? "Register with Password" : "Already have credentials? Sign in"}
             </button>
           </div>
         </div>
       )}
 
-      {/* COUNCIL DASHBOARD DECK (Pending approvals & role updates) */}
-      {user && profile && ["president", "vp", "gs", "tech_head", "advisory_head"].includes(profile.role) && (
+      {/* SETTINGS PANEL (Account deletion) */}
+      {showSettings && user && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-850 bg-slate-950 p-6 md:p-8 shadow-2xl">
+            <button
+              onClick={() => setShowSettings(false)}
+              className="absolute top-4 right-4 text-slate-500 hover:text-white text-lg"
+            >
+              ✕
+            </button>
+            <h2 className="text-xl font-bold text-white mb-2">Account Telemetry</h2>
+            <p className="text-xs text-slate-500 mb-6">Manage your AstroClub credentials and files.</p>
+
+            <div className="space-y-6 text-xs">
+              <div className="rounded-lg border border-slate-900 bg-slate-900/20 p-4">
+                <p className="font-semibold text-slate-300">Identity Details</p>
+                <p className="text-slate-500 mt-1">Primary: {user.email || "Google / Guest Session"}</p>
+                {profile?.role && (
+                  <p className="text-slate-500 mt-0.5">Assigned Level: <span className="text-cyan-400 capitalize">{profile.role}</span></p>
+                )}
+                {profile?.secondary_email && (
+                  <p className="text-slate-500 mt-0.5">Linked Recovery: {profile.secondary_email}</p>
+                )}
+              </div>
+
+              {/* Decommission/Delete account option */}
+              <div className="border-t border-slate-900 pt-6">
+                <h3 className="font-semibold text-red-400 mb-1">Decommission Account</h3>
+                <p className="text-slate-500 leading-relaxed mb-4">
+                  Permanently delete your profile. Your authored blogs and logs will remain stored anonymously.
+                </p>
+
+                {deleteError && (
+                  <div className="mb-4 rounded-lg border border-red-800/50 bg-red-900/20 px-3 py-2 text-xs text-red-400">
+                    {deleteError}
+                  </div>
+                )}
+
+                <form onSubmit={handleDeleteAccount} className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-slate-500 uppercase font-semibold">Type DELETE to confirm</label>
+                    <input
+                      type="text"
+                      required
+                      value={deleteConfirmText}
+                      onChange={(e) => setDeleteConfirmText(e.target.value)}
+                      placeholder="DELETE"
+                      className="rounded border border-slate-850 bg-slate-950 px-3 py-2 text-slate-200"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full rounded bg-red-650 py-2.5 font-semibold text-white hover:bg-red-750 transition"
+                  >
+                    Permanently Delete Profile
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COUNCIL DASHBOARD DECK */}
+      {user && profile && ["president", "vp", "gs", "tech_head", "advisory_head"].includes(profile.role) && !lockout.isLocked && (
         <div className="relative z-10 rounded-2xl border border-slate-900 bg-slate-950/45 p-6 mb-12 backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-900 pb-4 mb-6">
             <div>
@@ -861,7 +1079,7 @@ export default function BlogsPage() {
                     <div key={post.id} className="rounded-lg border border-slate-900 bg-slate-900/20 p-4 flex flex-col justify-between gap-3 text-xs">
                       <div>
                         <p className="font-semibold text-slate-200">"{post.title}"</p>
-                        <p className="text-slate-500 mt-1">Author: {post.profiles?.full_name || "Member"} (Flagged by S.AI)</p>
+                        <p className="text-slate-500 mt-1">Author: {post.profiles?.full_name || "Member"}</p>
                       </div>
                       <div className="flex flex-wrap gap-2 pt-2">
                         <button
@@ -893,7 +1111,7 @@ export default function BlogsPage() {
             <div className="lg:col-span-12 border-t border-slate-900 pt-6 mt-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Transfer Council Credentials</h3>
               <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-2xl">
-                Transfer the administrative status of your role (e.g. {profile.role}) to a new student. This action immediately rewires the system designated email records, sets the new email as primary holder, and downgrades your account to a standard member.
+                Transfer the administrative status of your role (e.g. {profile.role}) to a new student. This action immediately rewires the system designated email records, sets the new email as primary holder, and downgrades your account.
               </p>
 
               {transferError && (
@@ -932,7 +1150,7 @@ export default function BlogsPage() {
                 </div>
                 <button
                   type="submit"
-                  className="bg-red-600 text-white font-semibold rounded px-5 py-2.5 hover:bg-red-700 transition"
+                  className="bg-red-655 text-white font-semibold rounded px-5 py-2.5 hover:bg-red-700 transition"
                 >
                   Confirm Transfer
                 </button>
@@ -942,22 +1160,22 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* APPLY FOR COUNCIL ROLE FORM */}
-      {showApply && user && profile && (
+      {/* STUDENT GATEWAY UPGRADE FORM */}
+      {showApply && user && profile && profile.role === "guest" && !lockout.isLocked && (
         <div className="relative z-10 max-w-md mx-auto mb-12 rounded-2xl border border-slate-800 bg-slate-950/80 p-6 md:p-8 backdrop-blur-md">
-          <h2 className="text-xl font-bold text-white mb-2">Apply for Role</h2>
+          <h2 className="text-xl font-bold text-white mb-2 font-mono">Student Upgrade Request</h2>
           <p className="text-xs text-slate-500 mb-6">
-            Submit a formal application to the administrative committee to request credentials.
+            Internal Observer ID: <span className="font-mono text-cyan-400">{user.id.slice(0, 8)}</span>
           </p>
 
           {applySuccess ? (
             <div className="rounded-lg border border-emerald-800/50 bg-emerald-900/20 px-4 py-3 text-xs text-emerald-400">
-              ✓ Application submitted! A council member will review and authorize your request.
+              ✓ Upgrade application submitted! A council member will review and authorize your request.
             </div>
           ) : (
             <form onSubmit={handleRoleApplicationSubmit} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase">Select Role</label>
+              <div className="flex flex-col gap-1.5 text-xs">
+                <label className="font-semibold text-slate-400 uppercase">Select Target Role</label>
                 <select
                   value={requestedRole}
                   onChange={(e) => setRequestedRole(e.target.value)}
@@ -975,7 +1193,7 @@ export default function BlogsPage() {
                 disabled={applyLoading}
                 className="rounded-lg bg-white py-2.5 text-xs font-semibold text-slate-950 hover:bg-slate-200 transition"
               >
-                {applyLoading ? "Submitting..." : "Submit Role Application"}
+                {applyLoading ? "Submitting..." : "Submit Upgrade Request"}
               </button>
             </form>
           )}
@@ -983,11 +1201,11 @@ export default function BlogsPage() {
       )}
 
       {/* WRITE BLOG POST PANEL */}
-      {showWrite && user && profile && profile.status !== "restricted" && (
+      {showWrite && user && profile && profile.status !== "restricted" && !lockout.isLocked && (
         <div className="relative z-10 rounded-2xl border border-slate-900 bg-slate-950/85 p-6 md:p-8 mb-12 shadow-2xl backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-900 pb-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-white">Stellar Log Draft</h2>
+              <h2 className="text-xl font-bold text-white font-mono">Stellar Log Draft</h2>
               <p className="text-xs text-slate-500 mt-1">Submit observations or articles (S.AI checked, Markdown fully supported).</p>
             </div>
             <button
@@ -1055,7 +1273,7 @@ export default function BlogsPage() {
                       <button
                         type="button"
                         onClick={() => setPostImages(prev => prev.filter((_, i) => i !== idx))}
-                        className="absolute top-0 right-0 bg-red-600 text-white rounded-bl w-4 h-4 flex items-center justify-center text-[10px]"
+                        className="absolute top-0 right-0 bg-red-650 text-white rounded-bl w-4 h-4 flex items-center justify-center text-[10px]"
                       >
                         ✕
                       </button>
@@ -1093,7 +1311,7 @@ export default function BlogsPage() {
         <div className="flex flex-col gap-6">
           {posts.map((post) => {
             const authorName = post.profiles?.full_name ?? null;
-            const initials = getInitials(authorName, post.author_id);
+            const initials = getInitials(authorName, post.author_id || "Former Member");
 
             return (
               <article
@@ -1108,7 +1326,7 @@ export default function BlogsPage() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2 flex-wrap text-xs text-slate-500">
-                      <span className="font-semibold text-slate-300">{authorName ?? "Club Member"}</span>
+                      <span className="font-semibold text-slate-300">{authorName ?? "Former Member"}</span>
                       <span>·</span>
                       <time>{formatDate(post.created_at)}</time>
                     </div>
@@ -1123,7 +1341,6 @@ export default function BlogsPage() {
                       {getExcerpt(post.content)}
                     </p>
 
-                    {/* Rendering images in the blog feed if they exist */}
                     {post.images && post.images.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-4">
                         {post.images.slice(0, 4).map((img, idx) => (
