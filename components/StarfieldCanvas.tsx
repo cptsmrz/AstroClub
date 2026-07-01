@@ -32,7 +32,7 @@ interface ConstellationDef {
 const CONSTELLATIONS: ConstellationDef[] = [
   {
     name: "Ursa Major (Big Dipper)",
-    scale: 2.5,
+    scale: 2.75,
     points: [
       { x: -50, y: -20, size: 1.2 },
       { x: -25, y: -15, size: 1.1 },
@@ -46,7 +46,7 @@ const CONSTELLATIONS: ConstellationDef[] = [
   },
   {
     name: "Orion",
-    scale: 3,
+    scale: 3.3,
     points: [
       { x: 40, y: -20, size: 1.8 }, // Betelgeuse (L Shoulder)
       { x: 35, y: 20, size: 1.2 },  // Bellatrix (R Shoulder)
@@ -67,7 +67,7 @@ const CONSTELLATIONS: ConstellationDef[] = [
   },
   {
     name: "Cassiopeia",
-    scale: 2,
+    scale: 2.2,
     points: [
       { x: -30, y: -20, size: 1.2 },
       { x: -15, y: 15, size: 1.1 },
@@ -79,7 +79,7 @@ const CONSTELLATIONS: ConstellationDef[] = [
   },
   {
     name: "Ursa Minor",
-    scale: 2.2,
+    scale: 2.42,
     points: [
       { x: 40, y: 40, size: 1.6 },   // Polaris (North Star)
       { x: 20, y: 25, size: 0.8 },   // Yildun
@@ -93,7 +93,7 @@ const CONSTELLATIONS: ConstellationDef[] = [
   },
   {
     name: "Cygnus",
-    scale: 2.5,
+    scale: 2.75,
     points: [
       { x: 0, y: -40, size: 1.6 }, // Deneb
       { x: 0, y: -10, size: 1.1 }, // Sadr
@@ -123,8 +123,8 @@ export default function StarfieldCanvas() {
     canvas.width = W;
     canvas.height = H;
 
-    // Generate stars
-    const numStars = Math.floor((W * H) / 2000);
+    // Generate stars (increased density by 10% more)
+    const numStars = Math.floor((W * H) / 1800);
     const stars: Star[] = [];
     for (let i = 0; i < numStars; i++) {
       stars.push({
