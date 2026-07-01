@@ -314,7 +314,50 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Blog Image Handler (Converts files to base64, max 7) ---
+  // --- Blog Image Handler (Compresses to WebP, max 7 images) ---
+  const compressToWebP = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(e.target?.result as string); // fallback
+            return;
+          }
+
+          // Rescale if larger than 1200px
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert to webp with 0.8 quality
+          const dataUrl = canvas.toDataURL("image/webp", 0.8);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + postImages.length > 7) {
@@ -322,17 +365,10 @@ export default function BlogsPage() {
       return;
     }
 
-    const promises = files.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
+    const promises = files.map(file => compressToWebP(file));
 
-    Promise.all(promises).then(base64s => {
-      setPostImages(prev => [...prev, ...base64s]);
+    Promise.all(promises).then(webpBase64s => {
+      setPostImages(prev => [...prev, ...webpBase64s]);
     });
   };
 
