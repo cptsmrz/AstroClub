@@ -34,6 +34,15 @@ CREATE TABLE IF NOT EXISTS public.role_applications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- 6. Modify blog author foreign key constraint to retain posts on account deletion
+ALTER TABLE public.blogs 
+  DROP CONSTRAINT IF EXISTS blogs_author_id_fkey,
+  DROP CONSTRAINT IF EXISTS blogs_author_profile_fkey,
+  ADD CONSTRAINT blogs_author_profile_fkey 
+    FOREIGN KEY (author_id) 
+    REFERENCES public.profiles(id) 
+    ON DELETE SET NULL;
+
 -- 4. Create security reports table for S.AI moderation flags
 CREATE TABLE IF NOT EXISTS public.security_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,4 +57,7 @@ CREATE TABLE IF NOT EXISTS public.security_reports (
 ALTER TABLE public.blogs
   ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS edit_allowed_until TIMESTAMP WITH TIME ZONE,
+  ADD COLUMN IF NOT EXISTS contributor_type TEXT,
+  ADD COLUMN IF NOT EXISTS contributor_name TEXT,
+  ADD COLUMN IF NOT EXISTS contributor_email TEXT,
   ALTER COLUMN status SET DEFAULT 'draft'; -- 'draft', 'published', 'flagged_review'

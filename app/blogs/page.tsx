@@ -23,6 +23,9 @@ interface BlogPost {
   status: string;
   images: string[];
   edit_allowed_until: string | null;
+  contributor_type: string | null;
+  contributor_name: string | null;
+  contributor_email: string | null;
   profiles: Profile | null;
 }
 
@@ -65,6 +68,12 @@ export default function BlogsPage() {
   const [postSubmitting, setPostSubmitting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
   const [postSuccess, setPostSuccess] = useState<string | null>(null);
+
+  // --- Guest Contributor Modal (First Post Only) ---
+  const [showContributorModal, setShowContributorModal] = useState(false);
+  const [guestType, setGuestType] = useState<"student" | "teacher">("student");
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
 
   // --- Role Application State ---
   const [showApply, setShowApply] = useState(false);
@@ -150,11 +159,11 @@ export default function BlogsPage() {
 
       setPendingApplications(apps || []);
 
-      // Fetch flagged posts
+      // Fetch flagged AND pending blogs needing manual review
       const { data: blogs } = await supabase
         .from("blogs")
-        .select("id, title, content, created_at, author_id, status, images, edit_allowed_until, profiles(full_name)")
-        .eq("status", "flagged_review");
+        .select("id, title, content, created_at, author_id, status, images, edit_allowed_until, contributor_type, contributor_name, contributor_email, profiles(full_name)")
+        .in("status", ["flagged_review", "pending_review"]);
 
       setFlaggedPosts((blogs as unknown as BlogPost[]) || []);
     } catch (err) {
@@ -224,7 +233,6 @@ export default function BlogsPage() {
     try {
       let loginEmail = authEmail;
 
-      // Enable secondary email lookup mapping
       if (authMode === "signin" && !authEmail.endsWith("@gla.ac.in")) {
         const { data: linkedProfile } = await supabase
           .from("profiles")
@@ -263,7 +271,6 @@ export default function BlogsPage() {
     }
   };
 
-  // Google OAuth Login
   const handleGoogleSignIn = async () => {
     setAuthLoading(true);
     setAuthError(null);
@@ -282,7 +289,6 @@ export default function BlogsPage() {
     }
   };
 
-  // Separate Guest Login (Anonymous access)
   const handleGuestAccess = async () => {
     setAuthLoading(true);
     setAuthError(null);
@@ -358,7 +364,7 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Blog Image Handler (Compresses to WebP, max 7 images) ---
+  // --- Blog Image Handler ---
   const compressToWebP = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -368,7 +374,7 @@ export default function BlogsPage() {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           if (!ctx) {
-            resolve(e.target?.result as string); // fallback
+            resolve(e.target?.result as string);
             return;
           }
 
@@ -414,14 +420,49 @@ export default function BlogsPage() {
     });
   };
 
-  // --- Blog Submission (via S.AI Moderation Route) ---
-  const handlePostSubmit = async (e: React.FormEvent) => {
+  // --- Check first post and submit ---
+  const handlePostSubmitCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
     setPostSubmitting(true);
     setPostError(null);
     setPostSuccess(null);
 
+    try {
+      // Check if user is a guest and has 0 blog posts in the system
+      if (profile?.role === "guest") {
+        const { count, error } = await supabase
+          .from("blogs")
+          .select("*", { count: "exact", head: true })
+          .eq("author_id", user.id);
+
+        if (error) throw error;
+
+        if (count === 0) {
+          // Open contributor details modal for guest first-posts
+          setPostSubmitting(false);
+          setShowContributorModal(true);
+          return;
+        }
+      }
+
+      // If not guest or not first post, proceed normally
+      await executePostSubmission(null, null, null, false);
+    } catch (err: any) {
+      setPostError(err.message || "Failed to submit post.");
+      setPostSubmitting(false);
+    }
+  };
+
+  // Execute Post Submission to server API
+  const executePostSubmission = async (
+    cType: string | null,
+    cName: string | null,
+    cEmail: string | null,
+    isFirst: boolean
+  ) => {
+    setPostSubmitting(true);
     try {
       const res = await fetch("/api/blogs/moderate", {
         method: "POST",
@@ -431,7 +472,11 @@ export default function BlogsPage() {
           content: postBody,
           images: postImages,
           authorId: user.id,
-          authorEmail: user.email
+          authorEmail: user.email,
+          contributorType: cType,
+          contributorName: cName,
+          contributorEmail: cEmail,
+          isFirstPost: isFirst
         })
       });
 
@@ -441,8 +486,8 @@ export default function BlogsPage() {
       if (data.status === "restricted") {
         setProfile(prev => prev ? { ...prev, status: "restricted" } : null);
         setPostError(data.report);
-      } else if (data.status === "flagged_review") {
-        setPostSuccess(data.message);
+      } else if (data.status === "flagged_review" || data.status === "pending_review") {
+        setPostSuccess(data.message || "Post submitted for manual review.");
         setPostTitle("");
         setPostBody("");
         setPostImages([]);
@@ -458,6 +503,15 @@ export default function BlogsPage() {
     } finally {
       setPostSubmitting(false);
     }
+  };
+
+  // Contributor Onboarding Submit (Teacher/Student first post details)
+  const handleContributorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowContributorModal(false);
+    await executePostSubmission(guestType, guestName, guestEmail, true);
+    setGuestName("");
+    setGuestEmail("");
   };
 
   // --- Dashboard Actions ---
@@ -544,7 +598,7 @@ export default function BlogsPage() {
     setTransferSuccess(null);
 
     if (transferConfirmText !== "TRANSFER") {
-      setTransferError("Please type TRANSFER in all caps to confirm.");
+      setTransferError("Please type TRANSFER to confirm.");
       return;
     }
 
@@ -578,7 +632,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Account Deletion Sequence ---
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setDeleteError(null);
@@ -589,21 +642,16 @@ export default function BlogsPage() {
     }
 
     try {
-      // Step 1: Nullify author_id on blogs to preserve them
       await supabase
         .from("blogs")
         .update({ author_id: null })
         .eq("author_id", user.id);
 
-      // Step 2: Delete public profile row
       await supabase
         .from("profiles")
         .delete()
         .eq("id", user.id);
 
-      // Step 3: Delete Auth User and sign out
-      // (Note: Supabase API delete user usually requires Admin. Standard users delete profiles
-      // and sign out, which clears the session and decommissions their website status).
       await supabase.auth.signOut();
       setUser(null);
       setProfile(null);
@@ -614,7 +662,6 @@ export default function BlogsPage() {
     }
   };
 
-  // --- Helper formatting ---
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -639,7 +686,6 @@ export default function BlogsPage() {
     return fallbackId.slice(0, 2).toUpperCase();
   };
 
-  // --- Calculate Grace Period Lockouts ---
   const getLockoutState = () => {
     if (!profile || profile.role === "guest" || profile.secondary_email) {
       return { isLocked: false, remainingHours: 72 };
@@ -695,12 +741,15 @@ export default function BlogsPage() {
                       Apply for Role
                     </button>
                   )}
-                  <button
-                    onClick={() => setShowWrite(true)}
-                    className="rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-slate-200"
-                  >
-                    Write Post
-                  </button>
+                  {/* Lock out Guest observers (anonymously logged in without emails) from writing posts */}
+                  {user.email && (
+                    <button
+                      onClick={() => setShowWrite(true)}
+                      className="rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition hover:bg-slate-200"
+                    >
+                      Write Post
+                    </button>
+                  )}
                 </>
               )}
               <button
@@ -729,6 +778,83 @@ export default function BlogsPage() {
           )}
         </div>
       </div>
+
+      {/* GUEST FIRST POST MODAL (Contributor Identity Form) */}
+      {showContributorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-950 p-6 md:p-8 shadow-2xl">
+            <h2 className="text-lg font-bold text-white mb-2 font-mono text-cyan-400">Contributor Verification</h2>
+            <p className="text-xs text-slate-400 leading-relaxed mb-6">
+              Welcome to the logs! Since this is your first post as a guest contributor, please fill out your status and details. 
+            </p>
+
+            <form onSubmit={handleContributorSubmit} className="flex flex-col gap-4 text-xs">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-semibold text-slate-400 uppercase">Affiliation</label>
+                <div className="flex gap-4 mt-1">
+                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="guestType"
+                      checked={guestType === "student"}
+                      onChange={() => setGuestType("student")}
+                      className="accent-cyan-400"
+                    />
+                    Student
+                  </label>
+                  <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="guestType"
+                      checked={guestType === "teacher"}
+                      onChange={() => setGuestType("teacher")}
+                      className="accent-cyan-400"
+                    />
+                    Teacher / Faculty
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="font-semibold text-slate-400 uppercase">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="Your professional name"
+                  className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-slate-200 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="font-semibold text-slate-400 uppercase">Official Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.target.value)}
+                  placeholder="name@gla.ac.in"
+                  className="rounded border border-slate-800 bg-slate-950 px-3 py-2 text-slate-200 focus:outline-none"
+                />
+              </div>
+
+              <div className="border-t border-slate-900 pt-4 mt-2">
+                <p className="text-[10px] text-slate-500 italic">
+                  🛡️ Note: Your data is anonymous with us and will only be used for core verification reviews.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded bg-white py-2.5 font-semibold text-slate-950 hover:bg-slate-200 transition"
+              >
+                Verify & Submit Log
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* GRACE PERIOD ENFORCEMENT PAGE / LOCKOUT OVERLAY */}
       {user && profile && lockout.isLocked && (
@@ -770,7 +896,7 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* DISMISSIBLE ONBOARDING BANNER (Grace period warning) */}
+      {/* DISMISSIBLE ONBOARDING BANNER */}
       {user && profile && !lockout.isLocked && profile.role !== "guest" && !profile.secondary_email && (
         <div className="relative z-10 border border-yellow-800/50 bg-yellow-950/10 rounded-xl p-4 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="text-xs">
@@ -836,7 +962,6 @@ export default function BlogsPage() {
             )}
 
             <div className="flex flex-col gap-3">
-              {/* GOOGLE SIGN IN (Standard logins) */}
               <button
                 onClick={handleGoogleSignIn}
                 disabled={authLoading}
@@ -882,7 +1007,6 @@ export default function BlogsPage() {
                   />
                 </div>
 
-                {/* Password Rules Checklist */}
                 {authMode === "signup" && (
                   <div className="rounded-lg border border-slate-900 bg-slate-900/25 p-3 text-[10px] text-slate-400 space-y-1">
                     <p className="font-semibold mb-1">Password Checklist:</p>
@@ -927,7 +1051,6 @@ export default function BlogsPage() {
                 </div>
               </div>
 
-              {/* SEPARATE GUEST ACCESS BUTTON (No password, no email config) */}
               <button
                 onClick={handleGuestAccess}
                 disabled={authLoading}
@@ -951,7 +1074,7 @@ export default function BlogsPage() {
         </div>
       )}
 
-      {/* SETTINGS PANEL (Account deletion) */}
+      {/* SETTINGS PANEL */}
       {showSettings && user && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="relative w-full max-w-md rounded-2xl border border-slate-850 bg-slate-950 p-6 md:p-8 shadow-2xl">
@@ -962,12 +1085,12 @@ export default function BlogsPage() {
               ✕
             </button>
             <h2 className="text-xl font-bold text-white mb-2">Account Telemetry</h2>
-            <p className="text-xs text-slate-500 mb-6">Manage your AstroClub credentials and files.</p>
+            <p className="text-xs text-slate-500 mb-6">Manage your AstroClub credentials.</p>
 
             <div className="space-y-6 text-xs">
               <div className="rounded-lg border border-slate-900 bg-slate-900/20 p-4">
                 <p className="font-semibold text-slate-300">Identity Details</p>
-                <p className="text-slate-500 mt-1">Primary: {user.email || "Google / Guest Session"}</p>
+                <p className="text-slate-500 mt-1">Primary: {user.email || "Guest Observer Session"}</p>
                 {profile?.role && (
                   <p className="text-slate-500 mt-0.5">Assigned Level: <span className="text-cyan-400 capitalize">{profile.role}</span></p>
                 )}
@@ -976,7 +1099,6 @@ export default function BlogsPage() {
                 )}
               </div>
 
-              {/* Decommission/Delete account option */}
               <div className="border-t border-slate-900 pt-6">
                 <h3 className="font-semibold text-red-400 mb-1">Decommission Account</h3>
                 <p className="text-slate-500 leading-relaxed mb-4">
@@ -1066,12 +1188,12 @@ export default function BlogsPage() {
               )}
             </div>
 
-            {/* S.AI Flagged Blogs */}
+            {/* S.AI Flagged and Pending Blogs */}
             <div className="lg:col-span-6">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">S.AI Content Flags</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Review Queue</h3>
               {flaggedPosts.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-900 py-8 text-center text-xs text-slate-600">
-                  No posts flagged by S.AI.
+                  No posts in the review queue.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -1079,7 +1201,17 @@ export default function BlogsPage() {
                     <div key={post.id} className="rounded-lg border border-slate-900 bg-slate-900/20 p-4 flex flex-col justify-between gap-3 text-xs">
                       <div>
                         <p className="font-semibold text-slate-200">"{post.title}"</p>
-                        <p className="text-slate-500 mt-1">Author: {post.profiles?.full_name || "Member"}</p>
+                        <p className="text-slate-500 mt-1">Author: {post.profiles?.full_name || "Member"} ({post.status === "flagged_review" ? "Flagged by S.AI" : "Guest First Post"})</p>
+                        
+                        {/* Display Guest Contributor Details for review */}
+                        {post.contributor_type && (
+                          <div className="mt-2 p-2 bg-slate-950/60 rounded border border-slate-800 text-[10px] text-slate-400">
+                            <p className="font-semibold text-slate-300">Guest Info (Anonymous):</p>
+                            <p>Type: <span className="capitalize">{post.contributor_type}</span></p>
+                            <p>Name: {post.contributor_name}</p>
+                            <p>Official Email: {post.contributor_email}</p>
+                          </div>
+                        )}
                       </div>
                       <div className="flex flex-wrap gap-2 pt-2">
                         <button
@@ -1227,7 +1359,7 @@ export default function BlogsPage() {
             </div>
           )}
 
-          <form onSubmit={handlePostSubmit} className="flex flex-col gap-5 text-xs">
+          <form onSubmit={handlePostSubmitCheck} className="flex flex-col gap-5 text-xs">
             <div className="flex flex-col gap-1.5">
               <label htmlFor="post-title" className="font-semibold text-slate-400 uppercase">Post Title</label>
               <input
@@ -1254,7 +1386,6 @@ export default function BlogsPage() {
               />
             </div>
 
-            {/* MULTI IMAGE ATTACHMENTS PANEL (Up to 7) */}
             <div className="flex flex-col gap-2">
               <label className="font-semibold text-slate-400 uppercase">Image Attachments (Max 7)</label>
               <input
@@ -1319,7 +1450,6 @@ export default function BlogsPage() {
                 className="group rounded-xl border border-slate-900 bg-slate-950/20 p-6 transition duration-200 hover:border-slate-800 hover:bg-slate-900/20"
               >
                 <div className="flex items-start gap-4">
-                  {/* Avatar */}
                   <div className="shrink-0 w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-300">
                     {initials}
                   </div>
