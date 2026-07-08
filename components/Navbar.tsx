@@ -64,22 +64,24 @@ export default function Navbar() {
     <header className={`sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md transition-transform duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        {/* Logo Brand with Premium Sub-Tagline */}
-        <Link
-          href="/"
-          className="flex flex-col items-start transition-opacity hover:opacity-90"
-        >
-          <span className="text-xl font-bold tracking-wider text-white">
-            AstroClub
-          </span>
-          <span className="text-[9px] font-medium tracking-[0.25em] text-slate-500 uppercase leading-none mt-0.5">
-            Beyond The Stars
-          </span>
-        </Link>
+      <nav className="mx-auto grid grid-cols-2 md:grid-cols-3 items-center max-w-6xl px-6 py-4">
+        {/* Left Column: Logo Brand */}
+        <div className="flex justify-start">
+          <Link
+            href="/"
+            className="flex flex-col items-start transition-opacity hover:opacity-90"
+          >
+            <span className="text-xl font-bold tracking-wider text-white">
+              AstroClub
+            </span>
+            <span className="text-[9px] font-medium tracking-[0.25em] text-slate-500 uppercase leading-none mt-0.5">
+              Beyond The Stars
+            </span>
+          </Link>
+        </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Center Column: Desktop Navigation Links (Hidden on Mobile) */}
+        <div className="hidden md:flex justify-center">
           <ul className="flex items-center gap-6">
             {NAV_LINKS.map(({ href, label }) => {
               const isActive = pathname === href;
@@ -102,39 +104,42 @@ export default function Navbar() {
               );
             })}
           </ul>
+        </div>
 
+        {/* Right Column: CTA Button (Desktop) & Hamburger (Mobile) */}
+        <div className="flex justify-end items-center gap-4">
           <Link
             href="/request"
-            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-white/5"
+            className="hidden md:block rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-white/5"
           >
             Request Session
           </Link>
-        </div>
 
-        {/* Mobile Hamburger Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex md:hidden items-center justify-center p-2 text-slate-400 hover:text-white transition-colors focus:outline-none"
-          aria-label="Toggle navigation menu"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {isOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="flex md:hidden items-center justify-center p-2 text-slate-400 hover:text-white transition-colors focus:outline-none"
+            aria-label="Toggle navigation menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
       </nav>
 
       {/* Mobile Drawer (Slide in from Right) */}

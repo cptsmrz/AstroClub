@@ -45,34 +45,42 @@ export const metadata: Metadata = {
 
 function Footer() {
   return (
-    <footer className="mt-auto border-t border-slate-900 bg-slate-950 py-12 relative z-10">
+    <footer className="mt-auto border-t border-slate-900 bg-slate-950 py-12 relative z-10 font-body">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Col 1: Club Info */}
-          <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          {/* Col 1: Club Info (Left-aligned) */}
+          <div className="space-y-3 flex flex-col items-start text-left">
             <div className="flex flex-col items-start">
-              <span className="text-lg font-bold tracking-wider text-white">AstroClub</span>
-              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase">GLA UNIVERSITY</span>
+              <span className="text-lg font-bold tracking-wider text-white font-sans">AstroClub</span>
+              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">GLA UNIVERSITY</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
               Designing, building, and operating handcrafted telescopes from GLA University, Mathura. Witness the unseen and explore the vast cosmos.
             </p>
           </div>
 
-          {/* Col 2: Observational Center */}
-          <div className="space-y-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Observational Spot</h4>
-            <div className="text-xs text-slate-400 space-y-1">
-              <p className="font-medium text-slate-300">Basketball Court</p>
-              <p>GLA University Campus</p>
-              <p>Mathura, Uttar Pradesh, IN</p>
+          {/* Col 2: Navigation Links (Centered) */}
+          <div className="space-y-3 flex flex-col items-start md:items-center text-left md:text-center">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono">Navigation Logs</h4>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-slate-400">
+              <Link href="/" className="hover:text-cyan-400 transition-colors">Home</Link>
+              <Link href="/equipment" className="hover:text-cyan-400 transition-colors">Equipment</Link>
+              <Link href="/blogs" className="hover:text-cyan-400 transition-colors">Blogs</Link>
+              <Link href="/orrery" className="hover:text-cyan-400 transition-colors">Orrery 3D</Link>
+              <Link href="/about" className="hover:text-cyan-400 transition-colors">About Us</Link>
+              <Link href="/constitution" className="hover:text-cyan-400 transition-colors">Constitution</Link>
             </div>
           </div>
 
-          {/* Col 3: Social & Digital Presence */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Connect With Us</h4>
-            <div className="flex flex-wrap gap-4 items-center">
+          {/* Col 3: Observational Spot & Connect (Right-aligned) */}
+          <div className="space-y-4 flex flex-col items-start md:items-end text-left md:text-right">
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mb-1">Observational Spot</h4>
+              <p className="text-xs text-slate-300 font-medium">Basketball Court</p>
+              <p className="text-xs text-slate-400">GLA University Campus, Mathura</p>
+            </div>
+            
+            <div className="flex gap-4 items-center">
               {/* Instagram */}
               <a
                 href="https://www.instagram.com/astroclub_glau"
@@ -128,34 +136,12 @@ function Footer() {
                 </svg>
               </a>
             </div>
-            <div className="text-xs text-slate-500 pt-1">
-              Email: <a href="mailto:astroclub@gla.ac.in" className="hover:text-slate-300">astroclub@gla.ac.in</a>
-            </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="border-t border-slate-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-600">
-          <p>© 2026 AstroClub GLA. All rights reserved.</p>
-          <div className="flex flex-wrap gap-4 items-center justify-center sm:justify-start text-[11px] text-slate-500">
-            <Link href="/" className="hover:text-slate-350 transition-colors">
-              Home
-            </Link>
-            <span className="text-slate-800">|</span>
-            <Link href="/about" className="hover:text-slate-350 transition-colors">
-              About Us
-            </Link>
-            <span className="text-slate-800">|</span>
-            <Link href="/blogs" className="hover:text-slate-350 transition-colors">
-              Blogs
-            </Link>
-            <span className="text-slate-800">|</span>
-            <Link href="/constitution" className="hover:text-slate-350 transition-colors">
-              Constitution
-            </Link>
-            <span className="text-slate-800">|</span>
-            <span className="text-slate-600">GLA University, Mathura</span>
-          </div>
+        {/* Bottom copyright area */}
+        <div className="border-t border-slate-900 pt-6 text-center text-xs text-slate-500 font-mono">
+          <p>© 2026 AstroClub GLA. All rights reserved. | GLA University, Mathura, IN</p>
         </div>
       </div>
     </footer>
