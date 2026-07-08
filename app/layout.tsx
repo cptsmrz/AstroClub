@@ -139,9 +139,28 @@ function Footer() {
           </div>
         </div>
 
-        {/* Bottom copyright area */}
-        <div className="border-t border-slate-900 pt-6 text-center text-xs text-slate-500 font-mono">
-          <p>© 2026 AstroClub GLA. All rights reserved. | GLA University, Mathura, IN</p>
+        {/* Divider */}
+        <div className="border-t border-slate-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-600">
+          <p>© 2026 AstroClub GLA. All rights reserved.</p>
+          <div className="flex flex-wrap gap-4 items-center justify-center sm:justify-start text-[11px] text-slate-500">
+            <Link href="/" className="hover:text-slate-350 transition-colors">
+              Home
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/about" className="hover:text-slate-350 transition-colors">
+              About Us
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/blogs" className="hover:text-slate-350 transition-colors">
+              Blogs
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/constitution" className="hover:text-slate-350 transition-colors">
+              Constitution
+            </Link>
+            <span className="text-slate-800">|</span>
+            <span className="text-slate-600">GLA University, Mathura</span>
+          </div>
         </div>
       </div>
     </footer>
