@@ -49,25 +49,30 @@ interface Telescope {
 
 interface RoleInfo {
   title: string;
+  name: string;
   description: string;
 }
 
 const CLUB_ROLES: RoleInfo[] = [
   {
     title: "President",
-    description: "Determines the club's long-term roadmap, calibrates optics instrumentation, and oversees stargazing logistics."
-  },
-  {
-    title: "Technical Head",
-    description: "Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
+    name: "Aditi Sharma",
+    description: "3rd Year, B.Tech CS AIML. Determines the club's long-term roadmap, calibrates optics instrumentation, and oversees stargazing logistics."
   },
   {
     title: "Vice President",
+    name: "Dhruv Tigunayak",
     description: "Coordinates event logistics, manages sponsorships, and handles external relations."
   },
   {
     title: "General Secretary",
+    name: "Paritosh Kumar Mishra",
     description: "Manages club records, schedules observation logs, and directs internal communications."
+  },
+  {
+    title: "Technical Head",
+    name: "Sarthak Rathore",
+    description: "Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
   }
 ];
 
@@ -546,14 +551,19 @@ export default function HomePage() {
             {CLUB_ROLES.map((role) => (
               <div
                 key={role.title}
-                className="group rounded-xl border border-slate-900 bg-slate-950/40 p-5 transition-all hover:border-slate-800/80 hover:bg-slate-900/30 backdrop-blur-md"
+                className="group rounded-xl border border-slate-900 bg-slate-950/40 p-5 transition-all hover:border-slate-800/80 hover:bg-slate-900/30 backdrop-blur-md flex flex-col justify-between"
               >
-                <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-wide">
-                  {role.title}
-                </h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {role.description}
-                </p>
+                <div>
+                  <h3 className="text-[10px] font-bold font-mono tracking-widest text-slate-500 mb-1.5 uppercase">
+                    {role.title}
+                  </h3>
+                  <p className="text-sm font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                    {role.name}
+                  </p>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {role.description}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
