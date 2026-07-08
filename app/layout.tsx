@@ -4,6 +4,7 @@ import Link from "next/link";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Navbar from "@/components/Navbar";
+import SmoothScroll from "@/components/SmoothScroll";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -158,6 +159,7 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased`}
       >
         <Navbar />
+        <SmoothScroll />
 
         <main className="mx-auto max-w-6xl px-6 py-12 w-full flex-grow relative z-10">
           {children}
