@@ -200,45 +200,8 @@ export default function BlogsPage() {
     }
   }, []);
 
-  // --- Check for simulated local developer overrides ---
-  const applySimulatedOverrides = useCallback(() => {
-    if (process.env.NODE_ENV === "development") {
-      const devRole = localStorage.getItem("dev_role_override");
-      const devStatus = localStorage.getItem("dev_status_override") || "approved";
-      const devEmail = localStorage.getItem("dev_email_override");
-      const devSecondary = localStorage.getItem("dev_secondary_email_override");
-      const devCreatedAt = localStorage.getItem("dev_created_at_override");
-
-      if (devRole) {
-        setProfile({
-          full_name: "Simulated User",
-          role: devRole,
-          status: devStatus,
-          secondary_email: devSecondary || null,
-          created_at: devCreatedAt || new Date().toISOString()
-        });
-        setUser({
-          id: "simulated-dev-user-id",
-          email: devEmail || null
-        });
-
-        // Load mock admin lists if needed
-        const adminRoles = ["president", "vp", "gs", "tech_head", "advisory_head"];
-        if (adminRoles.includes(devRole)) {
-          fetchAdminDashboardData();
-        }
-        return true;
-      }
-    }
-    return false;
-  }, []);
-
   useEffect(() => {
     fetchPosts();
-
-    // Check if simulation override is active
-    const isOverrideActive = applySimulatedOverrides();
-    if (isOverrideActive) return;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -259,7 +222,7 @@ export default function BlogsPage() {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchPosts, applySimulatedOverrides]);
+  }, [fetchPosts]);
 
   // --- Auth Actions ---
   const handleAuth = async (e: React.FormEvent) => {
