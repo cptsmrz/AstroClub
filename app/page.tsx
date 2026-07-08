@@ -16,6 +16,30 @@ interface ApodData {
   date?: string;
 }
 
+interface CatalogItem {
+  title: string;
+  desc: string;
+  url: string;
+}
+
+const CLUB_CATALOG: CatalogItem[] = [
+  {
+    title: "The Heart Nebula (IC 1805)",
+    desc: "Captured by Madhav Gupta using a custom aligned tracker rig at the CCASS observation camp. Explores the glowing ionized hydrogen emission fields in the constellation Cassiopeia.",
+    url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    title: "Orion's Stellar Forge (M42)",
+    desc: "A wide-field deep exposure of the Orion Nebula, showing massive gas bands and the central Trapezium cluster. Calibrated and processed by our astrophotography leads.",
+    url: "https://images.unsplash.com/photo-1538370965046-79c0d6907d47?q=80&w=1200&auto=format&fit=crop"
+  },
+  {
+    title: "Lunar Mare Imbrium",
+    desc: "Close-up high-resolution lunar details captured using our handcrafted 8-inch Newtonian Reflector telescope on campus.",
+    url: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=1200&auto=format&fit=crop"
+  }
+];
+
 interface Telescope {
   id?: string;
   name: string;
@@ -214,6 +238,30 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 to-transparent z-10 pointer-events-none" />
       </section>
 
+      {/* SECTION 1.5: Mission Strip */}
+      <section className="relative z-10 -mt-8 max-w-7xl mx-auto px-4 md:px-6">
+        <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
+          <div className="flex items-center gap-4">
+            <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
+            <div className="text-left">
+              <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
+                Our Mandate
+              </span>
+              <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
+                A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/about"
+            className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
+          >
+            <span>Learn More About CCASS</span>
+            <span className="transition-transform group-hover:translate-x-1">→</span>
+          </Link>
+        </div>
+      </section>
+
       {/* Main Page Content Wrapper (Restructured into Telemetry Dashboard Grid) */}
       <div className="flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto">
 
@@ -235,45 +283,76 @@ export default function HomePage() {
             {apodLoading ? (
               <SkeletonCard />
             ) : apod ? (
-              <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
-                <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
-                  {apod.media_type === "video" ? (
-                    <iframe
-                      src={apod.url}
-                      title={apod.title}
-                      className="w-full h-full"
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <img
-                      src={apod.url}
-                      alt={apod.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="p-5 md:p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    {apod.title}
-                  </h3>
-                  <div className="relative">
-                    <p
-                      className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${!isExpanded ? "line-clamp-3" : ""
-                        }`}
-                    >
-                      {apod.explanation}
-                    </p>
-                    <button
-                      onClick={() => setIsExpanded(!isExpanded)}
-                      className="mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
-                    >
-                      {isExpanded ? "Show less" : "Read more"}
-                      <span>{isExpanded ? "↑" : "↓"}</span>
-                    </button>
+              (() => {
+                const catalogIndex = new Date().getDate() % CLUB_CATALOG.length;
+                const catalogItem = CLUB_CATALOG[catalogIndex];
+                const isVideo = apod.media_type === "video";
+
+                return (
+                  <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
+                    <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
+                      {isVideo ? (
+                        <a
+                          href={apod.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full h-full relative group cursor-pointer"
+                        >
+                          <img
+                            src={catalogItem.url}
+                            alt={catalogItem.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          />
+                          {/* Banner overlay for video notification */}
+                          <div className="absolute inset-x-0 bottom-0 bg-slate-950/85 backdrop-blur-sm border-t border-slate-900 px-4 py-3 flex items-center justify-between z-20 text-[11px]">
+                            <span className="text-slate-350 flex items-center gap-1.5 font-medium">
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                              📹 Today's NASA APOD is a video. Tap to view.
+                            </span>
+                            <span className="text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">
+                              Watch Video →
+                            </span>
+                          </div>
+                        </a>
+                      ) : (
+                        <img
+                          src={apod.url}
+                          alt={apod.title}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    <div className="p-5 md:p-6">
+                      <h3 className="text-lg font-semibold text-white mb-2 leading-snug">
+                        {isVideo ? catalogItem.title : apod.title}
+                      </h3>
+                      
+                      {isVideo && (
+                        <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">
+                          NASA Video: &quot;{apod.title}&quot;
+                        </div>
+                      )}
+
+                      <div className="relative">
+                        <p
+                          className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${
+                            !isExpanded ? "line-clamp-3" : ""
+                          }`}
+                        >
+                          {isVideo ? catalogItem.desc : apod.explanation}
+                        </p>
+                        <button
+                          onClick={() => setIsExpanded(!isExpanded)}
+                          className="mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+                        >
+                          {isExpanded ? "Show less" : "Read more"}
+                          <span>{isExpanded ? "↑" : "↓"}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })()
             ) : (
               <p className="text-slate-500 text-xs">Failed to load Astronomy Picture of the Day.</p>
             )}
