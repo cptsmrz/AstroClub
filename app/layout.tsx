@@ -69,16 +69,11 @@ function Footer() {
             </div>
           </div>
 
-          {/* Col 3: Observational Spot & Connect (Right-aligned) */}
+          {/* Col 3: Contact Us & Connect (Right-aligned) */}
           <div className="space-y-4 flex flex-col items-start md:items-end text-left md:text-right">
-            <div className="flex flex-col items-start md:items-end">
-              <span className="text-lg font-bold tracking-wider text-white font-sans">Basketball Court</span>
-              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">OBSERVATIONAL SPOT</span>
-            </div>
+            <span className="text-lg font-bold tracking-wider text-white font-sans">Contact Us</span>
             
-            <p className="text-[11px] text-slate-400">GLA University Campus, Mathura</p>
-            
-            <div className="flex gap-4 items-center pt-1">
+            <div className="flex gap-4 items-center">
               {/* Instagram */}
               <a
                 href="https://www.instagram.com/astroclub_glau"
@@ -133,6 +128,12 @@ function Footer() {
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
               </a>
+            </div>
+
+            <div className="text-[11px] text-slate-400 space-y-0.5">
+              <p className="font-semibold text-slate-300">Basketball Court</p>
+              <p>GLA University Campus, Mathura</p>
+              <p>Mathura, Uttar Pradesh, IN</p>
             </div>
           </div>
         </div>
