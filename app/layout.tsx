@@ -129,12 +129,6 @@ function Footer() {
                 </svg>
               </a>
             </div>
-
-            <div className="text-[11px] text-slate-400 space-y-0.5">
-              <p className="font-semibold text-slate-300">Basketball Court</p>
-              <p>GLA University Campus, Mathura</p>
-              <p>Mathura, Uttar Pradesh, IN</p>
-            </div>
           </div>
         </div>
 
