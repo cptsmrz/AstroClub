@@ -3,66 +3,30 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "StellarPortal — University Astronomy Club",
+  title: "AstroClub — GLA University",
   description:
-    "Official portal for the university astronomy club. Explore equipment, read blog posts, and request observation sessions.",
+    "Official portal for the university astronomy club. Explore handcrafted telescopes, read blog posts, view our 3D solar system simulator, and request observation sessions.",
+  openGraph: {
+    title: "AstroClub — GLA University",
+    description: "Official portal for the university astronomy club. Explore equipment, read blog posts, and request stargazing sessions.",
+    url: "https://astroclub.gla.ac.in",
+    siteName: "AstroClub GLA",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
+        width: 1200,
+        height: 630,
+        alt: "AstroClub Observatory Starry Night"
+      }
+    ],
+    type: "website"
+  }
 };
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/equipment", label: "Equipment" },
-  { href: "/blogs", label: "Blogs" },
-  { href: "/orrery", label: "Orrery 3D" },
-  { href: "/about", label: "About" },
-] as const;
-
-function Header() {
-  return (
-    <header className="sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        {/* Logo Brand with Premium Sub-Tagline */}
-        <Link
-          href="/"
-          className="flex flex-col items-start transition-opacity hover:opacity-90"
-        >
-          <span className="text-xl font-bold tracking-wider text-white">
-            AstroClub
-          </span>
-          <span className="text-[9px] font-medium tracking-[0.25em] text-slate-500 uppercase leading-none mt-0.5">
-            Beyond The Stars
-          </span>
-        </Link>
-
-        {/* Navigation */}
-        <div className="flex items-center gap-8">
-          <ul className="flex items-center gap-6">
-            {NAV_LINKS.map(({ href, label }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="text-sm text-slate-400 transition-colors hover:text-white"
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-          <Link
-            href="/request"
-            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-slate-950 transition-colors hover:bg-slate-200"
-          >
-            Request Session
-          </Link>
-        </div>
-      </nav>
-    </header>
-  );
-}
 
 function Footer() {
   return (
@@ -158,12 +122,20 @@ function Footer() {
         {/* Divider */}
         <div className="border-t border-slate-900 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-600">
           <p>© 2026 AstroClub GLA. All rights reserved.</p>
-          <div className="flex gap-4 items-center">
-            <Link href="/about" className="hover:text-slate-400 transition-colors">
+          <div className="flex flex-wrap gap-4 items-center justify-center sm:justify-start text-[11px] text-slate-500">
+            <Link href="/" className="hover:text-slate-350 transition-colors">
+              Home
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/about" className="hover:text-slate-350 transition-colors">
               About Us
             </Link>
             <span className="text-slate-800">|</span>
-            <Link href="/constitution" className="hover:text-slate-400 transition-colors">
+            <Link href="/blogs" className="hover:text-slate-350 transition-colors">
+              Blogs
+            </Link>
+            <span className="text-slate-800">|</span>
+            <Link href="/constitution" className="hover:text-slate-350 transition-colors">
               Constitution
             </Link>
             <span className="text-slate-800">|</span>
@@ -185,7 +157,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased`}
       >
-        <Header />
+        <Navbar />
 
         <main className="mx-auto max-w-6xl px-6 py-12 w-full flex-grow relative z-10">
           {children}
