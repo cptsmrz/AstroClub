@@ -14,6 +14,8 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -27,8 +29,41 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (isOpen) {
+        setVisible(true);
+        return;
+      }
+
+      // Always keep visible at the top
+      if (currentScrollY < 60) {
+        setVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+
+      if (currentScrollY > lastScrollY) {
+        // Scrolling down -> hide header
+        setVisible(false);
+      } else {
+        // Scrolling up -> show header
+        setVisible(true);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, isOpen]);
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md">
+    <header className={`sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md transition-transform duration-300 ${
+      visible ? "translate-y-0" : "-translate-y-full"
+    }`}>
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         {/* Logo Brand with Premium Sub-Tagline */}
         <Link
