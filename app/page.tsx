@@ -467,6 +467,41 @@ export default function HomePage() {
                 Book Session Ticket
               </Link>
             </div>
+
+            {/* AstroAcademy Card */}
+            <div className="mt-6 rounded-xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-md shadow-xl shadow-black/20 transition-all hover:border-slate-800/80">
+              <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase">AstroAcademy Lectures</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-4">
+                Astronomy Class Deck
+              </h3>
+              
+              <div className="space-y-4 text-xs md:text-sm">
+                <div className="flex items-start gap-3 group">
+                  <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">📚</span>
+                  <div>
+                    <h4 className="font-semibold text-slate-200">ASTR 101 & ASTR 102</h4>
+                    <p className="text-[11px] text-slate-450 mt-0.5">
+                      Our core academic lecture curriculum covering deep space physics, coordinates, and optical mechanics.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 group">
+                  <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🎓</span>
+                  <div>
+                    <h4 className="font-semibold text-slate-200">Open to All</h4>
+                    <p className="text-[11px] text-slate-450 mt-0.5">
+                      Unconditional entry. From freshers taking their first steps to PhD scholars auditing celestial telemetry.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-900/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                <span>CURRICULUM: ACTIVE</span>
+                <span className="text-slate-400">Classroom: CCASS Lab</span>
+              </div>
+            </div>
           </section>
         </div>
 
