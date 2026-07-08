@@ -56,22 +56,22 @@ interface RoleInfo {
 const CLUB_ROLES: RoleInfo[] = [
   {
     title: "President",
-    name: "Aditi Sharma",
+    name: "Aditi Sharma ☀️",
     description: "3rd Year, B.Tech CS AIML. Serves as the official representative, provides strategic direction, co-approves membership applications, and holds final decision-making and equipment approval authority."
   },
   {
     title: "Vice President",
-    name: "Dhruv Tigunayak",
+    name: "Dhruv Tigunayak 🪐",
     description: "3rd Year, B.Tech ECSE. Maintains internal operational stability, coordinates cross-functional activities, secures administrative permissions, manages conflict resolution, and co-approves membership/equipment access."
   },
   {
     title: "General Secretary",
-    name: "Paritosh Kumar Mishra",
+    name: "Paritosh Kumar Mishra 🌍",
     description: "3rd Year, B.Tech CS. Maintains official club records and correspondence, tracks membership database and attendance, ensures policy compliance, and co-approves membership/equipment access."
   },
   {
     title: "Technical Head",
-    name: "Sarthak Rathore",
+    name: "Sarthak Rathore 🌙",
     description: "3rd Year, B.Tech CS. Serves as the unified head of technical operations, coordinating the website, design, and content teams, and ensuring digital infrastructure maintenance and security."
   }
 ];
