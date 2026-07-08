@@ -9,8 +9,11 @@ import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
 // --- Type Definitions ---
 interface ApodData {
   url: string;
+  thumbnail_url?: string;
   title: string;
   explanation: string;
+  media_type?: string;
+  date?: string;
 }
 
 interface Telescope {
@@ -81,11 +84,13 @@ export default function HomePage() {
         if (!res.ok) throw new Error("Failed to fetch APOD");
         const data = await res.json();
 
-        const payload = {
+        const payload: ApodData = {
           date: today,
           title: data.title,
           url: data.url,
-          explanation: data.explanation
+          thumbnail_url: data.thumbnail_url,
+          explanation: data.explanation,
+          media_type: data.media_type || "image"
         };
 
         setApod(payload);
@@ -232,11 +237,21 @@ export default function HomePage() {
             ) : apod ? (
               <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
                 <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
-                  <img
-                    src={apod.url}
-                    alt={apod.title}
-                    className="w-full h-full object-cover"
-                  />
+                  {apod.media_type === "video" ? (
+                    <iframe
+                      src={apod.url}
+                      title={apod.title}
+                      className="w-full h-full"
+                      allow="autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <img
+                      src={apod.url}
+                      alt={apod.title}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
                 </div>
                 <div className="p-5 md:p-6">
                   <h3 className="text-lg font-semibold text-white mb-3">

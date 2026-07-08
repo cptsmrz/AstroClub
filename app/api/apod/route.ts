@@ -27,8 +27,10 @@ export async function GET() {
     // Update Cache
     cachedApod = {
       title: data.title,
-      url: data.url,
-      explanation: data.explanation
+      url: data.hdurl || data.url,
+      thumbnail_url: data.url,
+      explanation: data.explanation,
+      media_type: data.media_type || "image"
     };
     lastFetchedTime = currentTime;
 
