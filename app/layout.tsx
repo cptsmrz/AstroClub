@@ -50,10 +50,7 @@ function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-start">
           {/* Col 1: Club Info (Left-aligned) */}
           <div className="space-y-4 flex flex-col items-start text-left max-w-sm">
-            <div className="flex flex-col items-start">
-              <span className="text-lg font-bold tracking-wider text-white font-sans">AstroClub</span>
-              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">GLA UNIVERSITY</span>
-            </div>
+            <span className="text-lg font-bold tracking-wider text-white font-sans">AstroClub</span>
             {/* Scannable Key Highlights */}
             <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
               <li>Custom-machined telescope optical rigs</li>
@@ -62,21 +59,21 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Col 2: Poetic Centerpiece (Centered Haiku, pushed down to match GLA level) */}
-          <div className="flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto md:pt-[24px]">
-            <h4 className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500 font-mono">Cosmic Verse</h4>
-            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono mt-3">
+          {/* Col 2: Poetic Centerpiece (Centered Haiku, aligned to top) */}
+          <div className="space-y-4 flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto">
+            <span className="text-lg font-bold tracking-wider text-white font-sans">Cosmic Verse</span>
+            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono">
               Lenses trace the void,<br />
               Mirrors catch the ancient light,<br />
               Stars are brought to sight.
             </div>
           </div>
 
-          {/* Col 3: Observational Spot & Connect (Right-aligned, mirrored branding style) */}
+          {/* Col 3: Observational Spot & Connect (Right-aligned) */}
           <div className="space-y-4 flex flex-col items-start md:items-end text-left md:text-right">
             <div className="flex flex-col items-start md:items-end">
-              <span className="text-lg font-bold tracking-wider text-white font-sans">Observational Spot</span>
-              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">BASKETBALL COURT</span>
+              <span className="text-lg font-bold tracking-wider text-white font-sans">Basketball Court</span>
+              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">OBSERVATIONAL SPOT</span>
             </div>
             
             <p className="text-[11px] text-slate-400">GLA University Campus, Mathura</p>
