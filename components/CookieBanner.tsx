@@ -9,10 +9,10 @@ export default function CookieBanner() {
     // Check if consent has already been given
     const consent = localStorage.getItem("astroclub_cookie_consent");
     if (!consent) {
-      // Delay slightly for smooth user entry
+      // Delay showing for 30 seconds to let the user browse uninterrupted first
       const timer = setTimeout(() => {
         setShowBanner(true);
-      }, 1000);
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, []);
