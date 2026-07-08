@@ -77,75 +77,35 @@ const CLUB_ROLES: RoleInfo[] = [
 ];
 
 const getRoleBackground = (title: string) => {
+  let imageUrl = "";
   switch (title) {
     case "President":
-      return (
-        <svg className="absolute right-0 bottom-0 w-36 h-36 text-amber-500/10 pointer-events-none transform translate-x-4 translate-y-4 select-none" viewBox="0 0 100 100" fill="none">
-          <defs>
-            <radialGradient id="sun-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.15" />
-              <stop offset="50%" stopColor="#d97706" stopOpacity="0.05" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="50" fill="url(#sun-glow)" />
-          <circle cx="50" cy="50" r="22" stroke="#f59e0b" strokeOpacity="0.12" strokeWidth="1" strokeDasharray="3 3" />
-          <path d="M50 12 L50 22 M50 78 L50 88 M12 50 L22 50 M78 50 L88 50 M22 22 L29 29 M71 71 L78 78 M78 22 L71 29 M22 71 L29 78" stroke="#f59e0b" strokeOpacity="0.1" strokeWidth="1.5" />
-        </svg>
-      );
+      imageUrl = "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=300"; // NASA Sun solar flare close-up
+      break;
     case "Vice President":
-      return (
-        <svg className="absolute right-0 bottom-0 w-36 h-36 text-cyan-400/10 pointer-events-none transform translate-x-4 translate-y-4 select-none" viewBox="0 0 100 100" fill="none">
-          <defs>
-            <radialGradient id="white-hole-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.18" />
-              <stop offset="35%" stopColor="#22d3ee" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="50" fill="url(#white-hole-glow)" />
-          <circle cx="50" cy="50" r="6" fill="#ffffff" fillOpacity="0.3" />
-          <path d="M50 50 L10 10 M50 50 L90 10 M50 50 L90 90 M50 50 L10 90 M50 50 L5 50 M50 50 L95 50 M50 50 L50 5 M50 50 L50 95" stroke="#22d3ee" strokeOpacity="0.1" strokeWidth="0.75" />
-        </svg>
-      );
+      imageUrl = "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=300"; // NASA Chandra supernova remnants (White Hole representation)
+      break;
     case "General Secretary":
-      return (
-        <svg className="absolute right-0 bottom-0 w-36 h-36 text-indigo-500/10 pointer-events-none transform translate-x-4 translate-y-4 select-none" viewBox="0 0 100 100" fill="none">
-          <defs>
-            <radialGradient id="bh-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#000000" stopOpacity="0" />
-              <stop offset="45%" stopColor="#6366f1" stopOpacity="0.1" />
-              <stop offset="70%" stopColor="#4f46e5" stopOpacity="0.03" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <ellipse cx="50" cy="50" rx="42" ry="12" fill="none" stroke="#6366f1" strokeOpacity="0.15" strokeWidth="3.5" transform="rotate(-20 50 50)" />
-          <ellipse cx="50" cy="50" rx="36" ry="8" fill="none" stroke="#818cf8" strokeOpacity="0.08" strokeWidth="1" transform="rotate(-20 50 50)" />
-          <circle cx="50" cy="50" r="15" fill="#020617" />
-          <circle cx="50" cy="50" r="15" stroke="#6366f1" strokeOpacity="0.2" strokeWidth="1.5" />
-          <circle cx="50" cy="50" r="28" fill="url(#bh-glow)" />
-        </svg>
-      );
+      imageUrl = "https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=300"; // NASA Hubble accretion disk (Black Hole representation)
+      break;
     case "Technical Head":
-      return (
-        <svg className="absolute right-0 bottom-0 w-36 h-36 text-fuchsia-500/10 pointer-events-none transform translate-x-4 translate-y-4 select-none" viewBox="0 0 100 100" fill="none">
-          <defs>
-            <radialGradient id="quasar-glow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#ec4899" stopOpacity="0.15" />
-              <stop offset="60%" stopColor="#d946ef" stopOpacity="0.04" />
-              <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="35" fill="url(#quasar-glow)" />
-          <path d="M50 50 L50 -10 M50 50 L50 110" stroke="#f472b6" strokeOpacity="0.15" strokeWidth="4" strokeLinecap="round" />
-          <path d="M50 50 L50 -20 M50 50 L50 120" stroke="#ffffff" strokeOpacity="0.25" strokeWidth="1" />
-          <ellipse cx="50" cy="50" rx="30" ry="6" fill="none" stroke="#d946ef" strokeOpacity="0.12" strokeWidth="2" transform="rotate(15 50 50)" />
-          <circle cx="50" cy="50" r="5" fill="#ffffff" fillOpacity="0.3" />
-        </svg>
-      );
+      imageUrl = "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=300"; // NASA Active galactic nucleus / Quasar jet
+      break;
     default:
       return null;
   }
+
+  return (
+    <div className="absolute -right-2 -bottom-2 w-32 h-32 opacity-20 pointer-events-none select-none overflow-hidden rounded-br-xl">
+      <img 
+        src={imageUrl} 
+        alt="" 
+        loading="lazy"
+        className="w-full h-full object-cover" 
+      />
+      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/20 to-transparent" />
+    </div>
+  );
 };
 
 const EVENT_IMAGES = [
