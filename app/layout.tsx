@@ -55,18 +55,17 @@ function Footer() {
               <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">GLA UNIVERSITY</span>
             </div>
             
-            {/* Immersive Haiku */}
+            {/* Immersive 3-Line Tagline */}
             <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono border-l border-cyan-500/35 pl-3">
-              Lenses trace the void,<br />
-              Mirrors catch the ancient light,<br />
-              Stars are brought to sight.
+              Designing custom telescope rigs.<br />
+              Witnessing the unseen beyond the stars.<br />
+              Exploring the vast cosmos.
             </div>
 
             {/* Scannable Key Highlights */}
             <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
               <li>Custom-machined telescope optical rigs</li>
               <li>Immersive stargazing session logs</li>
-              <li>Core lectures open from freshers to PhDs</li>
               <li>Satellite transit coordinate tracking</li>
             </ul>
           </div>
