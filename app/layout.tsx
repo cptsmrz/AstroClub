@@ -47,7 +47,7 @@ function Footer() {
   return (
     <footer className="mt-auto border-t border-slate-900 bg-slate-950 py-12 relative z-10 font-body">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-start">
           {/* Col 1: Club Info (Left-aligned) */}
           <div className="space-y-4 flex flex-col items-start text-left max-w-sm">
             <div className="flex flex-col items-start">
@@ -62,25 +62,26 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Col 2: Poetic Centerpiece (Centered Haiku) */}
-          <div className="space-y-3 flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Cosmic Verse</h4>
-            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono pt-1">
+          {/* Col 2: Poetic Centerpiece (Centered Haiku, pushed down to match GLA level) */}
+          <div className="flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto md:pt-[24px]">
+            <h4 className="text-[8px] font-bold uppercase tracking-[0.2em] text-slate-500 font-mono">Cosmic Verse</h4>
+            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono mt-3">
               Lenses trace the void,<br />
               Mirrors catch the ancient light,<br />
               Stars are brought to sight.
             </div>
           </div>
 
-          {/* Col 3: Observational Spot & Connect (Right-aligned) */}
+          {/* Col 3: Observational Spot & Connect (Right-aligned, mirrored branding style) */}
           <div className="space-y-4 flex flex-col items-start md:items-end text-left md:text-right">
-            <div>
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mb-1">Observational Spot</h4>
-              <p className="text-xs text-slate-300 font-medium">Basketball Court</p>
-              <p className="text-xs text-slate-400">GLA University Campus, Mathura</p>
+            <div className="flex flex-col items-start md:items-end">
+              <span className="text-lg font-bold tracking-wider text-white font-sans">Observational Spot</span>
+              <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">BASKETBALL COURT</span>
             </div>
             
-            <div className="flex gap-4 items-center">
+            <p className="text-[11px] text-slate-400">GLA University Campus, Mathura</p>
+            
+            <div className="flex gap-4 items-center pt-1">
               {/* Instagram */}
               <a
                 href="https://www.instagram.com/astroclub_glau"
