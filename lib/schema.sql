@@ -61,3 +61,9 @@ ALTER TABLE public.blogs
   ADD COLUMN IF NOT EXISTS contributor_name TEXT,
   ADD COLUMN IF NOT EXISTS contributor_email TEXT,
   ALTER COLUMN status SET DEFAULT 'draft'; -- 'draft', 'published', 'flagged_review'
+
+-- 7. Add preferred date, group size, and purpose to session_requests
+ALTER TABLE public.session_requests
+  ADD COLUMN IF NOT EXISTS preferred_date TEXT,
+  ADD COLUMN IF NOT EXISTS group_size TEXT,
+  ADD COLUMN IF NOT EXISTS purpose TEXT;
