@@ -202,10 +202,10 @@ export default function HomePage() {
   const contentFadeStart = screenHeight * 0.30;
   const contentFadeEnd = screenHeight * 0.65;
   const contentOpacity = scrollOffset <= contentFadeStart
-    ? 0
+    ? 0.15
     : scrollOffset >= contentFadeEnd
       ? 1
-      : (scrollOffset - contentFadeStart) / (contentFadeEnd - contentFadeStart);
+      : 0.15 + (0.85 * (scrollOffset - contentFadeStart)) / (contentFadeEnd - contentFadeStart);
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
