@@ -319,20 +319,13 @@ export default function EquipmentPage() {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none" />
-                  <span className="absolute bottom-3 left-4 text-[9px] font-mono text-cyan-400 font-bold bg-slate-950/80 px-2 py-0.5 rounded border border-slate-900 uppercase tracking-widest">
-                    {capture.date}
-                  </span>
                 </div>
 
                 {/* Captures Details */}
                 <div className="p-4 md:p-5">
-                  <h3 className="text-[15px] font-semibold text-white group-hover:text-cyan-400 transition-colors mb-1 leading-snug">
+                  <h3 className="text-[15px] font-semibold text-white group-hover:text-cyan-400 transition-colors leading-snug">
                     {capture.title}
                   </h3>
-                  <div className="flex justify-between items-center text-[10px] text-slate-500 font-mono mt-2 pt-2.5 border-t border-slate-900/60">
-                    <span>Rig: {capture.instrument}</span>
-                    <span className="text-slate-400 font-semibold">{capture.credit}</span>
-                  </div>
                 </div>
               </div>
             ))}
@@ -370,33 +363,9 @@ export default function EquipmentPage() {
 
             {/* Modal Metadata description */}
             <div className="p-6 md:p-8 bg-slate-950 border-t border-slate-900">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-3">
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  {activeCapture.title}
-                </h3>
-                <span className="text-xs font-mono text-cyan-400 bg-cyan-950/20 border border-cyan-800/30 px-3 py-1 rounded-full uppercase tracking-wider self-start sm:self-auto font-bold">
-                  Capture Profile
-                </span>
-              </div>
-              
-              <p className="text-xs md:text-sm text-slate-400 leading-relaxed mb-6">
-                Official astronomical photograph catalogued by AstroClub members at the university observation sector. Processing includes noise-subtraction algorithms and multi-stack exposures.
-              </p>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-6 border-t border-slate-900 text-xs font-mono">
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block mb-1">Instrumentation</span>
-                  <span className="text-slate-200 font-semibold">{activeCapture.instrument}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block mb-1">Observer</span>
-                  <span className="text-slate-200 font-semibold">{activeCapture.credit}</span>
-                </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-widest block mb-1">Capture Epoch</span>
-                  <span className="text-slate-200 font-semibold">{activeCapture.date}</span>
-                </div>
-              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                {activeCapture.title}
+              </h3>
             </div>
           </div>
         </div>

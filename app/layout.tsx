@@ -49,7 +49,7 @@ function Footer() {
           <div className="space-y-2">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">Observational Spot</h4>
             <div className="text-xs text-slate-400 space-y-1">
-              <p className="font-medium text-slate-300">Basketball Ground</p>
+              <p className="font-medium text-slate-300">Basketball Court</p>
               <p>GLA University Campus</p>
               <p>Mathura, Uttar Pradesh, IN</p>
             </div>

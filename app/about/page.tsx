@@ -35,7 +35,7 @@ const MILESTONES: Milestone[] = [
   {
     date: "Sep 2024",
     title: "Observatory Spot Assigned",
-    desc: "Sanctioned observation camp setup at the Basketball Ground campus zone, launching bi-weekly stargazing public nights.",
+    desc: "Sanctioned observation camp setup at the Basketball Court campus zone, launching bi-weekly stargazing public nights.",
     icon: "🏛️"
   },
   {

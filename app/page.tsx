@@ -448,7 +448,7 @@ export default function HomePage() {
                   <div className="flex items-start gap-3">
                     <span className="text-xs text-slate-500 shrink-0 select-none">📍</span>
                     <div>
-                      <p className="text-[11px] text-slate-400">Basketball Ground, GLA University Campus</p>
+                      <p className="text-[11px] text-slate-400">Basketball Court, GLA University Campus</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
