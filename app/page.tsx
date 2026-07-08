@@ -288,30 +288,6 @@ export default function HomePage() {
         className="transition-opacity duration-300 flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto"
         style={{ opacity: contentOpacity }}
       >
-        {/* SECTION 1.5: Mission Strip with expanded spacing */}
-        <section className="relative w-full mb-4">
-          <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
-              <div className="text-left">
-                <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
-                  Our Mandate
-                </span>
-                <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
-                  A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/about"
-              className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
-            >
-              <span>Learn More About Us</span>
-              <span className="transition-transform group-hover:translate-x-1">→</span>
-            </Link>
-          </div>
-        </section>
-
         {/* TWO-COLUMN TELEMETRY GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -536,6 +512,30 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* SECTION 1.5: Mission Strip with expanded spacing */}
+        <section className="relative w-full mb-4">
+          <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
+              <div className="text-left">
+                <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
+                  Our Mandate
+                </span>
+                <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
+                  A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/about"
+              className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
+            >
+              <span>Learn More About Us</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
           </div>
         </section>
 
