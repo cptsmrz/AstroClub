@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 // Simple in-memory server cache
 let cachedApod: any = null;
 let lastFetchedTime: number = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Rate limit: 60 requests/min per IP (APOD is cached, so this is very generous)
+  const { allowed } = rateLimit(getClientIp(request), 60);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again in a minute." },
+      { status: 429 }
+    );
+  }
+
   const currentTime = Date.now();
   const ONE_DAY_MS = 24 * 60 * 60 * 1000; // Cache duration: 24 hours
 

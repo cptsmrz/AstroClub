@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit, getClientIp } from "@/lib/rateLimit";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -8,6 +9,15 @@ const supabaseServer = createClient(supabaseUrl, supabaseKey, {
 });
 
 export async function POST(request: Request) {
+  // Rate limit: max 10 blog submissions per minute per IP
+  const { allowed } = rateLimit(getClientIp(request), 10);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "You are submitting too quickly. Please wait a moment before trying again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const { 
       title, 

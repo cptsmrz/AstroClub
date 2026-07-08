@@ -29,6 +29,8 @@ export default function RequestPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // Honeypot: bots fill this hidden field, humans never see it
+  const [honeypot, setHoneypot] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -40,6 +42,17 @@ export default function RequestPage() {
     e.preventDefault();
     setFormError(null);
     setIsSuccess(false);
+
+    // Honeypot check — bots fill hidden fields, humans don't
+    if (honeypot) return;
+
+    // Validate Indian mobile number: 10 digits, starts with 6–9
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(formData.phone.replace(/\s+/g, ""))) {
+      setFormError("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const payload = {
@@ -90,6 +103,17 @@ export default function RequestPage() {
 
       {/* Form Card */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-8">
+        {/* Honeypot — visually hidden, only bots fill this */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={e => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          aria-hidden="true"
+          autoComplete="off"
+          style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+        />
         {/* Success */}
         {isSuccess && (
           <div className="mb-6 rounded-lg border border-emerald-800/50 bg-emerald-900/20 px-4 py-3 text-sm text-emerald-400">
