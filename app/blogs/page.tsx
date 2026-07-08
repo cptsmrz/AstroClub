@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { User } from "@supabase/supabase-js";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 
 // --- Types ---
@@ -39,7 +40,7 @@ interface RoleApplication {
 }
 
 export default function BlogsPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
 
   // --- Blog Feed State ---
@@ -315,6 +316,11 @@ export default function BlogsPage() {
     e.preventDefault();
     setOnboardingLoading(true);
     setOnboardingError(null);
+    if (!user) {
+      setOnboardingError("No user logged in.");
+      setOnboardingLoading(false);
+      return;
+    }
     try {
       const validDomain = secondaryEmail.endsWith("@gmail.com") || secondaryEmail.endsWith("@google.com");
       if (!validDomain) {
@@ -340,6 +346,7 @@ export default function BlogsPage() {
   const handleRoleApplicationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApplyLoading(true);
+    if (!user) return;
     try {
       await supabase.from("role_applications").insert([
         {
@@ -463,6 +470,11 @@ export default function BlogsPage() {
     isFirst: boolean
   ) => {
     setPostSubmitting(true);
+    if (!user) {
+      setPostError("You must be logged in to submit a post.");
+      setPostSubmitting(false);
+      return;
+    }
     try {
       const res = await fetch("/api/blogs/moderate", {
         method: "POST",
@@ -597,6 +609,8 @@ export default function BlogsPage() {
     setTransferError(null);
     setTransferSuccess(null);
 
+    if (!user || !profile) return;
+
     if (transferConfirmText !== "TRANSFER") {
       setTransferError("Please type TRANSFER to confirm.");
       return;
@@ -635,6 +649,8 @@ export default function BlogsPage() {
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setDeleteError(null);
+
+    if (!user) return;
 
     if (deleteConfirmText !== "DELETE") {
       setDeleteError("Please type DELETE to confirm.");
@@ -676,6 +692,13 @@ export default function BlogsPage() {
       .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
       .trim();
     return plainText || "Empty blog contents.";
+  };
+
+  const getReadingTime = (content: string): string => {
+    const wpm = 200;
+    const words = content.trim().split(/\s+/).length;
+    const mins = Math.max(1, Math.ceil(words / wpm));
+    return `${mins} min read`;
   };
 
   const getInitials = (name: string | null, fallbackId: string) => {
@@ -1455,10 +1478,12 @@ export default function BlogsPage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap text-xs text-slate-500">
-                      <span className="font-semibold text-slate-300">{authorName ?? "Former Member"}</span>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap text-xs text-slate-500 font-mono">
+                      <span className="font-semibold text-slate-350">{authorName ?? "Former Member"}</span>
                       <span>·</span>
                       <time>{formatDate(post.created_at)}</time>
+                      <span>·</span>
+                      <span className="text-cyan-400/80">{getReadingTime(post.content)}</span>
                     </div>
 
                     <Link href={`/blogs/${post.id}`}>
