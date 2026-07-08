@@ -47,21 +47,13 @@ function Footer() {
   return (
     <footer className="mt-auto border-t border-slate-900 bg-slate-950 py-12 relative z-10 font-body">
       <div className="mx-auto max-w-6xl px-6">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           {/* Col 1: Club Info (Left-aligned) */}
           <div className="space-y-4 flex flex-col items-start text-left max-w-sm">
             <div className="flex flex-col items-start">
               <span className="text-lg font-bold tracking-wider text-white font-sans">AstroClub</span>
               <span className="text-[8px] tracking-[0.2em] text-slate-500 uppercase font-mono">GLA UNIVERSITY</span>
             </div>
-            
-            {/* Immersive 3-Line Tagline */}
-            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono border-l border-cyan-500/35 pl-3">
-              Designing custom telescope rigs.<br />
-              Witnessing the unseen beyond the stars.<br />
-              Exploring the vast cosmos.
-            </div>
-
             {/* Scannable Key Highlights */}
             <ul className="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
               <li>Custom-machined telescope optical rigs</li>
@@ -70,7 +62,17 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Col 2: Observational Spot & Connect (Right-aligned) */}
+          {/* Col 2: Poetic Centerpiece (Centered Haiku) */}
+          <div className="space-y-3 flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">Cosmic Verse</h4>
+            <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono pt-1">
+              Lenses trace the void,<br />
+              Mirrors catch the ancient light,<br />
+              Stars are brought to sight.
+            </div>
+          </div>
+
+          {/* Col 3: Observational Spot & Connect (Right-aligned) */}
           <div className="space-y-4 flex flex-col items-start md:items-end text-left md:text-right">
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 font-mono mb-1">Observational Spot</h4>
