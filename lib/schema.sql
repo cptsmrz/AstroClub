@@ -67,3 +67,8 @@ ALTER TABLE public.session_requests
   ADD COLUMN IF NOT EXISTS preferred_date TEXT,
   ADD COLUMN IF NOT EXISTS group_size TEXT,
   ADD COLUMN IF NOT EXISTS purpose TEXT;
+
+-- 8. Add description and availability_status to telescopes
+ALTER TABLE public.telescopes
+  ADD COLUMN IF NOT EXISTS description TEXT,
+  ADD COLUMN IF NOT EXISTS availability_status TEXT DEFAULT 'in_service';
