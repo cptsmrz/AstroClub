@@ -1,38 +1,85 @@
 "use client";
 
+import { useState } from "react";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
+
+interface Milestone {
+  date: string;
+  title: string;
+  desc: string;
+  icon: string;
+}
 
 interface Member {
   name: string;
   role: string;
   bio: string;
   initials: string;
+  linkedin?: string;
+  photo_url?: string;
 }
+
+const MILESTONES: Milestone[] = [
+  {
+    date: "Feb 2024",
+    title: "Club Genesis",
+    desc: "AstroClub founded by Sameeraj, Madhav, and Prashant under the CCASS department to promote optical instrumentation and observational science.",
+    icon: "✨"
+  },
+  {
+    date: "Apr 2024",
+    title: "First Handcrafted Optics",
+    desc: "Successfully built and calibrated our first Newtonian Reflector telescope, achieving clear lunar and planetary resolution.",
+    icon: "🔭"
+  },
+  {
+    date: "Sep 2024",
+    title: "Observatory Spot Assigned",
+    desc: "Sanctioned observation camp setup at the Basketball Ground campus zone, launching bi-weekly stargazing public nights.",
+    icon: "🏛️"
+  },
+  {
+    date: "Feb 2025",
+    title: "Astronomy Quiz Inauguration",
+    desc: "Organized the first campus-wide Astronomy trivia tournament with over 300+ students participating.",
+    icon: "🌌"
+  },
+  {
+    date: "Jan 2026",
+    title: "StellarPortal Deployment",
+    desc: "Launched the automated observation booking queue and integrated S.AI content moderation controls.",
+    icon: "💻"
+  }
+];
 
 const BATCH_24: Member[] = [
   {
     name: "Sameeraj",
     role: "President & Founder",
     bio: "Pioneered the establishment of AstroClub, setting up the foundation for optical instrumentation workshops and observation routines.",
-    initials: "S"
+    initials: "S",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Madhav Gupta",
     role: "Astrophotography Head & Co-founder",
     bio: "Established the astrophotography division, introducing tracker mounts and deep-sky imaging pipelines to the club.",
-    initials: "MG"
+    initials: "MG",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Prashant Chauhan",
     role: "Telescope Handler & Co-founder",
     bio: "Co-founded the club and oversaw the calibration, transport, and maintenance of all major optical components.",
-    initials: "PC"
+    initials: "PC",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Kanika Agarwal",
     role: "Vice President",
     bio: "Coordinated administrative permissions, public relations, and university relations during the club's inaugural year.",
-    initials: "KA"
+    initials: "KA",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Aditya Dubey",
@@ -59,37 +106,43 @@ const BATCH_25: Member[] = [
     name: "Sameeraj",
     role: "President & Founder",
     bio: "Continues to guide the club's long-term vision, mentoring new leads on optical assembly and dark-sky expeditions.",
-    initials: "S"
+    initials: "S",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Jatin Kumar",
     role: "Technical Head & Design Head",
     bio: "Spearheads telescope design and structural engineering for custom-built mount systems.",
-    initials: "JK"
+    initials: "JK",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Madhav Gupta",
     role: "Astrophotography Head & Co-founder",
     bio: "Leads deep-space capturing sessions, specializing in narrow-band filtering and nebula stacking.",
-    initials: "MG"
+    initials: "MG",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Prashant Chauhan",
     role: "Telescope Lead, Handler & Co-founder",
     bio: "Manages our active instrument catalog, specializing in optical alignment and mirror testing.",
-    initials: "PC"
+    initials: "PC",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Kanika Agarwal",
     role: "Vice President",
     bio: "Supervises team actions, plans budget requests, and coordinates speaker programs.",
-    initials: "KA"
+    initials: "KA",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Aditya Raj",
     role: "General Secretary",
     bio: "Manages active student memberships, calendars, correspondence, and institutional documentation.",
-    initials: "AR"
+    initials: "AR",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Pawan Kumar",
@@ -164,13 +217,15 @@ const BATCH_26: Member[] = [
     name: "Aditya Varma",
     role: "Observatory Assistant",
     bio: "Focuses on deep-sky astrophotography, capturing nebulae and globular clusters using DSLR tracker mounts.",
-    initials: "AV"
+    initials: "AV",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Meera Joshi",
     role: "Operations Coordinator",
     bio: "Plans site layouts, schedules equipment logistics, and ensures safety checklists are followed during field observations.",
-    initials: "MJ"
+    initials: "MJ",
+    linkedin: "https://linkedin.com"
   },
   {
     name: "Varun Das",
@@ -187,117 +242,107 @@ const BATCH_26: Member[] = [
 ];
 
 export default function AboutPage() {
-  const BatchMilestone = ({ year, title, color }: { year: string; title: string; color: string }) => {
-    let glowBg = "bg-cyan-500/10 text-cyan-400 border-cyan-800";
-    let glowDot = "bg-cyan-400 shadow-[0_0_12px_#22d3ee]";
-    if (color === "indigo") {
-      glowBg = "bg-indigo-500/10 text-indigo-400 border-indigo-800";
-      glowDot = "bg-indigo-400 shadow-[0_0_12px_#818cf8]";
-    } else if (color === "emerald") {
-      glowBg = "bg-emerald-500/10 text-emerald-400 border-emerald-800";
-      glowDot = "bg-emerald-400 shadow-[0_0_12px_#34d399]";
-    }
-
-    return (
-      <div className="relative flex items-center md:justify-center z-10 w-full mb-10 pl-12 md:pl-0">
-        {/* Core Node on the center line */}
-        <div className={`absolute left-6 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-slate-900 ${glowDot}`} />
-        
-        {/* Glowing Badge */}
-        <div className={`px-6 py-2 rounded-full border backdrop-blur-md text-xs md:text-sm font-bold tracking-wider uppercase ${glowBg}`}>
-          Batch of 20{year} — {title}
-        </div>
-      </div>
-    );
-  };
+  const [activeTab, setActiveTab] = useState<"all" | "25" | "26" | "24">("all");
 
   const MemberCard = ({ 
     member, 
     textAccent, 
     bgAccentGlow, 
-    borderAccent,
-    align 
+    borderAccent 
   }: { 
     member: Member; 
     textAccent: string; 
     bgAccentGlow: string; 
     borderAccent: string;
-    align: "left" | "right";
   }) => {
     return (
-      <div className={`group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/35 p-6 backdrop-blur-sm transition-all duration-300 hover:border-slate-700 hover:bg-slate-900/50 hover:shadow-lg hover:shadow-black/25 ${borderAccent}`}>
-        {/* Visual Accent Glow on Hover */}
-        <div 
-          className={`absolute -right-12 -top-12 h-24 w-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none ${bgAccentGlow}`}
-        />
+      <div className={`group relative overflow-hidden rounded-2xl border border-slate-900 bg-slate-950/40 p-5 md:p-6 backdrop-blur-md transition-all duration-300 hover:border-slate-750 hover:bg-slate-900/30 hover:scale-[1.01] hover:shadow-xl hover:shadow-black/30 flex flex-col justify-between h-full`}>
+        {/* Hover Radial Background Glow */}
+        <div className={`absolute -right-12 -top-12 h-24 w-24 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none ${bgAccentGlow}`} />
         
-        <div className={`flex items-start gap-4 relative z-10 ${align === "right" ? "flex-row-reverse" : "flex-row"}`}>
-          {/* Monogram Avatar */}
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold border border-slate-800 bg-slate-900 text-slate-300 group-hover:text-white group-hover:scale-105 group-hover:border-slate-700 transition-all duration-300">
-            {member.initials}
+        <div>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              {/* Monogram/Avatar Photo Fallback */}
+              {member.photo_url ? (
+                <img
+                  src={member.photo_url}
+                  alt={member.name}
+                  className="h-11 w-11 rounded-xl object-cover border border-slate-800"
+                />
+              ) : (
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold border border-slate-800 bg-slate-900 text-slate-350 group-hover:text-white group-hover:border-slate-750 transition-all duration-300 font-mono">
+                  {member.initials}
+                </div>
+              )}
+              
+              <div>
+                <h3 className="text-[15px] font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                  {member.name}
+                </h3>
+                <span className={`text-[10px] font-bold tracking-widest uppercase ${textAccent}`}>
+                  {member.role}
+                </span>
+              </div>
+            </div>
+
+            {/* Optional LinkedIn profile */}
+            {member.linkedin && (
+              <a
+                href={member.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 hover:text-white transition-colors"
+                title={`${member.name} LinkedIn`}
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+              </a>
+            )}
           </div>
           
-          <div className={align === "right" ? "text-right" : "text-left"}>
-            <span className={`inline-block text-[10px] font-bold tracking-widest uppercase mb-1 ${textAccent}`}>
-              {member.role}
-            </span>
-            <h3 className="text-base font-semibold text-white transition-colors duration-300">
-              {member.name}
-            </h3>
-          </div>
+          <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
+            {member.bio}
+          </p>
         </div>
-        
-        <p className="text-sm text-slate-400 leading-relaxed mt-4 relative z-10">
-          {member.bio}
-        </p>
       </div>
     );
   };
 
-  const TimelineNode = ({ member, idx, accentColor }: { member: Member; idx: number; accentColor: string }) => {
-    const isLeft = idx % 2 === 0;
-    
+  const renderMemberSection = (members: Member[], title: string, color: string, badgeText: string) => {
     let textAccent = "text-cyan-400";
-    let bgAccentGlow = "group-hover:bg-cyan-500/20";
-    let borderAccent = "group-hover:border-cyan-500/50";
-    let glowDot = "bg-cyan-400 shadow-[0_0_8px_#22d3ee]";
-    if (accentColor === "indigo") {
+    let bgAccentGlow = "bg-cyan-500/10";
+    let borderAccent = "border-cyan-800/30";
+    if (color === "indigo") {
       textAccent = "text-indigo-400";
-      bgAccentGlow = "group-hover:bg-indigo-500/20";
-      borderAccent = "group-hover:border-indigo-500/50";
-      glowDot = "bg-indigo-400 shadow-[0_0_8px_#818cf8]";
-    } else if (accentColor === "emerald") {
+      bgAccentGlow = "bg-indigo-500/10";
+      borderAccent = "border-indigo-800/30";
+    } else if (color === "emerald") {
       textAccent = "text-emerald-400";
-      bgAccentGlow = "group-hover:bg-emerald-500/20";
-      borderAccent = "group-hover:border-emerald-500/50";
-      glowDot = "bg-emerald-400 shadow-[0_0_8px_#34d399]";
+      bgAccentGlow = "bg-emerald-500/10";
+      borderAccent = "border-emerald-800/30";
     }
 
     return (
-      <div className="relative flex flex-col md:flex-row w-full pl-12 md:pl-0 z-10">
-        {/* Node Dot on Timeline */}
-        <div className={`absolute left-6 md:left-1/2 -translate-x-1/2 top-8 w-2.5 h-2.5 rounded-full border border-slate-900 ${glowDot}`} />
-
-        {/* Horizontal Connector Line (desktop only) */}
-        <div className={`hidden md:block absolute top-[36px] w-[24px] h-px border-t border-dashed border-slate-800 ${
-          isLeft ? "right-1/2" : "left-1/2"
-        }`} />
-
-        {/* Desktop Layout (alternating left / right) */}
-        <div className={`hidden md:flex w-full items-center ${isLeft ? "flex-row-reverse" : "flex-row"}`}>
-          {/* Card Side */}
-          <div className="w-1/2 px-12 text-left">
-            <div className={`w-full max-w-md ${isLeft ? "ml-auto text-right" : "mr-auto"}`}>
-              <MemberCard member={member} textAccent={textAccent} bgAccentGlow={bgAccentGlow} borderAccent={borderAccent} align={isLeft ? "right" : "left"} />
-            </div>
-          </div>
-          {/* Empty Side */}
-          <div className="w-1/2" />
+      <div className="mb-12">
+        <div className="flex items-center gap-3 mb-6">
+          <h2 className="text-lg font-bold text-white tracking-tight">{title}</h2>
+          <span className={`text-[9px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border ${borderAccent} ${bgAccentGlow} ${textAccent}`}>
+            {badgeText}
+          </span>
         </div>
-
-        {/* Mobile Layout (always on right) */}
-        <div className="block md:hidden w-full text-left">
-          <MemberCard member={member} textAccent={textAccent} bgAccentGlow={bgAccentGlow} borderAccent={borderAccent} align="left" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {members.map((member, idx) => (
+            <div key={`${member.name}-${title}-${idx}`}>
+              <MemberCard 
+                member={member} 
+                textAccent={textAccent} 
+                bgAccentGlow={bgAccentGlow} 
+                borderAccent={borderAccent} 
+              />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -308,67 +353,98 @@ export default function AboutPage() {
       <StarfieldCanvas />
       
       <div className="relative z-10 flex flex-col gap-12 pb-16">
+        
         {/* Intro Hero Header */}
-        <div className="max-w-3xl mb-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-6 leading-tight">
-            Stellar Legacy.<br />
-            <span className="text-slate-500">The People Behind AstroClub.</span>
+        <div className="max-w-3xl">
+          <span className="text-xs font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-3">
+            Core Legacy & Directory
+          </span>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-5 leading-tight">
+            The Stellar Core of AstroClub
           </h1>
-          <p className="text-lg text-slate-400 leading-relaxed">
-            AstroClub is driven by students passionate about exploring the night sky, engineering advanced optics, and sharing the wonders of astronomy. Explore the leaders, builders, and stargazers who define our journey.
+          <p className="text-base md:text-lg text-slate-400 leading-relaxed">
+            AstroClub is driven by students passionate about exploring deep space and crafting optical instruments. Meet the crew, builders, and stargazers who pave the path forward.
           </p>
         </div>
 
-        {/* Tree timeline wrapper */}
-        <div className="relative flex flex-col w-full mt-4">
-          {/* Central Vertical Trunk Line */}
-          <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-px border-l border-dashed border-slate-800 -translate-x-1/2 z-0" />
+        {/* 1. CLUB MILESTONES (Chronological Progress timeline) */}
+        <section className="border-t border-slate-900 pt-10">
+          <div className="mb-8">
+            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+              Our Journey & Milestones
+            </h2>
+            <p className="text-slate-500 text-xs mt-1">Key highlights and operational breakthroughs since inception.</p>
+          </div>
 
-          {/* Batch of 24 Section */}
-          <div className="relative mb-16">
-            <BatchMilestone year="24" title="Alumni Pioneers" color="cyan" />
-            <div className="flex flex-col gap-8 mt-6">
-              {BATCH_24.map((member, idx) => (
-                <TimelineNode 
-                  key={member.name} 
-                  member={member} 
-                  idx={idx} 
-                  accentColor="cyan" 
-                />
+          <div className="relative border-l border-dashed border-slate-800 ml-3 pl-8 py-2 flex flex-col gap-8">
+            {MILESTONES.map((m, idx) => (
+              <div key={idx} className="relative group">
+                {/* Node Indicator */}
+                <span className="absolute -left-[41px] top-1.5 bg-slate-950 border border-slate-800 text-sm w-6 h-6 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300">
+                  {m.icon}
+                </span>
+
+                <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-4">
+                  <span className="text-xs font-mono font-bold text-cyan-400 tracking-wider w-24 shrink-0">
+                    {m.date}
+                  </span>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">
+                      {m.title}
+                    </h4>
+                    <p className="text-xs md:text-sm text-slate-450 leading-relaxed mt-1">
+                      {m.desc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 2. MEMBER DIRECTORY SECTION */}
+        <section className="border-t border-slate-900 pt-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                Member Directory
+              </h2>
+              <p className="text-slate-500 text-xs mt-1">The active crew, alumni pioneers, and core organizers.</p>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap gap-2 bg-slate-950 border border-slate-900 p-1 rounded-lg self-start">
+              {(["all", "26", "25", "24"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wider uppercase transition-all ${
+                    activeTab === tab 
+                      ? "bg-slate-900 text-white border border-slate-800" 
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {tab === "all" ? "All Batches" : `'${tab} Batch`}
+                </button>
               ))}
             </div>
           </div>
 
-          {/* Batch of 25 Section */}
-          <div className="relative mb-16">
-            <BatchMilestone year="25" title="Senior Leadership" color="indigo" />
-            <div className="flex flex-col gap-8 mt-6">
-              {BATCH_25.map((member, idx) => (
-                <TimelineNode 
-                  key={member.name} 
-                  member={member} 
-                  idx={idx} 
-                  accentColor="indigo" 
-                />
-              ))}
-            </div>
+          {/* Directory Rendering */}
+          <div className="flex flex-col gap-6">
+            {(activeTab === "all" || activeTab === "26") && 
+              renderMemberSection(BATCH_26, "Batch of 2026", "emerald", "Rising Juniors")}
+            
+            {(activeTab === "all" || activeTab === "25") && 
+              renderMemberSection(BATCH_25, "Batch of 2025", "indigo", "Senior Leadership")}
+            
+            {(activeTab === "all" || activeTab === "24") && 
+              renderMemberSection(BATCH_24, "Batch of 2024", "cyan", "Alumni Pioneers")}
           </div>
+        </section>
 
-          {/* Batch of 26 Section */}
-          <div className="relative">
-            <BatchMilestone year="26" title="Rising Juniors" color="emerald" />
-            <div className="flex flex-col gap-8 mt-6">
-              {BATCH_26.map((member, idx) => (
-                <TimelineNode 
-                  key={member.name} 
-                  member={member} 
-                  idx={idx} 
-                  accentColor="emerald" 
-                />
-              ))}
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );
