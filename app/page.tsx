@@ -62,17 +62,17 @@ const CLUB_ROLES: RoleInfo[] = [
   {
     title: "Vice President",
     name: "Dhruv Tigunayak",
-    description: "Coordinates event logistics, manages sponsorships, and handles external relations."
+    description: "3rd Year, B.Tech ECSE. Coordinates event logistics, manages sponsorships, and handles external relations."
   },
   {
     title: "General Secretary",
     name: "Paritosh Kumar Mishra",
-    description: "Manages club records, schedules observation logs, and directs internal communications."
+    description: "3rd Year, B.Tech CS. Manages club records, schedules observation logs, and directs internal communications."
   },
   {
     title: "Technical Head",
     name: "Sarthak Rathore",
-    description: "Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
+    description: "3rd Year, B.Tech CS. Maintains observatory equipment, leads calibration, and runs technical instrumentation workshops."
   }
 ];
 
