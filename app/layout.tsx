@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Orbitron, Rajdhani, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
@@ -7,14 +7,15 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import FullscreenPrompt from "@/components/FullscreenPrompt";
 
-const spaceGrotesk = Space_Grotesk({
+const orbitron = Orbitron({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-orbitron",
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
+const rajdhani = Rajdhani({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-rajdhani",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -168,7 +169,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased font-body`}
+        className={`${orbitron.variable} ${rajdhani.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased font-body`}
       >
         <Navbar />
         <SmoothScroll />

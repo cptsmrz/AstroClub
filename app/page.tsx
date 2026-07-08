@@ -96,14 +96,14 @@ const getRoleBackground = (title: string) => {
   }
 
   return (
-    <div className="absolute -right-2 -bottom-2 w-32 h-32 opacity-20 pointer-events-none select-none overflow-hidden rounded-br-xl">
+    <div className="absolute -right-2 -bottom-2 w-32 h-32 opacity-40 pointer-events-none select-none overflow-hidden rounded-br-xl">
       <img 
         src={imageUrl} 
         alt="" 
         loading="lazy"
         className="w-full h-full object-cover" 
       />
-      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/10 to-transparent" />
     </div>
   );
 };
@@ -587,13 +587,13 @@ export default function HomePage() {
               >
                 {getRoleBackground(role.title)}
                 <div className="relative z-10">
-                  <h3 className="text-[10px] font-bold font-mono tracking-widest text-slate-500 mb-1.5 uppercase">
+                  <h3 className="text-[10px] font-bold font-mono tracking-widest text-slate-500 mb-1.5 uppercase drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
                     {role.title}
                   </h3>
-                  <p className="text-sm font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                  <p className="text-sm font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
                     {role.name}
                   </p>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-slate-300 leading-relaxed drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
                     {role.description}
                   </p>
                 </div>
