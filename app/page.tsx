@@ -43,15 +43,19 @@ const CLUB_CATALOG: CatalogItem[] = [
 interface Telescope {
   id?: string;
   name: string;
-  specs: any;
-  image_url: string | null;
+  specs: Record<string, unknown> | null | string;
+  image_url?: string | null;
 }
 
-// --- Static Data ---
-const CLUB_ROLES = [
+interface RoleInfo {
+  title: string;
+  description: string;
+}
+
+const CLUB_ROLES: RoleInfo[] = [
   {
     title: "President",
-    description: "Oversees club operations, manages core permissions, and coordinates with GLA administration."
+    description: "Determines the club's long-term roadmap, calibrates optics instrumentation, and oversees stargazing logistics."
   },
   {
     title: "Technical Head",
@@ -67,8 +71,32 @@ const CLUB_ROLES = [
   }
 ];
 
+const EVENT_IMAGES = [
+  { 
+    url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600", 
+    title: "Observatory Night Setup", 
+    desc: "Setting up our custom refractor rigs at the campus field." 
+  },
+  { 
+    url: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=600", 
+    title: "Astrophotography Lab", 
+    desc: "Processing stellar coordinates and long-exposure deep space frames." 
+  },
+  { 
+    url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=600", 
+    title: "Instrumentation Workshop", 
+    desc: "Grinding mirrors and calibrating Newtonian optical components." 
+  },
+  { 
+    url: "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=600", 
+    title: "Public Viewing Session", 
+    desc: "Inviting university freshmen to trace lunar craters and planet positions." 
+  }
+];
+
 export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [screenHeight, setScreenHeight] = useState(1080);
 
   // --- State: NASA APOD ---
   const [apod, setApod] = useState<ApodData | null>(null);
@@ -81,12 +109,26 @@ export default function HomePage() {
 
   // --- Data Fetching & Scroll Tracking ---
   useEffect(() => {
-    const handleScroll = () => {
-      setScrollOffset(window.scrollY);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    if (typeof window !== "undefined") {
+      setScreenHeight(window.innerHeight);
+      
+      const handleResize = () => setScreenHeight(window.innerHeight);
+      window.addEventListener("resize", handleResize);
 
-    // Fetch NASA APOD with localStorage caching
+      const handleScroll = () => {
+        setScrollOffset(window.scrollY);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, []);
+
+  // Fetch NASA APOD with localStorage caching
+  useEffect(() => {
     const fetchApod = async () => {
       try {
         const today = new Date().toISOString().split("T")[0];
@@ -109,38 +151,31 @@ export default function HomePage() {
         const data = await res.json();
 
         const payload: ApodData = {
-          date: today,
-          title: data.title,
           url: data.url,
           thumbnail_url: data.thumbnail_url,
+          title: data.title,
           explanation: data.explanation,
-          media_type: data.media_type || "image"
+          media_type: data.media_type,
+          date: today
         };
 
         setApod(payload);
-
-        // Save to cache
         if (typeof window !== "undefined") {
           localStorage.setItem("astroclub_apod_cache", JSON.stringify(payload));
         }
       } catch (error) {
-        console.error("NASA APOD Error:", error);
-        setApod({
-          title: "Vistas of the Deep Cosmos",
-          url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
-          explanation: "Exploring the cosmos from our own backyard. Our club connects stargazers and space enthusiasts to the beauty of the universe, bringing deep space closer through observations, discussions, and shared discovery."
-        });
+        console.error("APOD Load Error:", error);
       } finally {
         setApodLoading(false);
       }
     };
 
-    // Fetch Telescopes from Supabase
     const fetchTelescopes = async () => {
       try {
         const { data, error } = await supabase
           .from("telescopes")
-          .select("*");
+          .select("*")
+          .order("name");
 
         if (error) throw error;
         setTelescopes(data || []);
@@ -153,11 +188,24 @@ export default function HomePage() {
 
     fetchApod();
     fetchTelescopes();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
+
+  // Custom scroll linked opacities
+  const heroFadeStart = screenHeight * 0.20;
+  const heroFadeEnd = screenHeight * 0.55;
+  const heroOpacity = scrollOffset <= heroFadeStart
+    ? 1
+    : scrollOffset >= heroFadeEnd
+      ? 0
+      : 1 - (scrollOffset - heroFadeStart) / (heroFadeEnd - heroFadeStart);
+
+  const contentFadeStart = screenHeight * 0.30;
+  const contentFadeEnd = screenHeight * 0.65;
+  const contentOpacity = scrollOffset <= contentFadeStart
+    ? 0
+    : scrollOffset >= contentFadeEnd
+      ? 1
+      : (scrollOffset - contentFadeStart) / (contentFadeEnd - contentFadeStart);
 
   const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
@@ -176,7 +224,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Option B: Dynamic Zooming Starfield Wrapper with 15% Edge Buffer */}
+      {/* Background Starfield Canvas */}
       <div
         className="fixed inset-0 pointer-events-none z-0 transition-transform duration-75 ease-out"
         style={{
@@ -187,28 +235,26 @@ export default function HomePage() {
         <StarfieldCanvas />
       </div>
 
-      {/* SECTION 1: Integrated Hero Parallax (Restructured split layout) */}
+      {/* SECTION 1: Integrated Hero Parallax (Split layout) */}
       <section className="relative w-full min-h-[85vh] py-8 md:py-12 overflow-hidden flex items-center border-b border-slate-900/40">
-
         <div
           className="relative w-full max-w-7xl mx-auto px-4 md:px-6 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-10 transition-all duration-75 ease-out"
           style={{
             transform: `translateY(${scrollOffset * 0.22}px) scale(${Math.max(0.9, 1 - scrollOffset * 0.0006)})`,
-            opacity: Math.max(0, 1 - scrollOffset * 0.0016)
+            opacity: heroOpacity
           }}
         >
           {/* Hero Landing Text */}
           <div className="w-full lg:max-w-2xl text-left">
             <span className="text-[10px] font-bold tracking-[0.4em] text-cyan-400 uppercase block mb-3">
-              Center for Cosmology, Astrophysics & Space Science
+              Official Student Observatory Collective
             </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.15]">
               Witness the Unseen.<br />
               <span className="bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 bg-clip-text text-transparent">Beyond the Stars.</span>
             </h1>
             <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl mb-8">
-              Welcome to AstroClub, GLA University, Mathura.
-              We are a community of student researchers, engineers, and stargazers building our own optical telescopes to bring deep-space observation closer to Earth.
+              A student collective trading sleep for photons. We grind mirrors, write tracking algorithms, and align optics to bring deep space down to campus rooftops. From nebulas to rocket launches, we explore it together.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -227,47 +273,48 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Option C: Clean Saturn Image Card */}
+          {/* Saturn Image Card */}
           <div className="w-full lg:w-auto flex justify-center">
             <OrbitingPlanetCanvas />
           </div>
-
         </div>
 
         {/* Bottom Fade Gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 to-transparent z-10 pointer-events-none" />
       </section>
 
-      {/* SECTION 1.5: Mission Strip */}
-      <section className="relative z-10 -mt-8 max-w-7xl mx-auto px-4 md:px-6">
-        <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
-          <div className="flex items-center gap-4">
-            <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
-            <div className="text-left">
-              <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
-                Our Mandate
-              </span>
-              <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
-                A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
-              </p>
+      {/* Dynamic Fading Container for lower page content */}
+      <div 
+        className="transition-opacity duration-300 flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto"
+        style={{ opacity: contentOpacity }}
+      >
+        {/* SECTION 1.5: Mission Strip with expanded spacing */}
+        <section className="relative w-full mb-4">
+          <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
+              <div className="text-left">
+                <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
+                  Our Mandate
+                </span>
+                <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
+                  A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
+                </p>
+              </div>
             </div>
+            <Link
+              href="/about"
+              className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
+            >
+              <span>Learn More About Us</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
           </div>
-          <Link
-            href="/about"
-            className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
-          >
-            <span>Learn More About CCASS</span>
-            <span className="transition-transform group-hover:translate-x-1">→</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* Main Page Content Wrapper (Restructured into Telemetry Dashboard Grid) */}
-      <div className="flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto">
+        </section>
 
         {/* TWO-COLUMN TELEMETRY GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
+          
           {/* COLUMN 1: NASA APOD (7 Cols) */}
           <section className="lg:col-span-7 flex flex-col">
             <div className="mb-6 flex items-center justify-between">
@@ -371,23 +418,43 @@ export default function HomePage() {
                 <h3 className="text-lg font-bold text-white mt-1 mb-4">
                   Stella Nocturna
                 </h3>
-                <p className="text-xs md:text-sm text-slate-400 leading-relaxed mb-6">
-                  Join us every weekend for celestial tracking. Observe satellites, map constellations, and view deep-sky bodies up close.
-                </p>
-
-                <div className="space-y-4 text-xs md:text-sm mb-8">
-                  <div className="flex items-start gap-3">
-                    <span className="text-base select-none">📍</span>
+                
+                {/* 3 Punchy Gen-Z Bullet Points */}
+                <div className="space-y-4 mb-6 text-xs md:text-sm">
+                  <div className="flex items-start gap-3 group">
+                    <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🌌</span>
                     <div>
-                      <h4 className="font-semibold text-slate-300">Location</h4>
-                      <p className="text-slate-400">Basketball Ground, GLA University Campus</p>
+                      <h4 className="font-semibold text-slate-200">Zero Cost Stargazing</h4>
+                      <p className="text-[11px] text-slate-450 mt-0.5">Free public observation camps. Just bring curiosity.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 group">
+                    <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🔭</span>
+                    <div>
+                      <h4 className="font-semibold text-slate-200">Handcrafted Gear Only</h4>
+                      <p className="text-[11px] text-slate-450 mt-0.5">Operate student-built Newtonian reflector scopes.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 group">
+                    <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🛰️</span>
+                    <div>
+                      <h4 className="font-semibold text-slate-200">Satellite Tracking</h4>
+                      <p className="text-[11px] text-slate-450 mt-0.5">Map constellations and trace live satellite trains.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3.5 text-xs md:text-sm mb-8 pt-4 border-t border-slate-900/60">
+                  <div className="flex items-start gap-3">
+                    <span className="text-xs text-slate-500 shrink-0 select-none">📍</span>
+                    <div>
+                      <p className="text-[11px] text-slate-400">Basketball Ground, GLA University Campus</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <span className="text-base select-none">⏰</span>
+                    <span className="text-xs text-slate-500 shrink-0 select-none">⏰</span>
                     <div>
-                      <h4 className="font-semibold text-slate-300">Schedule</h4>
-                      <p className="text-slate-400">Fridays & Saturdays, 5:00 PM onwards</p>
+                      <p className="text-[11px] text-slate-400">Fridays & Saturdays, 5:00 PM onwards</p>
                     </div>
                   </div>
                 </div>
@@ -395,17 +462,50 @@ export default function HomePage() {
 
               <Link
                 href="/request"
-                className="w-full text-center rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition-colors hover:bg-slate-200 active:scale-[0.99]"
+                className="w-full text-center rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition-all hover:bg-slate-200 active:scale-[0.99] hover:scale-[1.01]"
               >
                 Book Session Ticket
               </Link>
             </div>
           </section>
-
         </div>
 
+        {/* SECTION 1.8: Club Work Marquee/Slider */}
+        <section className="w-full border-t border-slate-900 pt-10">
+          <SectionTitle>Club Work</SectionTitle>
+          <div className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x scroll-smooth">
+            {EVENT_IMAGES.map((img, i) => (
+              <div 
+                key={i} 
+                className="min-w-[280px] sm:min-w-[340px] snap-start rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden group hover:border-slate-800 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+                  <img 
+                    src={img.url} 
+                    alt={img.title} 
+                    loading="lazy" 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none" />
+                  <span className="absolute bottom-3 left-4 text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest bg-slate-950/80 px-2.5 py-0.5 rounded border border-slate-900">
+                    EVENT 0{i + 1}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors mb-1">
+                    {img.title}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    {img.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* SECTION 2: Core Leadership */}
-        <section>
+        <section className="border-t border-slate-900 pt-10">
           <SectionTitle>Core Leadership</SectionTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {CLUB_ROLES.map((role) => (
@@ -425,7 +525,7 @@ export default function HomePage() {
         </section>
 
         {/* SECTION 3: Telescope Inventory */}
-        <section>
+        <section className="border-t border-slate-900 pt-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
             <div>
               <h2 className="text-xl font-bold tracking-tight text-white mb-1 flex items-center gap-2">
@@ -438,7 +538,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/equipment"
-              className="text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors self-start md:self-auto"
+              className="text-xs font-semibold text-slate-500 hover:text-slate-355 transition-colors self-start md:self-auto uppercase tracking-wider"
             >
               Full Catalog →
             </Link>
@@ -451,7 +551,7 @@ export default function HomePage() {
               <SkeletonCard />
             </div>
           ) : telescopes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-900 bg-slate-950/20 py-12 text-center px-4">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-900 bg-slate-955/20 py-12 text-center px-4">
               <span className="text-3xl mb-2 select-none">🔭</span>
               <p className="text-slate-400 text-sm font-medium">Instruments inventory cataloguing in progress</p>
             </div>
@@ -460,17 +560,18 @@ export default function HomePage() {
               {telescopes.map((tele) => (
                 <div
                   key={tele.id}
-                  className="group rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden transition-all hover:border-slate-800/80 backdrop-blur-md"
+                  className="group rounded-xl border border-slate-905 bg-slate-955/40 overflow-hidden transition-all hover:border-slate-800/80 backdrop-blur-md"
                 >
                   <div className="h-44 w-full bg-slate-900/40 overflow-hidden">
                     {tele.image_url ? (
                       <img
                         src={tele.image_url}
                         alt={tele.name}
+                        loading="lazy"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-800 bg-slate-950/50">
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-800 bg-slate-955/50">
                         <span className="text-3xl select-none">🔭</span>
                         <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-600">Handcrafted</span>
                       </div>
