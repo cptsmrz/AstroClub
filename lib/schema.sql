@@ -72,3 +72,31 @@ ALTER TABLE public.session_requests
 ALTER TABLE public.telescopes
   ADD COLUMN IF NOT EXISTS description TEXT,
   ADD COLUMN IF NOT EXISTS availability_status TEXT DEFAULT 'in_service';
+
+-- 9. Create database-level role-synchronization trigger
+CREATE OR REPLACE FUNCTION public.handle_user_role_elevation()
+RETURNS TRIGGER AS $$
+DECLARE
+  matching_role TEXT;
+BEGIN
+  -- Search for matching email in system_approvers
+  SELECT role INTO matching_role 
+  FROM public.system_approvers 
+  WHERE designated_email = NEW.email;
+
+  -- Elevate role if matched
+  IF matching_role IS NOT NULL THEN
+    NEW.role := matching_role;
+    NEW.status := 'approved';
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Bind trigger to profiles table
+DROP TRIGGER IF EXISTS tr_elevate_user_role ON public.profiles;
+CREATE TRIGGER tr_elevate_user_role
+  BEFORE INSERT OR UPDATE OF email ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_user_role_elevation();

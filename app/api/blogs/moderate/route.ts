@@ -19,24 +19,36 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Extract & Verify Auth JWT from Request Headers
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing or invalid authorization header." }, { status: 401 });
+    }
+    const token = authHeader.substring(7);
+    const { data: { user }, error: authError } = await supabaseServer.auth.getUser(token);
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized access token." }, { status: 401 });
+    }
+
     const { 
       title, 
       content, 
       images, 
-      authorId, 
-      authorEmail,
       contributorType,
       contributorName,
       contributorEmail,
       isFirstPost
     } = await request.json();
 
-    if (!authorId || !title || !content) {
+    const authorId = user.id;
+    const authorEmail = user.email;
+
+    if (!title || !content) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
     // 1. S.AI IMAGE CHECK: Nudity / Explicit content scan
-    const hasNudity = images.some((img: string) => 
+    const hasNudity = Array.isArray(images) && images.some((img: string) => 
       img.toLowerCase().includes("nudity") || 
       img.toLowerCase().includes("nsfw") || 
       img.toLowerCase().includes("explicit")

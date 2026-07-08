@@ -109,26 +109,7 @@ export default function BlogsPage() {
   // --- Fetch User Profile & Sync Roles ---
   const fetchUserProfile = async (uid: string, userEmail: string | undefined) => {
     try {
-      const email = userEmail || "";
-
-      // 1. Sync designated approver credentials
-      if (email) {
-        const { data: approver } = await supabase
-          .from("system_approvers")
-          .select("role")
-          .eq("designated_email", email)
-          .maybeSingle();
-
-        if (approver) {
-          // Elevate role
-          await supabase
-            .from("profiles")
-            .update({ role: approver.role, status: "approved" })
-            .eq("id", uid);
-        }
-      }
-
-      // 2. Load profile data
+      // Load profile data
       const { data: prof, error } = await supabase
         .from("profiles")
         .select("full_name, role, status, secondary_email, created_at")
@@ -178,15 +159,7 @@ export default function BlogsPage() {
   const fetchPosts = useCallback(async () => {
     setPostsLoading(true);
     try {
-      // 1. Automatically delete flagged posts that have exceeded their 24h edit window
-      await supabase
-        .from("blogs")
-        .delete()
-        .eq("status", "flagged_review")
-        .not("edit_allowed_until", "is", null)
-        .lt("edit_allowed_until", new Date().toISOString());
-
-      // 2. Fetch live published blogs
+      // 1. Fetch live published blogs
       const { data, error } = await supabase
         .from("blogs")
         .select("id, title, content, created_at, author_id, status, images, edit_allowed_until, profiles(full_name)")
@@ -476,15 +449,19 @@ export default function BlogsPage() {
       return;
     }
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const res = await fetch("/api/blogs/moderate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           title: postTitle,
           content: postBody,
           images: postImages,
-          authorId: user.id,
-          authorEmail: user.email,
           contributorType: cType,
           contributorName: cName,
           contributorEmail: cEmail,
