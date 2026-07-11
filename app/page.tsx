@@ -412,10 +412,19 @@ export default function HomePage() {
       <div
         className="fixed inset-0 z-[100] overflow-hidden"
         style={{
-          // Solid site-bg during telemetry (no canvas bleed), transparent during matrix (stars show), black for fade
-          backgroundColor: phase === "telemetry" ? "#020617" : phase === "black" ? "#000000" : "transparent",
+          // rgba so CSS can interpolate smoothly between phases
+          // telemetry → solid slate-950 | matrix → transparent (same color, alpha 0) | black → pitch black
+          backgroundColor:
+            phase === "telemetry" ? "rgba(2,6,23,1)"
+            : phase === "matrix"  ? "rgba(2,6,23,0)"
+            : phase === "black"   ? "rgba(0,0,0,1)"
+            : "transparent",
+          // Smooth bg dissolve telemetry→matrix; opacity fade for the final black→none transition
+          transition:
+            phase === "black"
+              ? "opacity 0.9s ease-out"
+              : "background-color 1s ease-out",
           opacity: overlayOpacity,
-          transition: phase === "black" ? "opacity 0.9s ease-out" : "none",
           pointerEvents: phase === "none" ? "none" : "all",
         }}
       >
