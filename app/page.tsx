@@ -257,15 +257,16 @@ export default function HomePage() {
       setIntroPhase("matrix");
 
       // Transition to Darkness Fade at 11.0 seconds (6.0s into matrix phase)
+      // Transition to Darkness Fade at 11.0 seconds (6.0s into matrix phase)
       const toWarpTimer = setTimeout(() => {
-        // Unmount intro overlay immediately and trigger instant darkness black overlay
+        // Unmount intro overlay immediately and trigger solid space black overlay
         setIntroPhase("none");
         setWarpFlashActive(true);
         setWarpFlashOpacity(1);
         localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-        // Trigger the 1.0-second fade-out in the next frame
-        const fadeOutTimer = setTimeout(() => {
+        // Wait exactly 1.0 second (space black darkness hold) before starting the fade-out
+        const holdTimer = setTimeout(() => {
           setWarpFlashOpacity(0);
           
           // Complete fade-out and show fullscreen prompt after exactly 1.0 second
@@ -277,9 +278,9 @@ export default function HomePage() {
           }, 1000);
 
           return () => clearTimeout(endTimer);
-        }, 50);
+        }, 1000);
 
-        return () => clearTimeout(fadeOutTimer);
+        return () => clearTimeout(holdTimer);
       }, 6000);
 
       return () => {
@@ -300,7 +301,7 @@ export default function HomePage() {
     setWarpFlashActive(true);
     setWarpFlashOpacity(1);
 
-    // Fast 1.0-second fade-out on skip
+    // Fast 1.0-second pitch black hold followed by 1.0-second fade
     setTimeout(() => {
       setWarpFlashOpacity(0);
       
@@ -310,7 +311,7 @@ export default function HomePage() {
           setShowFullscreenModal(true);
         }
       }, 1000);
-    }, 50);
+    }, 1000);
   };
 
   // --- State: NASA APOD ---
@@ -482,10 +483,10 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.0 second, mimicking the site's natural background) */}
+      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.0 second, mimicking deep space black) */}
       {warpFlashActive && (
         <div 
-          className="fixed inset-0 bg-[#020617] z-[110] pointer-events-none transition-opacity ease-out"
+          className="fixed inset-0 bg-black z-[110] pointer-events-none transition-opacity ease-out"
           style={{
             opacity: warpFlashOpacity,
             transitionDuration: "1000ms"
