@@ -252,7 +252,7 @@ export default function HomePage() {
       }, 100);
 
       return () => clearTimeout(t3);
-    }, 11000);
+    }, 9000);
 
     return () => {
       if (typingTimer) clearTimeout(typingTimer);
@@ -419,8 +419,12 @@ export default function HomePage() {
           pointerEvents: phase === "none" ? "none" : "all",
         }}
       >
-        {/* Starfield lives inside the overlay — visible during telemetry + matrix phases */}
-        {phase !== "none" && <StarfieldCanvas />}
+        {/* Stars-only blurred starfield — strictly background stars, no constellations, no Saturn */}
+        {phase !== "none" && (
+          <div style={{ filter: "blur(1.5px)", position: "absolute", inset: 0 }}>
+            <StarfieldCanvas starsOnly />
+          </div>
+        )}
 
         {/* Matrix rain canvas — always mounted, only draws when phase===matrix */}
         <IntroCanvas phase={phase} />

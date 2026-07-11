@@ -108,7 +108,7 @@ const CONSTELLATIONS: ConstellationDef[] = [
 // ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
-export default function StarfieldCanvas() {
+export default function StarfieldCanvas({ starsOnly = false }: { starsOnly?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
 
@@ -204,61 +204,63 @@ export default function StarfieldCanvas() {
         }
       });
 
-      // 2. Draw Constellations with Parallax drift
-      const quadrants = getQuadrants(W, H);
+      // 2. Draw Constellations with Parallax drift (skipped when starsOnly=true)
+      if (!starsOnly) {
+        const quadrants = getQuadrants(W, H);
 
-      CONSTELLATIONS.forEach((constellation, index) => {
-        const q = quadrants[index % quadrants.length];
-        
-        const cx = q.x + fgShiftX * q.driftFactor;
-        const cy = q.y + fgShiftY * q.driftFactor;
-        const scale = constellation.scale;
+        CONSTELLATIONS.forEach((constellation, index) => {
+          const q = quadrants[index % quadrants.length];
+          
+          const cx = q.x + fgShiftX * q.driftFactor;
+          const cy = q.y + fgShiftY * q.driftFactor;
+          const scale = constellation.scale;
 
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(q.angle);
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(q.angle);
 
-        ctx.strokeStyle = "rgba(51, 65, 85, 0.08)";
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(-80 * scale, -80 * scale, 160 * scale, 160 * scale);
-
-        ctx.beginPath();
-        constellation.edges.forEach(([startIdx, endIdx]) => {
-          const p1 = constellation.points[startIdx];
-          const p2 = constellation.points[endIdx];
-          ctx.moveTo(p1.x * scale, p1.y * scale);
-          ctx.lineTo(p2.x * scale, p2.y * scale);
-        });
-        ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
-        ctx.lineWidth = 0.75;
-        ctx.shadowColor = "rgba(255, 255, 255, 0.2)";
-        ctx.shadowBlur = 4;
-        ctx.stroke();
-        
-        ctx.shadowBlur = 0;
-
-        constellation.points.forEach((p) => {
-          const px = p.x * scale;
-          const py = p.y * scale;
-          const starSize = (p.size || 1) * 2.0;
+          ctx.strokeStyle = "rgba(51, 65, 85, 0.08)";
+          ctx.lineWidth = 0.5;
+          ctx.strokeRect(-80 * scale, -80 * scale, 160 * scale, 160 * scale);
 
           ctx.beginPath();
-          ctx.arc(px, py, starSize, 0, Math.PI * 2);
-          ctx.fillStyle = "#ffffff";
-          ctx.fill();
+          constellation.edges.forEach(([startIdx, endIdx]) => {
+            const p1 = constellation.points[startIdx];
+            const p2 = constellation.points[endIdx];
+            ctx.moveTo(p1.x * scale, p1.y * scale);
+            ctx.lineTo(p2.x * scale, p2.y * scale);
+          });
+          ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
+          ctx.lineWidth = 0.75;
+          ctx.shadowColor = "rgba(255, 255, 255, 0.2)";
+          ctx.shadowBlur = 4;
+          ctx.stroke();
+          
+          ctx.shadowBlur = 0;
 
-          const glow = ctx.createRadialGradient(px, py, 0, px, py, starSize * 5);
-          glow.addColorStop(0, "rgba(255, 255, 255, 0.35)");
-          glow.addColorStop(0.3, "rgba(148, 163, 184, 0.12)");
-          glow.addColorStop(1, "rgba(148, 163, 184, 0)");
-          ctx.beginPath();
-          ctx.arc(px, py, starSize * 5, 0, Math.PI * 2);
-          ctx.fillStyle = glow;
-          ctx.fill();
+          constellation.points.forEach((p) => {
+            const px = p.x * scale;
+            const py = p.y * scale;
+            const starSize = (p.size || 1) * 2.0;
+
+            ctx.beginPath();
+            ctx.arc(px, py, starSize, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+
+            const glow = ctx.createRadialGradient(px, py, 0, px, py, starSize * 5);
+            glow.addColorStop(0, "rgba(255, 255, 255, 0.35)");
+            glow.addColorStop(0.3, "rgba(148, 163, 184, 0.12)");
+            glow.addColorStop(1, "rgba(148, 163, 184, 0)");
+            ctx.beginPath();
+            ctx.arc(px, py, starSize * 5, 0, Math.PI * 2);
+            ctx.fillStyle = glow;
+            ctx.fill();
+          });
+
+          ctx.restore();
         });
-
-        ctx.restore();
-      });
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
