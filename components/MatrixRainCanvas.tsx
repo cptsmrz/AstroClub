@@ -18,8 +18,8 @@ class RainDrop {
   nextChange: number;
 
   constructor(canvasWidth: number) {
-    // Restrict width to the center 75% of the screen (leaving 12.5% margins on left and right)
-    this.x = (canvasWidth * 0.125) + Math.random() * (canvasWidth * 0.75);
+    // Restrict width to leave exactly 0.75 inches (~72 pixels) on each side
+    this.x = 72 + Math.random() * (canvasWidth - 144);
     this.y = Math.random() * -800 - 50; // start off-screen
     this.depth = 0.25 + Math.random() * 1.25; // 3D depth parallax scale
     this.fontSize = Math.floor(10 + this.depth * 11);
@@ -40,8 +40,8 @@ class RainDrop {
     this.chars = [];
     this.nextChange = 0;
     
-    // Generate trail of characters
-    const trailLength = Math.floor(10 + Math.random() * 16);
+    // Generate shorter character trails to save RAM
+    const trailLength = Math.floor(6 + Math.random() * 8);
     for (let i = 0; i < trailLength; i++) {
       this.chars.push(this.getRandomChar());
     }
@@ -93,14 +93,11 @@ class RainDrop {
       const trailOpacity = this.opacity * (1 - i / this.chars.length);
       
       if (i === 0) {
-        // Blazing white/green leading character
-        ctx.fillStyle = `rgba(235, 255, 235, ${this.opacity})`;
-        ctx.shadowColor = "#10b981";
-        ctx.shadowBlur = this.depth * 9;
+        // Blazing light emerald leading character (simulates glow without heavy shadow rendering)
+        ctx.fillStyle = `rgba(209, 250, 229, ${this.opacity})`;
       } else {
-        // Falling emerald green trail
+        // Falling green trail
         ctx.fillStyle = `rgba(16, 185, 129, ${trailOpacity})`;
-        ctx.shadowBlur = 0;
       }
 
       ctx.fillText(this.chars[i], this.x, charY);
@@ -126,8 +123,8 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Stream count relative to 75% width coverage area
-    const streamCount = Math.floor((canvas.width * 0.75) / 11);
+    // Stream count relative to 75% width coverage area (spaced out for 50% fewer columns)
+    const streamCount = Math.floor((canvas.width - 144) / 24);
     const drops: RainDrop[] = [];
     for (let i = 0; i < streamCount; i++) {
       drops.push(new RainDrop(canvas.width));
@@ -138,9 +135,6 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
       // Clear with slight alpha to preserve trailing glow
       ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Reset shadows for background rendering
-      ctx.shadowBlur = 0;
 
       // Update and draw code drops
       drops.forEach(drop => {
