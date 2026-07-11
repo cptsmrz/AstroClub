@@ -286,6 +286,15 @@ const BATCH_26: Member[] = [
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState<"all" | "25" | "26" | "24">("all");
 
+  const pathD = MILESTONES.reduce((acc, _, idx) => {
+    if (idx === 0) return "M 160 225";
+    const prevX = (idx - 1) * 320 + 160;
+    const currX = idx * 320 + 160;
+    const midX = (prevX + currX) / 2;
+    const controlY = (idx - 1) % 2 === 0 ? 100 : 350;
+    return `${acc} Q ${midX} ${controlY} ${currX} 225`;
+  }, "");
+
   const MemberCard = ({ 
     member, 
     textAccent, 
@@ -409,7 +418,7 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* 1. CLUB MILESTONES (Horizontal Roadmap Slider) */}
+        {/* 1. CLUB MILESTONES (Horizontal Winding S-Roadmap) */}
         <section className="border-t border-slate-900 pt-10 relative overflow-hidden">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -417,7 +426,7 @@ export default function AboutPage() {
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
                 Our Journey & Roadmap
               </h2>
-              <p className="text-slate-500 text-xs mt-1">Scroll horizontally to trace our key breakthroughs and historic milestones.</p>
+              <p className="text-slate-500 text-xs mt-1">Follow the winding S-curve track below to trace our key breakthroughs.</p>
             </div>
             
             {/* Scroll indicators */}
@@ -445,44 +454,103 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Horizontal scroll container with dashed progress line */}
-          <div className="relative">
-            {/* Horizontal connecting line across the scroll track */}
-            <div className="absolute top-[20px] left-0 right-0 h-[1.5px] border-t border-dashed border-slate-900 z-0 pointer-events-none" />
-
+          {/* Horizontal scroll container with winding road height */}
+          <div className="relative h-[480px] w-full overflow-hidden">
             <div 
               id="roadmap-container"
-              className="flex flex-row overflow-x-auto gap-5 pb-6 pt-2 px-1 custom-scrollbar scroll-smooth snap-x snap-mandatory z-10 relative"
+              className="flex flex-row overflow-x-auto gap-0 pb-6 pt-2 px-0 custom-scrollbar scroll-smooth snap-x snap-mandatory z-10 relative h-full items-center"
             >
-              {MILESTONES.map((m, idx) => (
-                <div 
-                  key={idx} 
-                  className="min-w-[290px] md:min-w-[320px] max-w-[320px] snap-start flex flex-col gap-4 relative group"
-                >
-                  {/* Timeline Node Connector Circle */}
-                  <div className="flex items-center gap-3">
-                    <span className="bg-slate-950 border-2 border-slate-900 text-sm w-10 h-10 rounded-full flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-slate-900 transition-all duration-300 relative z-10 shadow-lg">
-                      {m.icon}
-                    </span>
-                    <span className="text-[10px] font-mono font-bold text-cyan-400 tracking-wider bg-cyan-950/30 border border-cyan-900/40 px-2 py-0.5 rounded-full">
-                      {m.date}
-                    </span>
-                  </div>
+              {/* Horizontal connecting Bezier line across the scroll track */}
+              <svg 
+                className="absolute top-0 left-0 h-full pointer-events-none z-0" 
+                style={{ width: `${MILESTONES.length * 320}px` }}
+                viewBox={`0 0 ${MILESTONES.length * 320} 450`}
+                fill="none"
+              >
+                <path 
+                  d={pathD} 
+                  stroke="url(#roadmap-line-gradient)" 
+                  strokeWidth="2.5" 
+                  strokeDasharray="6 6"
+                />
+                <defs>
+                  <linearGradient id="roadmap-line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
+                    <stop offset="50%" stopColor="#818cf8" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#ec4899" stopOpacity="0.4" />
+                  </linearGradient>
+                </defs>
+              </svg>
 
-                  {/* Card Content */}
-                  <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-5 flex-grow backdrop-blur-sm transition-all hover:border-slate-850 hover:bg-slate-900/20 shadow-md flex flex-col gap-2 relative overflow-hidden">
-                    {/* Subtle corner highlight */}
-                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
-                    
-                    <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">
-                      {m.title}
-                    </h4>
-                    <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line flex-grow">
-                      {m.desc}
-                    </p>
+              {MILESTONES.map((m, idx) => {
+                const isEven = idx % 2 === 0;
+                return (
+                  <div 
+                    key={idx} 
+                    className="flex flex-col items-center justify-center shrink-0 w-[320px] h-[450px] relative group snap-start z-10"
+                  >
+                    {isEven ? (
+                      <>
+                        {/* 1. Card at the top */}
+                        <div className="bg-slate-950/60 border border-slate-900/60 rounded-xl p-4 w-[280px] h-[175px] backdrop-blur-sm transition-all hover:border-slate-800 hover:bg-slate-900/20 shadow-md flex flex-col gap-1.5 relative overflow-hidden text-left">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
+                          <h4 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors uppercase tracking-wider">
+                            {m.title}
+                          </h4>
+                          <p className="text-[11px] text-slate-400 leading-relaxed whitespace-pre-line flex-grow overflow-y-auto custom-scrollbar">
+                            {m.desc}
+                          </p>
+                        </div>
+
+                        {/* 2. Dotted vertical connector down to node */}
+                        <div className="w-[1.5px] h-[35px] border-l border-dashed border-slate-850 mt-1" />
+
+                        {/* 3. Node on the central path */}
+                        <div className="bg-slate-950 border-2 border-slate-900 text-sm w-9 h-9 rounded-full flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-slate-900 transition-all duration-300 shadow-lg relative z-10">
+                          {m.icon}
+                        </div>
+
+                        {/* 4. Date badge below node */}
+                        <span className="text-[9px] font-mono font-bold text-cyan-400 tracking-wider bg-cyan-950/30 border border-cyan-900/40 px-2 py-0.5 rounded-full mt-2 select-none">
+                          {m.date}
+                        </span>
+
+                        {/* 5. Spacer to balance bottom */}
+                        <div className="h-[175px] w-[280px] pointer-events-none" />
+                      </>
+                    ) : (
+                      <>
+                        {/* 1. Spacer to balance top */}
+                        <div className="h-[175px] w-[280px] pointer-events-none" />
+
+                        {/* 2. Date badge above node */}
+                        <span className="text-[9px] font-mono font-bold text-cyan-400 tracking-wider bg-cyan-950/30 border border-cyan-900/40 px-2 py-0.5 rounded-full mb-2 select-none">
+                          {m.date}
+                        </span>
+
+                        {/* 3. Node on the central path */}
+                        <div className="bg-slate-950 border-2 border-slate-900 text-sm w-9 h-9 rounded-full flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-slate-900 transition-all duration-300 shadow-lg relative z-10">
+                          {m.icon}
+                        </div>
+
+                        {/* 4. Dotted vertical connector down to card */}
+                        <div className="w-[1.5px] h-[35px] border-l border-dashed border-slate-850 mb-1" />
+
+                        {/* 5. Card at the bottom */}
+                        <div className="bg-slate-950/60 border border-slate-900/60 rounded-xl p-4 w-[280px] h-[175px] backdrop-blur-sm transition-all hover:border-slate-800 hover:bg-slate-900/20 shadow-md flex flex-col gap-1.5 relative overflow-hidden text-left">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
+                          <h4 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors uppercase tracking-wider">
+                            {m.title}
+                          </h4>
+                          <p className="text-[11px] text-slate-400 leading-relaxed whitespace-pre-line flex-grow overflow-y-auto custom-scrollbar">
+                            {m.desc}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
