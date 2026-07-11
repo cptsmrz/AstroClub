@@ -412,8 +412,8 @@ export default function HomePage() {
       <div
         className="fixed inset-0 z-[100] overflow-hidden"
         style={{
-          // Transparent during sim, solid black only for the fade-out phase
-          backgroundColor: phase === "black" ? "#000000" : "transparent",
+          // Solid site-bg during telemetry (no canvas bleed), transparent during matrix (stars show), black for fade
+          backgroundColor: phase === "telemetry" ? "#020617" : phase === "black" ? "#000000" : "transparent",
           opacity: overlayOpacity,
           transition: phase === "black" ? "opacity 0.9s ease-out" : "none",
           pointerEvents: phase === "none" ? "none" : "all",
