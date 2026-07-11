@@ -24,16 +24,16 @@ class Particle {
     this.angle = Math.random() * Math.PI * 2;
     // Keplerian speed: closer orbits spin faster
     this.angularSpeed = (0.012 + Math.random() * 0.01) * (110 / this.radius);
-    this.yOffset = (Math.random() - 0.5) * 6; // thin accretion disk plane
-    this.size = 0.7 + Math.random() * 1.6;
+    this.yOffset = (Math.random() - 0.5) * 8; // thicker gas plane
+    this.size = 1.3 + Math.random() * 2.8; // larger particles to overlap and blur
 
-    const heat = Math.max(0, 1 - (this.radius - 65) / 90);
-    if (heat > 0.75) {
-      this.color = `rgba(225, 245, 255, ${0.45 + Math.random() * 0.4})`; // white-hot inner boundary
-    } else if (heat > 0.35) {
-      this.color = `rgba(255, 215, 120, ${0.4 + Math.random() * 0.4})`; // golden-yellow middle
+    const heat = Math.max(0, 1 - (this.radius - 65) / 95);
+    if (heat > 0.78) {
+      this.color = `rgba(225, 245, 255, ${0.5 + Math.random() * 0.4})`; // blazing hot white-blue core
+    } else if (heat > 0.4) {
+      this.color = `rgba(255, 220, 110, ${0.45 + Math.random() * 0.4})`; // gold-yellow plasma
     } else {
-      this.color = `rgba(240, 110, 35, ${0.25 + Math.random() * 0.45})`; // orange-red outer rim
+      this.color = `rgba(240, 105, 30, ${0.3 + Math.random() * 0.45})`; // warm orange-red gas
     }
   }
 
@@ -51,18 +51,18 @@ class Particle {
 
     // 1. Einstein Ring (Bent background light wrapping around top and bottom)
     if (z < 0) {
-      // Calculate lensed projection curve: squashed halo ring
-      const lensY = Math.abs(x) * 0.15 + (this.radius - Math.abs(x)) * 0.34;
+      // Calculate lensed projection curve: squashed halo ring wrapping higher over the black hole
+      const lensY = Math.abs(x) * 0.12 + (this.radius - Math.abs(x)) * 0.45;
       
       ctx.fillStyle = this.color;
       ctx.beginPath();
       // Upper lensed arc
-      ctx.arc(cx + x, cy - lensY + y, this.size * 0.75, 0, Math.PI * 2);
+      ctx.arc(cx + x, cy - lensY + y, this.size * 0.85, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.beginPath();
       // Lower lensed arc
-      ctx.arc(cx + x, cy + lensY + y, this.size * 0.75, 0, Math.PI * 2);
+      ctx.arc(cx + x, cy + lensY + y, this.size * 0.85, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -97,8 +97,8 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Instantiate particles
-    const particleCount = 1500;
+    // Instantiate particles with higher density
+    const particleCount = 2200;
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
@@ -128,6 +128,9 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
       particles.forEach(p => p.update(collapseProgress));
       particles.sort((a, b) => a.z - b.z);
 
+      // Enable blur filter for volumetric gaseous plasma look
+      ctx.filter = "blur(1.6px)";
+
       // Render sorted particles
       const horizonRadius = Math.max(8, 48 * (1 - collapseProgress * 0.75));
 
@@ -135,22 +138,38 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
         // Once we cross from background (z < 0) to foreground (z >= 0),
         // we render the solid black event horizon sphere blocking the background disk.
         if (p.z >= 0 && p.z - p.angularSpeed * p.radius < 0) {
+          // Temporarily disable filter to keep event horizon sphere sharp
+          ctx.filter = "none";
           ctx.fillStyle = "#000000";
           ctx.beginPath();
           ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
           ctx.fill();
 
-          // Event horizon outer gravitational lensing shadow ring
-          ctx.strokeStyle = "rgba(255, 215, 120, 0.25)";
-          ctx.lineWidth = 1.5;
+          // Blazing corona glow directly surrounding the event horizon
+          const coronaGlow = ctx.createRadialGradient(cx, cy, horizonRadius, cx, cy, horizonRadius + 14);
+          coronaGlow.addColorStop(0, "rgba(255, 230, 160, 0.45)");
+          coronaGlow.addColorStop(0.3, "rgba(240, 110, 30, 0.2)");
+          coronaGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = coronaGlow;
           ctx.beginPath();
-          ctx.arc(cx, cy, horizonRadius + 1, 0, Math.PI * 2);
+          ctx.arc(cx, cy, horizonRadius + 14, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Event horizon outer gravitational lensing shadow boundary
+          ctx.strokeStyle = "rgba(255, 215, 120, 0.35)";
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, horizonRadius + 0.8, 0, Math.PI * 2);
           ctx.stroke();
+
+          // Re-enable blur filter for subsequent foreground particles
+          ctx.filter = "blur(1.6px)";
         }
         p.draw(ctx, cx, cy);
       });
 
-      // Event horizon final draw override in case no particles intersected zero-point
+      // Event horizon final draw override to guarantee the center is solid black
+      ctx.filter = "none";
       ctx.fillStyle = "#000000";
       ctx.beginPath();
       ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);

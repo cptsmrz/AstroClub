@@ -159,6 +159,10 @@ export default function HomePage() {
   const [showSkip, setShowSkip] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
+  // Warp flash transition states
+  const [warpFlashActive, setWarpFlashActive] = useState(false);
+  const [warpFlashOpacity, setWarpFlashOpacity] = useState(0);
+
   // Auto-request browser Fullscreen when intro starts
   useEffect(() => {
     if (introPhase === "telemetry") {
@@ -247,21 +251,30 @@ export default function HomePage() {
         requestAnimationFrame(animateCollapse);
       }, 5500);
 
-      // Transition to Warp (White Flash) at 14.7s (7.2s into Gargantua)
+      // Transition to Singularity Warp Flash at 14.7s (7.2s into Gargantua)
       const toWarpTimer = setTimeout(() => {
-        setIntroPhase("warp");
+        // Unmount intro telemetry and canvas immediately, and show the white overlay instantly
+        setIntroPhase("none");
+        setWarpFlashActive(true);
+        setWarpFlashOpacity(1);
+        localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-        // Complete sequence and reveal homepage at 15.5s
-        const toNoneTimer = setTimeout(() => {
-          localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
-          setIntroPhase("none");
-          // If browser is currently in fullscreen, show the keep-fullscreen choice modal!
-          if (document.fullscreenElement) {
-            setShowFullscreenModal(true);
-          }
-        }, 800);
+        // Trigger the 2-second fade-out in the next frame
+        const fadeOutTimer = setTimeout(() => {
+          setWarpFlashOpacity(0);
+          
+          // Complete fade-out and show fullscreen prompt after exactly 2 seconds
+          const endTimer = setTimeout(() => {
+            setWarpFlashActive(false);
+            if (document.fullscreenElement) {
+              setShowFullscreenModal(true);
+            }
+          }, 2000);
 
-        return () => clearTimeout(toNoneTimer);
+          return () => clearTimeout(endTimer);
+        }, 50);
+
+        return () => clearTimeout(fadeOutTimer);
       }, 7200);
 
       return () => {
@@ -280,9 +293,20 @@ export default function HomePage() {
   const skipIntro = () => {
     localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
     setIntroPhase("none");
-    if (document.fullscreenElement) {
-      setShowFullscreenModal(true);
-    }
+    setWarpFlashActive(true);
+    setWarpFlashOpacity(1);
+
+    // Fast 2-second fade-out on skip
+    setTimeout(() => {
+      setWarpFlashOpacity(0);
+      
+      setTimeout(() => {
+        setWarpFlashActive(false);
+        if (document.fullscreenElement) {
+          setShowFullscreenModal(true);
+        }
+      }, 2000);
+    }, 50);
   };
 
   // --- State: NASA APOD ---
@@ -416,49 +440,52 @@ export default function HomePage() {
     <>
       {/* TARS Telemetry CRT Intro Overlay */}
       {introPhase !== "none" && (
-        <>
-          {introPhase === "warp" ? (
-            /* Blinding White Flash of Singularity Warp */
-            <div className="fixed inset-0 bg-white z-[110] transition-opacity duration-500 opacity-100 flex items-center justify-center pointer-events-none" />
-          ) : (
-            /* Main Overlay container covering Telemetry and Gargantua phases */
-            <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
-              {/* CRT Screen Filters */}
-              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
-              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
-              
-              {/* Option A: Gargantua Accretion Disk Canvas (Renders behind the telemetry text during gargantua phase) */}
-              <GargantuaCanvas 
-                isActive={introPhase === "gargantua"} 
-                collapseProgress={collapseProgress} 
-              />
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
+          {/* CRT Screen Filters */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
+          
+          {/* Option A: Gargantua Accretion Disk Canvas (Renders behind the telemetry text during gargantua phase) */}
+          <GargantuaCanvas 
+            isActive={introPhase === "gargantua"} 
+            collapseProgress={collapseProgress} 
+          />
 
-              {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Gargantua) */}
-              <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
-                introPhase === "gargantua" ? "opacity-0 pointer-events-none" : "opacity-100"
-              }`}>
-                {printedLines.map((line, idx) => (
-                  <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
-                    <span>{line}</span>
-                    {idx === printedLines.length - 1 && (
-                      <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
-                    )}
-                  </div>
-                ))}
+          {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Gargantua) */}
+          <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
+            introPhase === "gargantua" ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}>
+            {printedLines.map((line, idx) => (
+              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
+                <span>{line}</span>
+                {idx === printedLines.length - 1 && (
+                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
+                )}
               </div>
+            ))}
+          </div>
 
-              {/* Skip Button (shows after 5 seconds delay) */}
-              {showSkip && (
-                <button 
-                  onClick={skipIntro}
-                  className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
-                >
-                  [ SKIP ENTRY SEQUENCE ]
-                </button>
-              )}
-            </div>
+          {/* Skip Button (shows after 5 seconds delay) */}
+          {showSkip && (
+            <button 
+              onClick={skipIntro}
+              className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
+            >
+              [ SKIP ENTRY SEQUENCE ]
+            </button>
           )}
-        </>
+        </div>
+      )}
+
+      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 2 seconds) */}
+      {warpFlashActive && (
+        <div 
+          className="fixed inset-0 bg-white z-[110] pointer-events-none transition-opacity ease-out"
+          style={{
+            opacity: warpFlashOpacity,
+            transitionDuration: "2000ms"
+          }}
+        />
       )}
 
       {/* Fullscreen Stay/Exit Selection Modal (Shown after the intro sequence finishes) */}
