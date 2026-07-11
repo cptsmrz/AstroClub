@@ -5,8 +5,19 @@
   --foreground: #e2e8f0; /* Slate 200 light readable text */
 }
 
+@font-face {
+  font-family: 'Ambila';
+  src: url('/fonts/Ambila.woff2') format('woff2'),
+       url('/fonts/Ambila.woff') format('woff'),
+       url('/fonts/Ambila.otf') format('opentype'),
+       url('/fonts/Ambila.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --font-sans: var(--font-dela), sans-serif;
+  --font-sans: 'Ambila', var(--font-dela), sans-serif;
   --font-body: var(--font-rajdhani), sans-serif;
   --font-mono: var(--font-orbitron), monospace;
   --font-serif: var(--font-cinzel), serif;
@@ -24,7 +35,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-dela), sans-serif;
+  font-family: 'Ambila', var(--font-dela), sans-serif;
 }
 
 /* Premium Custom Scrollbars for Astro Cockpits */
