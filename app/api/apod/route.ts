@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const apiKey = process.env.NASA_API_KEY || process.env.NEXT_PUBLIC_NASA_API_KEY || "DEMO_KEY";
     
     const res = await fetch(
-      `https://api.nasa.gov/planetary/apod?api_key=${apiKey}`
+      `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&thumbs=true`
     );
     
     if (!res.ok) throw new Error("NASA API response not OK");
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     cachedApod = {
       title: data.title,
       url: data.hdurl || data.url,
-      thumbnail_url: data.url,
+      thumbnail_url: data.thumbnail_url || data.url,
       explanation: data.explanation,
       media_type: data.media_type || "image"
     };
@@ -48,11 +48,15 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("NASA Server APOD Error:", error);
     
-    // Return a stable fallback payload if the API fails or rate-limit is exceeded
-    return NextResponse.json({
-      title: "Vistas of the Deep Cosmos",
-      url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
-      explanation: "Exploring the cosmos from our own backyard. Our club connects stargazers and space enthusiasts to the beauty of the universe, bringing deep space closer through observations, discussions, and shared discovery."
-    });
+    // Return the fallback payload with a 502 status code so clients don't cache it
+    return NextResponse.json(
+      {
+        title: "Vistas of the Deep Cosmos",
+        url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
+        explanation: "Exploring the cosmos from our own backyard. Our club connects stargazers and space enthusiasts to the beauty of the universe, bringing deep space closer through observations, discussions, and shared discovery.",
+        media_type: "image"
+      },
+      { status: 502 }
+    );
   }
 }

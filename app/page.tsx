@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
+import GargantuaCanvas from "@/components/GargantuaCanvas";
 
 // --- Type Definitions ---
 interface ApodData {
@@ -150,20 +151,27 @@ export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [screenHeight, setScreenHeight] = useState(1080);
 
-  // --- State: TARS CRT Intro Sequence ---
-  const [showIntro, setShowIntro] = useState(() => {
-    if (typeof window !== "undefined") {
-      return !sessionStorage.getItem("astroclub_intro_played");
-    }
-    return false;
-  });
+  // --- State: TARS CRT Intro Sequence (Sequential A+B) ---
+  const [introPhase, setIntroPhase] = useState<"telemetry" | "gargantua" | "warp" | "none">("none");
   const [printedLines, setPrintedLines] = useState<string[]>([]);
-  const [isCollapsing, setIsCollapsing] = useState(false);
-  const [isDone, setIsDone] = useState(false);
+  const [collapseProgress, setCollapseProgress] = useState(0);
+  const [showSkip, setShowSkip] = useState(false);
 
   useEffect(() => {
-    if (!showIntro) return;
+    const lastPlayed = localStorage.getItem("astroclub_intro_last_played");
+    const now = Date.now();
+    
+    if (!lastPlayed || now - parseInt(lastPlayed, 10) > 86400000) {
+      setIntroPhase("telemetry");
+    } else {
+      setIntroPhase("none");
+    }
+  }, []);
 
+  useEffect(() => {
+    if (introPhase === "none") return;
+
+    // 1. Typewriter logs typing
     const TELEMETRY_LINES = [
       "CCASS COGNITIVE TELEMETRY FEED [SEC XI]",
       "ESTABLISHING STELLARPORTAL COGNITIVE LINK...",
@@ -184,34 +192,72 @@ export default function HomePage() {
     ];
 
     let currentLine = 0;
-    const interval = setInterval(() => {
+    const typingInterval = setInterval(() => {
       if (currentLine < TELEMETRY_LINES.length) {
         setPrintedLines(prev => [...prev, TELEMETRY_LINES[currentLine]]);
         currentLine++;
       } else {
-        clearInterval(interval);
-        
-        setTimeout(() => {
-          setIsCollapsing(true);
-          
-          setTimeout(() => {
-            setIsDone(true);
-            
-            setTimeout(() => {
-              sessionStorage.setItem("astroclub_intro_played", "true");
-              setShowIntro(false);
-            }, 250);
-          }, 350);
-        }, 1200);
+        clearInterval(typingInterval);
       }
-    }, 240);
+    }, 320);
 
-    return () => clearInterval(interval);
-  }, [showIntro]);
+    // 2. Skip Button Delay Timer (shows skip after 5 seconds)
+    const skipButtonTimer = setTimeout(() => {
+      setShowSkip(true);
+    }, 5000);
+
+    // 3. Transition to Gargantua Accretion Disk at 7 seconds
+    const toGargantuaTimer = setTimeout(() => {
+      setIntroPhase("gargantua");
+
+      // Start gravitational collapse animation at 12.5s (5.5s into Gargantua)
+      const collapseStartTimer = setTimeout(() => {
+        let startTimestamp: number | null = null;
+        const duration = 1700;
+
+        const animateCollapse = (timestamp: number) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const elapsed = timestamp - startTimestamp;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          setCollapseProgress(progress);
+
+          if (elapsed < duration) {
+            requestAnimationFrame(animateCollapse);
+          }
+        };
+        requestAnimationFrame(animateCollapse);
+      }, 5500);
+
+      // Transition to Warp (White Flash) at 14.2s (7.2s into Gargantua)
+      const toWarpTimer = setTimeout(() => {
+        setIntroPhase("warp");
+
+        // Complete sequence and reveal homepage at 15.0s
+        const toNoneTimer = setTimeout(() => {
+          localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
+          setIntroPhase("none");
+        }, 800);
+
+        return () => clearTimeout(toNoneTimer);
+      }, 7200);
+
+      return () => {
+        clearTimeout(collapseStartTimer);
+        clearTimeout(toWarpTimer);
+      };
+    }, 7000);
+
+    return () => {
+      clearInterval(typingInterval);
+      clearTimeout(skipButtonTimer);
+      clearTimeout(toGargantuaTimer);
+    };
+  }, [introPhase]);
 
   const skipIntro = () => {
-    sessionStorage.setItem("astroclub_intro_played", "true");
-    setShowIntro(false);
+    localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
+    setIntroPhase("none");
   };
 
   // --- State: NASA APOD ---
@@ -253,7 +299,10 @@ export default function HomePage() {
           const cached = localStorage.getItem("astroclub_apod_cache");
           if (cached) {
             const parsed = JSON.parse(cached);
-            if (parsed.date === today) {
+            // Self-heal: clear prior corrupted fallback caches
+            if (parsed.title === "Vistas of the Deep Cosmos") {
+              localStorage.removeItem("astroclub_apod_cache");
+            } else if (parsed.date === today) {
               setApod(parsed);
               setApodLoading(false);
               return;
@@ -262,8 +311,22 @@ export default function HomePage() {
         }
 
         const res = await fetch("/api/apod");
-        if (!res.ok) throw new Error("Failed to fetch APOD");
         const data = await res.json();
+
+        if (!res.ok) {
+          // If the server returned the 502 fallback payload, use it but do not cache it!
+          if (data.title === "Vistas of the Deep Cosmos") {
+            setApod({
+              url: data.url,
+              thumbnail_url: data.url,
+              title: data.title,
+              explanation: data.explanation,
+              media_type: data.media_type || "image"
+            });
+            return;
+          }
+          throw new Error("Failed to fetch APOD");
+        }
 
         const payload: ApodData = {
           url: data.url,
@@ -327,33 +390,50 @@ export default function HomePage() {
   return (
     <>
       {/* TARS Telemetry CRT Intro Overlay */}
-      {showIntro && (
-        <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden transition-all duration-300 origin-center z-[100] ${
-          isDone ? "scale-x-0 opacity-0" : isCollapsing ? "scale-y-[0.003] opacity-100" : "scale-100 opacity-100"
-        }`}>
-          {/* CRT screen filters */}
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-30 z-20" />
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
-          
-          <div className="max-w-xl w-full flex flex-col items-start gap-1 relative z-10">
-            {printedLines.map((line, idx) => (
-              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed">
-                <span>{line}</span>
-                {idx === printedLines.length - 1 && (
-                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
-                )}
-              </div>
-            ))}
-          </div>
+      {introPhase !== "none" && (
+        <>
+          {introPhase === "warp" ? (
+            /* Blinding White Flash of Singularity Warp */
+            <div className="fixed inset-0 bg-white z-[110] transition-opacity duration-500 opacity-100 flex items-center justify-center pointer-events-none" />
+          ) : (
+            /* Main Overlay container covering Telemetry and Gargantua phases */
+            <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
+              {/* CRT Screen Filters */}
+              <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
+              <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
+              
+              {/* Option A: Gargantua Accretion Disk Canvas (Renders behind the telemetry text during gargantua phase) */}
+              <GargantuaCanvas 
+                isActive={introPhase === "gargantua"} 
+                collapseProgress={collapseProgress} 
+              />
 
-          {/* Skip Button */}
-          <button 
-            onClick={skipIntro}
-            className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
-          >
-            [ SKIP ENTRY SEQUENCE ]
-          </button>
-        </div>
+              {/* Option B: Typewriter printed logs (Fades out when transitioning to Gargantua) */}
+              <div className={`max-w-xl w-full flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
+                introPhase === "gargantua" ? "opacity-0 pointer-events-none" : "opacity-100"
+              }`}>
+                {printedLines.map((line, idx) => (
+                  <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed">
+                    <span>{line}</span>
+                    {idx === printedLines.length - 1 && (
+                      <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Skip Button (shows after 5 seconds delay) */}
+              {showSkip && (
+                <button 
+                  onClick={skipIntro}
+                  className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
+                >
+                  [ SKIP ENTRY SEQUENCE ]
+                </button>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {/* Background Starfield Canvas */}
@@ -442,7 +522,6 @@ export default function HomePage() {
                 const catalogIndex = new Date().getDate() % CLUB_CATALOG.length;
                 const catalogItem = CLUB_CATALOG[catalogIndex];
                 const isVideo = apod.media_type === "video";
-
                 return (
                   <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
                     <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
@@ -454,8 +533,8 @@ export default function HomePage() {
                           className="block w-full h-full relative group cursor-pointer"
                         >
                           <img
-                            src={catalogItem.url}
-                            alt={catalogItem.title}
+                            src={apod.thumbnail_url || catalogItem.url}
+                            alt={apod.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                           />
                           {/* Banner overlay for video notification */}
@@ -479,22 +558,22 @@ export default function HomePage() {
                     </div>
                     <div className="p-5 md:p-6">
                       <h3 className="text-lg font-semibold text-white mb-2 leading-snug">
-                        {isVideo ? catalogItem.title : apod.title}
+                        {apod.title}
                       </h3>
                       
                       {isVideo && (
                         <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">
-                          NASA Video: &quot;{apod.title}&quot;
+                          NASA Video Link
                         </div>
                       )}
-
+ 
                       <div className="relative">
                         <p
                           className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${
                             !isExpanded ? "line-clamp-3" : ""
                           }`}
                         >
-                          {isVideo ? catalogItem.desc : apod.explanation}
+                          {apod.explanation}
                         </p>
                         <button
                           onClick={() => setIsExpanded(!isExpanded)}
