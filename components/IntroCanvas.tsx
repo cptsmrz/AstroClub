@@ -39,7 +39,7 @@ export default function IntroCanvas({ phase }: IntroCanvasProps) {
       yPos = Array.from({ length: n }, () =>
         Math.random() * -(canvas.height / fontSize) * 1.5
       );
-      speeds = Array.from({ length: n }, () => 0.7 + Math.random() * 1.3);
+      speeds = Array.from({ length: n }, () => 0.25 + Math.random() * 0.45);
     };
     initColumns();
 
@@ -55,7 +55,7 @@ export default function IntroCanvas({ phase }: IntroCanvasProps) {
       }
 
       // Trail fade
-      ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.font = `bold ${fontSize}px monospace`;
@@ -64,7 +64,7 @@ export default function IntroCanvas({ phase }: IntroCanvasProps) {
       // Grow arrays if window resized
       while (yPos.length < n) {
         yPos.push(Math.random() * -(canvas.height / fontSize));
-        speeds.push(0.7 + Math.random() * 1.3);
+        speeds.push(0.25 + Math.random() * 0.45);
       }
 
       for (let i = 0; i < n; i++) {
@@ -93,7 +93,7 @@ export default function IntroCanvas({ phase }: IntroCanvasProps) {
 
         if (yPos[i] * fontSize > canvas.height) {
           yPos[i] = Math.random() * -12;
-          speeds[i] = 0.7 + Math.random() * 1.3;
+          speeds[i] = 0.25 + Math.random() * 0.45;
         }
       }
 
