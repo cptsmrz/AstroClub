@@ -443,15 +443,17 @@ export default function HomePage() {
   return (
     <>
       {/* TARS Telemetry CRT + Matrix falling code rain Intro Overlay */}
-      {introPhase !== "none" && (
-        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
+      {(introPhase !== "none" || warpFlashActive) && (
+        <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100] transition-opacity duration-300 ${
+          introPhase === "none" ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}>
           {/* CRT Screen Filters (Phosphor glow scanlines) */}
           <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
           <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
           
           {/* Option A: Matrix falling green code rain (Renders behind the telemetry logs during matrix phase) */}
           <MatrixRainCanvas 
-            isActive={introPhase === "matrix"} 
+            isActive={introPhase === "matrix" || (introPhase === "none" && warpFlashActive)} 
             collapseProgress={collapseProgress} 
           />
 
