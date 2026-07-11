@@ -214,17 +214,32 @@ export default function HomePage() {
     ];
 
     let currentLine = 0;
-    let typingInterval: NodeJS.Timeout | null = null;
+    let typingTimer: NodeJS.Timeout | null = null;
 
     if (introPhase === "telemetry") {
-      typingInterval = setInterval(() => {
-        if (currentLine < TELEMETRY_LINES.length) {
-          setPrintedLines(prev => [...prev, TELEMETRY_LINES[currentLine]]);
-          currentLine++;
+      const scheduleTyping = (index: number) => {
+        if (index >= TELEMETRY_LINES.length) return;
+
+        setPrintedLines(prev => [...prev, TELEMETRY_LINES[index]]);
+
+        let delay = 0;
+        if (index < 2) {
+          // Lines 1 to 3: printed in 1.0 second total (500ms intervals)
+          delay = 500;
+        } else if (index < 14) {
+          // Every line except last: printed in 3.5 seconds total (291ms intervals)
+          delay = 291;
         } else {
-          if (typingInterval) clearInterval(typingInterval);
+          // Last line: printed in 1.0 second
+          delay = 1000;
         }
-      }, 320);
+
+        typingTimer = setTimeout(() => {
+          scheduleTyping(index + 1);
+        }, delay);
+      };
+
+      scheduleTyping(0);
     }
 
     // 2. Skip Button Delay Timer (shows skip after 5 seconds)
@@ -232,11 +247,11 @@ export default function HomePage() {
       setShowSkip(true);
     }, 5000);
 
-    // 3. Transition to Matrix Rain at 5.0 seconds
+    // 3. Transition to Matrix Rain at 5.5 seconds (1.0s + 3.5s + 1.0s telemetry duration)
     const toMatrixTimer = setTimeout(() => {
       setIntroPhase("matrix");
 
-      // Start speed acceleration (gravitational code drop warp) at 10.3 seconds (5.3s into matrix phase)
+      // Start speed acceleration (gravitational code drop warp) at 8.3 seconds (2.8s into matrix phase)
       const collapseStartTimer = setTimeout(() => {
         let startTimestamp: number | null = null;
         const duration = 1700;
@@ -253,42 +268,42 @@ export default function HomePage() {
           }
         };
         requestAnimationFrame(animateCollapse);
-      }, 5300);
+      }, 2800);
 
-      // Transition to Singularity Warp Flash at 12.0 seconds (7.0s into matrix phase)
+      // Transition to Singularity Warp Flash at 10.0 seconds (4.5s into matrix phase)
       const toWarpTimer = setTimeout(() => {
-        // Unmount intro overlay immediately and trigger instant warp white flash
+        // Unmount intro overlay immediately and trigger instant warp neon green flash
         setIntroPhase("none");
         setWarpFlashActive(true);
         setWarpFlashOpacity(1);
         localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-        // Trigger the 2-second fade-out in the next frame
+        // Trigger the 1.5-second fade-out in the next frame
         const fadeOutTimer = setTimeout(() => {
           setWarpFlashOpacity(0);
           
-          // Complete fade-out and show fullscreen prompt after exactly 2 seconds
+          // Complete fade-out and show fullscreen prompt after exactly 1.5 seconds
           const endTimer = setTimeout(() => {
             setWarpFlashActive(false);
             if (document.fullscreenElement) {
               setShowFullscreenModal(true);
             }
-          }, 2000);
+          }, 1500);
 
           return () => clearTimeout(endTimer);
         }, 50);
 
         return () => clearTimeout(fadeOutTimer);
-      }, 7000);
+      }, 4500);
 
       return () => {
         clearTimeout(collapseStartTimer);
         clearTimeout(toWarpTimer);
       };
-    }, 5000);
+    }, 5500);
 
     return () => {
-      if (typingInterval) clearInterval(typingInterval);
+      if (typingTimer) clearTimeout(typingTimer);
       clearTimeout(skipButtonTimer);
       clearTimeout(toMatrixTimer);
     };
@@ -300,7 +315,7 @@ export default function HomePage() {
     setWarpFlashActive(true);
     setWarpFlashOpacity(1);
 
-    // Fast 2-second fade-out on skip
+    // Fast 1.5-second fade-out on skip
     setTimeout(() => {
       setWarpFlashOpacity(0);
       
@@ -309,7 +324,7 @@ export default function HomePage() {
         if (document.fullscreenElement) {
           setShowFullscreenModal(true);
         }
-      }, 2000);
+      }, 1500);
     }, 50);
   };
 
@@ -483,13 +498,13 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 2 seconds) */}
+      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.5 seconds) */}
       {warpFlashActive && (
         <div 
-          className="fixed inset-0 bg-white z-[110] pointer-events-none transition-opacity ease-out"
+          className="fixed inset-0 bg-[#39ff14] z-[110] pointer-events-none transition-opacity ease-out"
           style={{
             opacity: warpFlashOpacity,
-            transitionDuration: "2000ms"
+            transitionDuration: "1500ms"
           }}
         />
       )}

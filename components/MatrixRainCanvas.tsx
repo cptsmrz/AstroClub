@@ -53,10 +53,10 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
 
           if (s === steps - 1) {
             // Brighter leading character
-            ctx.fillStyle = "#a7f3d0"; // emerald-200
+            ctx.fillStyle = "#d1fec3"; // light neon green tint
           } else {
-            // Classic matrix green trail
-            ctx.fillStyle = "#10b981"; // emerald-500
+            // Pure neon green trail
+            ctx.fillStyle = "#39ff14"; // neon green
           }
 
           ctx.fillText(char, x, y);
