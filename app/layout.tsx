@@ -47,9 +47,10 @@ function Footer() {
           <div className="space-y-4 flex flex-col items-start md:items-center text-left md:text-center max-w-xs mx-auto">
             <span className="text-lg font-bold tracking-wider text-white font-sans">Cosmic Verse</span>
             <div className="italic text-[11px] text-cyan-400/90 leading-relaxed font-mono">
-              Lenses trace the void,<br />
-              Mirrors catch the ancient light,<br />
-              Stars are brought to sight.
+              Beyond the clouds where comets fly,<br />
+              We trace the secrets of the sky,<br />
+              Uniting hearts to watch the stars,<br />
+              From distant moons to glowing Mars.
             </div>
           </div>
 
