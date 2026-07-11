@@ -409,39 +409,81 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* 1. CLUB MILESTONES (Chronological Progress timeline) */}
-        <section className="border-t border-slate-900 pt-10">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-              Our Journey & Milestones
-            </h2>
-            <p className="text-slate-500 text-xs mt-1">Key highlights and operational breakthroughs since inception.</p>
+        {/* 1. CLUB MILESTONES (Horizontal Roadmap Slider) */}
+        <section className="border-t border-slate-900 pt-10 relative overflow-hidden">
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                Our Journey & Roadmap
+              </h2>
+              <p className="text-slate-500 text-xs mt-1">Scroll horizontally to trace our key breakthroughs and historic milestones.</p>
+            </div>
+            
+            {/* Scroll indicators */}
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  const el = document.getElementById("roadmap-container");
+                  if (el) el.scrollBy({ left: -320, behavior: 'smooth' });
+                }}
+                className="w-8 h-8 rounded-lg bg-slate-950 border border-slate-900 hover:border-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all text-xs cursor-pointer select-none"
+                aria-label="Scroll left"
+              >
+                ←
+              </button>
+              <button 
+                onClick={() => {
+                  const el = document.getElementById("roadmap-container");
+                  if (el) el.scrollBy({ left: 320, behavior: 'smooth' });
+                }}
+                className="w-8 h-8 rounded-lg bg-slate-950 border border-slate-900 hover:border-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all text-xs cursor-pointer select-none"
+                aria-label="Scroll right"
+              >
+                →
+              </button>
+            </div>
           </div>
 
-          <div className="relative border-l border-dashed border-slate-800 ml-3 pl-8 py-2 flex flex-col gap-8">
-            {MILESTONES.map((m, idx) => (
-              <div key={idx} className="relative group">
-                {/* Node Indicator */}
-                <span className="absolute -left-[41px] top-1.5 bg-slate-950 border border-slate-800 text-sm w-6 h-6 rounded-full flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300">
-                  {m.icon}
-                </span>
+          {/* Horizontal scroll container with dashed progress line */}
+          <div className="relative">
+            {/* Horizontal connecting line across the scroll track */}
+            <div className="absolute top-[20px] left-0 right-0 h-[1.5px] border-t border-dashed border-slate-900 z-0 pointer-events-none" />
 
-                <div className="flex flex-col md:flex-row md:items-start gap-1 md:gap-4">
-                  <span className="text-xs font-mono font-bold text-cyan-400 tracking-wider w-24 shrink-0">
-                    {m.date}
-                  </span>
-                  <div>
+            <div 
+              id="roadmap-container"
+              className="flex flex-row overflow-x-auto gap-5 pb-6 pt-2 px-1 custom-scrollbar scroll-smooth snap-x snap-mandatory z-10 relative"
+            >
+              {MILESTONES.map((m, idx) => (
+                <div 
+                  key={idx} 
+                  className="min-w-[290px] md:min-w-[320px] max-w-[320px] snap-start flex flex-col gap-4 relative group"
+                >
+                  {/* Timeline Node Connector Circle */}
+                  <div className="flex items-center gap-3">
+                    <span className="bg-slate-950 border-2 border-slate-900 text-sm w-10 h-10 rounded-full flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-slate-900 transition-all duration-300 relative z-10 shadow-lg">
+                      {m.icon}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold text-cyan-400 tracking-wider bg-cyan-950/30 border border-cyan-900/40 px-2 py-0.5 rounded-full">
+                      {m.date}
+                    </span>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-5 flex-grow backdrop-blur-sm transition-all hover:border-slate-850 hover:bg-slate-900/20 shadow-md flex flex-col gap-2 relative overflow-hidden">
+                    {/* Subtle corner highlight */}
+                    <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
+                    
                     <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">
                       {m.title}
                     </h4>
-                    <p className="text-xs md:text-sm text-slate-450 leading-relaxed mt-1 whitespace-pre-line">
+                    <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-line flex-grow">
                       {m.desc}
                     </p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
