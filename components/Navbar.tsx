@@ -9,7 +9,8 @@ const NAV_LINKS = [
   { href: "/equipment", label: "Equipment" },
   { href: "/blogs", label: "Blogs" },
   { href: "/orrery", label: "Orrery 3D" },
-  { href: "/about", label: "About" },
+  { href: "/about", label: "About Us" },
+  { href: "/roadmap", label: "Archive" },
 ] as const;
 
 export default function Navbar() {
