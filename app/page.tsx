@@ -419,8 +419,8 @@ export default function HomePage() {
           pointerEvents: phase === "none" ? "none" : "all",
         }}
       >
-        {/* Stars-only blurred starfield — strictly background stars, no constellations, no Saturn */}
-        {phase !== "none" && (
+        {/* Stars-only blurred starfield — strictly during matrix rain phase only */}
+        {phase === "matrix" && (
           <div style={{ filter: "blur(1.5px)", position: "absolute", inset: 0 }}>
             <StarfieldCanvas starsOnly />
           </div>
