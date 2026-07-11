@@ -26,38 +26,47 @@ export default function MatrixRainCanvas({ isActive }: MatrixRainCanvasProps) {
     const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
     
-    // yPositions array tracks the current vertical row index for each column
+    // yPositions tracks the current row index (fractional for smooth speed variations)
     const yPositions = new Array(columns).fill(0).map(() => 
-      Math.floor(Math.random() * -(canvas.height / fontSize) * 1.5)
+      Math.random() * -(canvas.height / fontSize) * 1.5
+    );
+
+    // Each column has a distinct speed to ensure natural desynchronized drop rates (prevents density jolts)
+    const speeds = new Array(columns).fill(0).map(() => 
+      0.65 + Math.random() * 1.35
     );
 
     const charPool = "ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789";
 
     const render = () => {
-      // Classic semi-transparent black fill to draw trails organically
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      // Classic trailing fade using transparent black overlay
+      ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.font = `${fontSize}px monospace`;
+      ctx.font = `bold ${fontSize}px monospace`;
 
       for (let i = 0; i < yPositions.length; i++) {
         const x = i * fontSize;
-        const y = yPositions[i] * fontSize;
+        const currentYIndex = Math.floor(yPositions[i]);
+        const y = currentYIndex * fontSize;
 
-        // Draw green character at previous position to turn the white head green
-        ctx.fillStyle = "#39ff14"; // neon green
-        ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y - fontSize);
+        if (y >= 0) {
+          // 1. Draw classic Matrix green character at the previous position to turn the white head green
+          ctx.fillStyle = "#00ff41"; // Original Matrix green
+          ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y - fontSize);
 
-        // Draw white/light-green character at new head position
-        ctx.fillStyle = "#d1fec3"; // light green tint
-        ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y);
+          // 2. Draw white highlight character at the new head position
+          ctx.fillStyle = "#ffffff"; // White head
+          ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y);
+        }
 
-        // Update position (uniform constant speed)
-        yPositions[i] += 1;
+        // Advance position by speed (fractional value, creates organic falling offsets)
+        yPositions[i] += speeds[i];
 
-        // Reset column to the top once it goes off the bottom of the screen
-        if (yPositions[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          yPositions[i] = Math.floor(Math.random() * -4);
+        // Reset column to top when it clears the bottom of the screen
+        if (yPositions[i] * fontSize > canvas.height) {
+          yPositions[i] = Math.random() * -12;
+          speeds[i] = 0.65 + Math.random() * 1.35; // re-randomize speed
         }
       }
 
