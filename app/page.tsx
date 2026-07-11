@@ -238,7 +238,7 @@ export default function HomePage() {
       setPhase("black");
       localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-      // After 1 s black hold → start fading the overlay
+      // After 0.1 s → start fading the overlay (fade starts at 11.1 s)
       const t3 = setTimeout(() => {
         setOverlayOpacity(0); // CSS transition takes 0.9 s
 
@@ -249,7 +249,7 @@ export default function HomePage() {
         }, 950);
 
         return () => clearTimeout(t4);
-      }, 1000);
+      }, 100);
 
       return () => clearTimeout(t3);
     }, 11000);

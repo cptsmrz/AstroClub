@@ -6,6 +6,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { supabase } from "@/lib/supabase";
+import StarfieldCanvas from "@/components/StarfieldCanvas";
 
 // --- Type Definitions ---
 interface Profile {
@@ -129,7 +130,9 @@ export default function BlogDetailPage() {
   const initials = getInitials(authorName, post.author_id);
 
   return (
-    <article className="max-w-3xl mx-auto">
+    <>
+      <StarfieldCanvas />
+      <article className="max-w-3xl mx-auto relative z-10">
       {/* Back Navigation */}
       <Link
         href="/blogs"
@@ -297,5 +300,6 @@ export default function BlogDetailPage() {
         </Link>
       </div>
     </article>
+    </>
   );
 }
