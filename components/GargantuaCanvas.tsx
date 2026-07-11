@@ -107,7 +107,7 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
 
     // Accretion disk center coordinates
     const render = () => {
-      const cx = canvas.width / 2;
+      const cx = canvas.width * 0.28;
       const cy = canvas.height / 2;
 
       // Draw faint background gravitational lensing fog

@@ -152,21 +152,39 @@ export default function HomePage() {
   const [screenHeight, setScreenHeight] = useState(1080);
 
   // --- State: TARS CRT Intro Sequence (Sequential A+B) ---
-  const [introPhase, setIntroPhase] = useState<"telemetry" | "gargantua" | "warp" | "none">("none");
+  // Default to "telemetry" to run on every refresh during testing.
+  const [introPhase, setIntroPhase] = useState<"telemetry" | "gargantua" | "warp" | "none">("telemetry");
   const [printedLines, setPrintedLines] = useState<string[]>([]);
   const [collapseProgress, setCollapseProgress] = useState(0);
   const [showSkip, setShowSkip] = useState(false);
+  const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
+  // Auto-request browser Fullscreen when intro starts
+  useEffect(() => {
+    if (introPhase === "telemetry") {
+      const enterFullscreen = async () => {
+        try {
+          if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (err) {
+          console.log("Fullscreen request deferred until user interaction:", err);
+        }
+      };
+      enterFullscreen();
+    }
+  }, [introPhase]);
+
+  // Production daily play tracking check (commented out for refresh-testing)
+  /*
   useEffect(() => {
     const lastPlayed = localStorage.getItem("astroclub_intro_last_played");
     const now = Date.now();
-    
-    if (!lastPlayed || now - parseInt(lastPlayed, 10) > 86400000) {
-      setIntroPhase("telemetry");
-    } else {
+    if (lastPlayed && now - parseInt(lastPlayed, 10) < 86400000) {
       setIntroPhase("none");
     }
   }, []);
+  */
 
   useEffect(() => {
     if (introPhase === "none") return;
@@ -206,11 +224,11 @@ export default function HomePage() {
       setShowSkip(true);
     }, 5000);
 
-    // 3. Transition to Gargantua Accretion Disk at 7 seconds
+    // 3. Transition to Gargantua Accretion Disk at 7.5 seconds (extended by 0.5s)
     const toGargantuaTimer = setTimeout(() => {
       setIntroPhase("gargantua");
 
-      // Start gravitational collapse animation at 12.5s (5.5s into Gargantua)
+      // Start gravitational collapse animation at 13.0s (5.5s into Gargantua)
       const collapseStartTimer = setTimeout(() => {
         let startTimestamp: number | null = null;
         const duration = 1700;
@@ -229,14 +247,18 @@ export default function HomePage() {
         requestAnimationFrame(animateCollapse);
       }, 5500);
 
-      // Transition to Warp (White Flash) at 14.2s (7.2s into Gargantua)
+      // Transition to Warp (White Flash) at 14.7s (7.2s into Gargantua)
       const toWarpTimer = setTimeout(() => {
         setIntroPhase("warp");
 
-        // Complete sequence and reveal homepage at 15.0s
+        // Complete sequence and reveal homepage at 15.5s
         const toNoneTimer = setTimeout(() => {
           localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
           setIntroPhase("none");
+          // If browser is currently in fullscreen, show the keep-fullscreen choice modal!
+          if (document.fullscreenElement) {
+            setShowFullscreenModal(true);
+          }
         }, 800);
 
         return () => clearTimeout(toNoneTimer);
@@ -246,7 +268,7 @@ export default function HomePage() {
         clearTimeout(collapseStartTimer);
         clearTimeout(toWarpTimer);
       };
-    }, 7000);
+    }, 7500);
 
     return () => {
       clearInterval(typingInterval);
@@ -258,6 +280,9 @@ export default function HomePage() {
   const skipIntro = () => {
     localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
     setIntroPhase("none");
+    if (document.fullscreenElement) {
+      setShowFullscreenModal(true);
+    }
   };
 
   // --- State: NASA APOD ---
@@ -408,12 +433,12 @@ export default function HomePage() {
                 collapseProgress={collapseProgress} 
               />
 
-              {/* Option B: Typewriter printed logs (Fades out when transitioning to Gargantua) */}
-              <div className={`max-w-xl w-full flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
+              {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Gargantua) */}
+              <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
                 introPhase === "gargantua" ? "opacity-0 pointer-events-none" : "opacity-100"
               }`}>
                 {printedLines.map((line, idx) => (
-                  <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed">
+                  <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
                     <span>{line}</span>
                     {idx === printedLines.length - 1 && (
                       <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
@@ -434,6 +459,44 @@ export default function HomePage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Fullscreen Stay/Exit Selection Modal (Shown after the intro sequence finishes) */}
+      {showFullscreenModal && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md">
+          <div className="bg-slate-950/90 border border-slate-900 rounded-xl p-8 max-w-md w-full text-center space-y-6 font-mono text-xs shadow-2xl">
+            <span className="text-cyan-400 font-bold uppercase tracking-widest text-[9px] bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-900/30">
+              Telemetry Uplink Complete
+            </span>
+            <h4 className="text-sm font-semibold text-white tracking-wide">AstroClub Portal Live</h4>
+            <p className="text-slate-400 leading-relaxed text-[11px]">
+              Uplink succeeded. Would you like to keep the immersive widescreen fullscreen telemetry mode active for this session?
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button 
+                onClick={() => setShowFullscreenModal(false)}
+                className="px-4 py-2 border border-emerald-900 bg-emerald-950/20 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/40 rounded transition-all cursor-pointer font-bold"
+              >
+                [ KEEP FULLSCREEN ]
+              </button>
+              <button 
+                onClick={async () => {
+                  try {
+                    if (document.exitFullscreen) {
+                      await document.exitFullscreen();
+                    }
+                  } catch (err) {
+                    console.log("Exit fullscreen failed:", err);
+                  }
+                  setShowFullscreenModal(false);
+                }}
+                className="px-4 py-2 border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:bg-slate-900/60 rounded transition-all cursor-pointer font-bold"
+              >
+                [ EXIT FULLSCREEN ]
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Background Starfield Canvas */}
