@@ -21,34 +21,76 @@ interface Member {
 
 const MILESTONES: Milestone[] = [
   {
-    date: "Feb 2024",
-    title: "Club Genesis",
-    desc: "AstroClub founded by Sameeraj, Madhav, and Prashant under the CCASS department to promote optical instrumentation and observational science.",
-    icon: "✨"
+    date: "Oct 2023",
+    title: "Initial Department Link",
+    desc: "Sameeraj establishes first contact with the CCASS directors at Academic Block XI, registering the first active student engagement in astronomy since the department's 2022 commencement.",
+    icon: "🚪"
   },
   {
-    date: "Apr 2024",
-    title: "First Handcrafted Optics",
-    desc: "Successfully built and calibrated our first Newtonian Reflector telescope, achieving clear lunar and planetary resolution.",
-    icon: "🔭"
-  },
-  {
-    date: "Sep 2024",
-    title: "Observatory Spot Assigned",
-    desc: "Sanctioned observation camp setup at the Basketball Court campus zone, launching bi-weekly stargazing public nights.",
-    icon: "🏛️"
-  },
-  {
-    date: "Feb 2025",
-    title: "Astronomy Quiz Inauguration",
-    desc: "Organized the first campus-wide Astronomy trivia tournament with over 300+ students participating.",
+    date: "Dec 2023",
+    title: "The Catalyst Seminar",
+    desc: "He along with a friend, Riddhi Gupta, attends a seminar on black holes and expanding universes, initiating plans to transform the faculty association into a student-run collective.",
     icon: "🌌"
   },
   {
-    date: "Jan 2026",
+    date: "Feb 2024",
+    title: "First Telescope Builds",
+    desc: "The club's future council (unaware at this time) constructs its first custom instruments in a 2-day workshop: a Galilean telescope (Feb 1) and a Newtonian reflector (Feb 2).",
+    icon: "🔧"
+  },
+  {
+    date: "Feb 2024",
+    title: "First Public Stargazing",
+    desc: "The first council hosts the inaugural public observation night at the campus field, guiding over 130 students and faculty members to trace lunar and planetary coordinates.",
+    icon: "🔭"
+  },
+  {
+    date: "Feb 2024 - Mar 2025",
+    title: "Council Expansion",
+    desc: "Driven by growing student interest, the active student leadership gradually expands from the 7 founders to a 17-member council to prepare for future public operations.",
+    icon: "🤝"
+  },
+  {
+    date: "Jan 2025",
+    title: "ESA Feature",
+    desc: "The President Sameeraj & the Astrophotography Head Madhav capture the Heart Nebula using custom setups, earning official recognition from the European Space Agency (ESA).",
+    icon: "🛰️"
+  },
+  {
+    date: "Aug - Sep 2025",
+    title: "Formalizing Structure",
+    desc: "The club executes three structured recruitment drives in 10 days, establishing official departments, role hierarchy, and technical divisions.",
+    icon: "📋"
+  },
+  {
+    date: "Sep - Nov 2025",
+    title: "Launching ASTR 101",
+    desc: "The club founder conducts a 6-week curriculum in observational astronomy and telescope handling. It was an open classroom class for a cohort of 17+ student members.",
+    icon: "🎓"
+  },
+  {
+    date: "Early 2026",
+    title: "South Africa Presentation",
+    desc: "Director Dr. Anirudh Pradhan presents AstroClub's research internationally. The astrophotography team captured and identified sunspots, compiling a presentation proofread by the design team.",
+    icon: "🌍"
+  },
+  {
+    date: "Mar 2026",
+    title: "University-Level Events",
+    desc: "Under the new council led by President Aditi, the club independently organizes:\n• March 17: The first university-level Astronomy Quiz with 7,000+ INR in prizes.\n• March 24: The third public stargazing observation night.",
+    icon: "🏆"
+  },
+  {
+    date: "Jul 2026",
     title: "StellarPortal Deployment",
-    desc: "Launched the automated observation booking queue and integrated S.AI content moderation controls.",
+    desc: "The club's official website goes live, providing a digital hub for deep-space logs, member directories, and automated booking queues.",
     icon: "💻"
+  },
+  {
+    date: "Aug 2026",
+    title: "Constitutional Adoption",
+    desc: "AstroClub adopts its first-ever constitution, standardizing operational guidelines, officer elections, and code of conduct.",
+    icon: "📜"
   }
 ];
 
@@ -393,7 +435,7 @@ export default function AboutPage() {
                     <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors">
                       {m.title}
                     </h4>
-                    <p className="text-xs md:text-sm text-slate-450 leading-relaxed mt-1">
+                    <p className="text-xs md:text-sm text-slate-450 leading-relaxed mt-1 whitespace-pre-line">
                       {m.desc}
                     </p>
                   </div>
