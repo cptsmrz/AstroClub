@@ -410,35 +410,61 @@ export default function HomePage() {
        * no jolt, no layout reflow.
        */}
       <div
-        className="fixed inset-0 z-[100] bg-black overflow-hidden"
+        className="fixed inset-0 z-[100] overflow-hidden"
         style={{
+          // Transparent during sim, solid black only for the fade-out phase
+          backgroundColor: phase === "black" ? "#000000" : "transparent",
           opacity: overlayOpacity,
           transition: phase === "black" ? "opacity 0.9s ease-out" : "none",
           pointerEvents: phase === "none" ? "none" : "all",
         }}
       >
+        {/* Starfield lives inside the overlay — visible during telemetry + matrix phases */}
+        {phase !== "none" && <StarfieldCanvas />}
+
         {/* Matrix rain canvas — always mounted, only draws when phase===matrix */}
         <IntroCanvas phase={phase} />
 
         {/* CRT scanline + vignette overlays */}
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-20" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.6)_100%)] z-20" />
 
-        {/* Typewriter telemetry logs — fade out when entering matrix phase */}
+        {/* Typewriter telemetry logs — VT323 CRT font, fade out when entering matrix phase */}
         <div
-          className="absolute inset-0 flex flex-col items-start justify-center p-6 md:px-16 gap-1 font-mono text-emerald-500 select-none z-10"
+          className="absolute inset-0 flex flex-col items-start justify-center p-6 md:px-16 gap-0.5 select-none z-10"
           style={{
             opacity: phase === "telemetry" ? 1 : 0,
             transition: "opacity 1s ease-out",
             pointerEvents: "none",
+            fontFamily: "'Share Tech Mono', monospace",
           }}
         >
           <div className="w-full max-w-5xl">
             {printedLines.map((line, idx) => (
-              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
+              <div
+                key={idx}
+                className="flex items-center leading-snug tracking-wide"
+                style={{
+                  fontFamily: line.startsWith("==") || line.startsWith("CCASS") || line.startsWith("ASTRONOMY") || line.startsWith("WELCOME") || line.startsWith("CLEAR") || line.startsWith("UPLINK")
+                    ? "'VT323', monospace"
+                    : "'Share Tech Mono', monospace",
+                  fontSize: line.startsWith("CCASS") || line.startsWith("ASTRONOMY") || line.startsWith("WELCOME") || line.startsWith("CLEAR") || line.startsWith("UPLINK")
+                    ? "1.35rem"
+                    : line.startsWith("==")
+                    ? "1.1rem"
+                    : "0.8rem",
+                  color: line.startsWith("[ OK ]") ? "#4ade80"
+                    : line.startsWith("[ INFO ]") ? "#67e8f9"
+                    : line.startsWith("==") ? "#334155"
+                    : line.startsWith("CCASS") ? "#a7f3d0"
+                    : line.startsWith("CLEAR") ? "#4ade80"
+                    : "#6ee7b7",
+                  textShadow: "0 0 8px currentColor",
+                }}
+              >
                 <span>{line}</span>
                 {idx === printedLines.length - 1 && (
-                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
+                  <span className="w-[2px] h-[1em] bg-emerald-400 animate-[pulse_0.8s_infinite] ml-1.5 shrink-0 inline-block" />
                 )}
               </div>
             ))}
@@ -449,7 +475,8 @@ export default function HomePage() {
         {showSkip && phase !== "black" && (
           <button
             onClick={skipIntro}
-            className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
+            className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-black/40 text-[11px] text-emerald-500 hover:text-emerald-300 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30 backdrop-blur-sm"
+            style={{ fontFamily: "'Share Tech Mono', monospace" }}
           >
             [ SKIP ENTRY SEQUENCE ]
           </button>

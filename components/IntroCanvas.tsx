@@ -21,6 +21,8 @@ export default function IntroCanvas({ phase }: IntroCanvasProps) {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      // Start fully transparent so stars show through before trails accumulate
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
     resize();
     window.addEventListener("resize", resize);
