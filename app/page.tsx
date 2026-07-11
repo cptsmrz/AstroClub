@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
-import MatrixRainCanvas from "@/components/MatrixRainCanvas";
+import IntroCanvas, { type IntroPhase } from "@/components/IntroCanvas";
 
 // --- Type Definitions ---
 interface ApodData {
@@ -151,48 +151,44 @@ export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [screenHeight, setScreenHeight] = useState(1080);
 
-  // --- State: TARS Telemetry & Matrix Rain Intro Sequence (Sequential B+A) ---
-  // Default to "telemetry" to run on every refresh during testing.
-  const [introPhase, setIntroPhase] = useState<"telemetry" | "matrix" | "none">("telemetry");
+  // --- Intro Sequence State ---
+  // Single phase drives everything. Overlay div is ALWAYS mounted so React never causes a DOM jolt.
+  const [phase, setPhase] = useState<IntroPhase>("telemetry");
   const [printedLines, setPrintedLines] = useState<string[]>([]);
   const [showSkip, setShowSkip] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
+  // overlayOpacity: 1 = fully black, 0 = fully transparent (homepage visible)
+  const [overlayOpacity, setOverlayOpacity] = useState(1);
 
-  // Warp flash transition states
-  const [warpFlashActive, setWarpFlashActive] = useState(false);
-  const [warpFlashOpacity, setWarpFlashOpacity] = useState(0);
-
-  // Auto-request browser Fullscreen when intro starts
+  // Auto-request fullscreen on load
   useEffect(() => {
-    if (introPhase === "telemetry") {
-      const enterFullscreen = async () => {
-        try {
-          if (document.documentElement.requestFullscreen) {
-            await document.documentElement.requestFullscreen();
-          }
-        } catch (err) {
-          console.log("Fullscreen request deferred until user interaction:", err);
+    const enterFullscreen = async () => {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
         }
-      };
-      enterFullscreen();
-    }
-  }, [introPhase]);
+      } catch (err) {
+        console.log("Fullscreen deferred:", err);
+      }
+    };
+    enterFullscreen();
+  }, []);
 
-  // Production daily play tracking check (commented out for refresh-testing)
+  // Production daily play tracking (commented out for testing — runs every refresh)
   /*
   useEffect(() => {
     const lastPlayed = localStorage.getItem("astroclub_intro_last_played");
-    const now = Date.now();
-    if (lastPlayed && now - parseInt(lastPlayed, 10) < 86400000) {
-      setIntroPhase("none");
+    if (lastPlayed && Date.now() - parseInt(lastPlayed, 10) < 86400000) {
+      setPhase("none");
+      setOverlayOpacity(0);
     }
   }, []);
   */
 
   useEffect(() => {
-    if (introPhase === "none") return;
+    if (phase === "none") return;
 
-    // 1. Typewriter logs typing (active during telemetry phase)
+    // ── TELEMETRY LINES ──────────────────────────────────────────────────────
     const TELEMETRY_LINES = [
       "CCASS COGNITIVE TELEMETRY FEED [SEC XI]",
       "ESTABLISHING STELLARPORTAL COGNITIVE LINK...",
@@ -212,106 +208,70 @@ export default function HomePage() {
       "CLEAR SKIES."
     ];
 
-    let currentLine = 0;
     let typingTimer: NodeJS.Timeout | null = null;
 
-    if (introPhase === "telemetry") {
+    // ── Typewriter scheduler ──────────────────────────────────────────────────
+    if (phase === "telemetry") {
       const scheduleTyping = (index: number) => {
         if (index >= TELEMETRY_LINES.length) return;
-
         setPrintedLines(prev => [...prev, TELEMETRY_LINES[index]]);
-
-        let delay = 0;
-        if (index === 0) {
-          // Line 1: printed in 1.0 second
-          delay = 1000;
-        } else if (index < 13) {
-          // Lines 2 to 14: printed in 1.0s total (77ms intervals)
-          delay = 77;
-        } else if (index === 13) {
-          // Wait 1.5 seconds after Line 14
-          delay = 1500;
-        } else if (index === 14) {
-          // Second last and last line: printed in 0.5s total (250ms intervals)
-          delay = 250;
-        } else {
-          // Wait 1.3 seconds before transitioning to Matrix rain (5.0s total telemetry)
-          delay = 1326;
-        }
-
-        typingTimer = setTimeout(() => {
-          scheduleTyping(index + 1);
-        }, delay);
+        const delays = [1000, ...Array(11).fill(77), 1500, 250, 1326];
+        const delay = delays[index] ?? 77;
+        typingTimer = setTimeout(() => scheduleTyping(index + 1), delay);
       };
-
       scheduleTyping(0);
     }
 
-    // 2. Skip Button Delay Timer (shows skip after 5 seconds)
-    const skipButtonTimer = setTimeout(() => {
-      setShowSkip(true);
-    }, 5000);
+    // Show skip button after 4 s
+    const skipTimer = setTimeout(() => setShowSkip(true), 4000);
 
-    // 3. Transition to Matrix Rain at 5.0 seconds
-    const toMatrixTimer = setTimeout(() => {
-      setIntroPhase("matrix");
+    // ── Phase transitions ─────────────────────────────────────────────────────
+    // 0 s  → telemetry starts
+    // 5 s  → matrix rain starts
+    // 11 s → phase = "black" (solid black overlay, star map already live under it)
+    // 12 s → overlay starts fading out (0.9 s CSS transition)
+    // 12.9 s → overlay fully transparent, phase = "none", hero fades in
 
-      // Transition to Darkness Fade at 11.0 seconds (6.0s into matrix phase)
-      // Transition to Darkness Fade at 11.0 seconds (6.0s into matrix phase)
-      const toWarpTimer = setTimeout(() => {
-        // Unmount intro overlay immediately and trigger solid space black overlay
-        setIntroPhase("none");
-        setWarpFlashActive(true);
-        setWarpFlashOpacity(1);
-        localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
+    const t1 = setTimeout(() => setPhase("matrix"), 5000);
 
-        // Wait exactly 1.0 second (space black darkness hold) before starting the fade-out
-        const holdTimer = setTimeout(() => {
-          setWarpFlashOpacity(0);
-          
-          // Complete fade-out and show fullscreen prompt after exactly 1.0 second
-          const endTimer = setTimeout(() => {
-            setWarpFlashActive(false);
-            if (document.fullscreenElement) {
-              setShowFullscreenModal(true);
-            }
-          }, 1000);
+    const t2 = setTimeout(() => {
+      setPhase("black");
+      localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-          return () => clearTimeout(endTimer);
-        }, 1000);
+      // After 1 s black hold → start fading the overlay
+      const t3 = setTimeout(() => {
+        setOverlayOpacity(0); // CSS transition takes 0.9 s
 
-        return () => clearTimeout(holdTimer);
-      }, 6000);
+        // After the 0.9 s fade → mark complete
+        const t4 = setTimeout(() => {
+          setPhase("none");
+          if (document.fullscreenElement) setShowFullscreenModal(true);
+        }, 950);
 
-      return () => {
-        clearTimeout(toWarpTimer);
-      };
-    }, 5000);
+        return () => clearTimeout(t4);
+      }, 1000);
+
+      return () => clearTimeout(t3);
+    }, 11000);
 
     return () => {
       if (typingTimer) clearTimeout(typingTimer);
-      clearTimeout(skipButtonTimer);
-      clearTimeout(toMatrixTimer);
+      clearTimeout(skipTimer);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
-  }, [introPhase]);
+  }, [phase]);
 
   const skipIntro = () => {
     localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
-    setIntroPhase("none");
-    setWarpFlashActive(true);
-    setWarpFlashOpacity(1);
-
-    // Fast 1.0-second pitch black hold followed by 1.0-second fade
+    setPhase("black");
     setTimeout(() => {
-      setWarpFlashOpacity(0);
-      
+      setOverlayOpacity(0);
       setTimeout(() => {
-        setWarpFlashActive(false);
-        if (document.fullscreenElement) {
-          setShowFullscreenModal(true);
-        }
-      }, 1000);
-    }, 1000);
+        setPhase("none");
+        if (document.fullscreenElement) setShowFullscreenModal(true);
+      }, 950);
+    }, 600);
   };
 
   // --- State: NASA APOD ---
@@ -443,24 +403,37 @@ export default function HomePage() {
 
   return (
     <>
-      {/* TARS Telemetry CRT + Matrix falling code rain Intro Overlay */}
-      {(introPhase !== "none" || warpFlashActive) && (
-        <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100] transition-opacity duration-300 ${
-          introPhase === "none" ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}>
-          {/* CRT Screen Filters (Phosphor glow scanlines) */}
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
-          
-          {/* Option A: Matrix falling green code rain (Renders behind the telemetry logs during matrix phase) */}
-          <MatrixRainCanvas 
-            isActive={introPhase === "matrix" || (introPhase === "none" && warpFlashActive)} 
-          />
+      {/*
+       * ALWAYS-MOUNTED intro overlay.
+       * pointer-events are blocked when phase is "none" so the homepage is interactive.
+       * opacity is driven by overlayOpacity state + CSS transition — no DOM mount/unmount,
+       * no jolt, no layout reflow.
+       */}
+      <div
+        className="fixed inset-0 z-[100] bg-black overflow-hidden"
+        style={{
+          opacity: overlayOpacity,
+          transition: phase === "black" ? "opacity 0.9s ease-out" : "none",
+          pointerEvents: phase === "none" ? "none" : "all",
+        }}
+      >
+        {/* Matrix rain canvas — always mounted, only draws when phase===matrix */}
+        <IntroCanvas phase={phase} />
 
-          {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Matrix phase) */}
-          <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
-            introPhase === "matrix" ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}>
+        {/* CRT scanline + vignette overlays */}
+        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-20" />
+
+        {/* Typewriter telemetry logs — fade out when entering matrix phase */}
+        <div
+          className="absolute inset-0 flex flex-col items-start justify-center p-6 md:px-16 gap-1 font-mono text-emerald-500 select-none z-10"
+          style={{
+            opacity: phase === "telemetry" ? 1 : 0,
+            transition: "opacity 1s ease-out",
+            pointerEvents: "none",
+          }}
+        >
+          <div className="w-full max-w-5xl">
             {printedLines.map((line, idx) => (
               <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
                 <span>{line}</span>
@@ -470,29 +443,18 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-
-          {/* Skip Button (shows after 5 seconds delay) */}
-          {showSkip && (
-            <button 
-              onClick={skipIntro}
-              className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
-            >
-              [ SKIP ENTRY SEQUENCE ]
-            </button>
-          )}
         </div>
-      )}
 
-      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.0 second, mimicking deep space black) */}
-      {warpFlashActive && (
-        <div 
-          className="fixed inset-0 bg-black z-[110] pointer-events-none transition-opacity ease-out"
-          style={{
-            opacity: warpFlashOpacity,
-            transitionDuration: "1000ms"
-          }}
-        />
-      )}
+        {/* Skip button */}
+        {showSkip && phase !== "black" && (
+          <button
+            onClick={skipIntro}
+            className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
+          >
+            [ SKIP ENTRY SEQUENCE ]
+          </button>
+        )}
+      </div>
 
       {/* Fullscreen Stay/Exit Selection Modal (Shown after the intro sequence finishes) */}
       {showFullscreenModal && (
