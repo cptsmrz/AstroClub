@@ -223,15 +223,21 @@ export default function HomePage() {
         setPrintedLines(prev => [...prev, TELEMETRY_LINES[index]]);
 
         let delay = 0;
-        if (index < 2) {
-          // Lines 1 to 3: printed in 1.0 second total (500ms intervals)
-          delay = 500;
-        } else if (index < 14) {
-          // Every line except last: printed in 3.5 seconds total (291ms intervals)
-          delay = 291;
-        } else {
-          // Last line: printed in 1.0 second
+        if (index === 0) {
+          // Line 1: printed in 1.0 second
           delay = 1000;
+        } else if (index < 13) {
+          // Lines 2 to 14: printed in 1.0s total (77ms intervals)
+          delay = 77;
+        } else if (index === 13) {
+          // Wait 1.5 seconds after Line 14
+          delay = 1500;
+        } else if (index === 14) {
+          // Second last and last line: printed in 0.5s total (250ms intervals)
+          delay = 250;
+        } else {
+          // Wait 1.3 seconds before transitioning to Matrix rain (5.0s total telemetry)
+          delay = 1326;
         }
 
         typingTimer = setTimeout(() => {
@@ -247,11 +253,11 @@ export default function HomePage() {
       setShowSkip(true);
     }, 5000);
 
-    // 3. Transition to Matrix Rain at 5.5 seconds (1.0s + 3.5s + 1.0s telemetry duration)
+    // 3. Transition to Matrix Rain at 5.0 seconds
     const toMatrixTimer = setTimeout(() => {
       setIntroPhase("matrix");
 
-      // Start speed acceleration (gravitational code drop warp) at 8.3 seconds (2.8s into matrix phase)
+      // Start speed acceleration (gravitational code drop warp) at 8.3 seconds (3.3s into matrix phase)
       const collapseStartTimer = setTimeout(() => {
         let startTimestamp: number | null = null;
         const duration = 1700;
@@ -268,39 +274,39 @@ export default function HomePage() {
           }
         };
         requestAnimationFrame(animateCollapse);
-      }, 2800);
+      }, 3300);
 
-      // Transition to Singularity Warp Flash at 10.0 seconds (4.5s into matrix phase)
+      // Transition to Darkness Fade at 10.0 seconds (5.0s into matrix phase)
       const toWarpTimer = setTimeout(() => {
-        // Unmount intro overlay immediately and trigger instant warp neon green flash
+        // Unmount intro overlay immediately and trigger instant darkness black overlay
         setIntroPhase("none");
         setWarpFlashActive(true);
         setWarpFlashOpacity(1);
         localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-        // Trigger the 1.5-second fade-out in the next frame
+        // Trigger the 1.0-second fade-out in the next frame
         const fadeOutTimer = setTimeout(() => {
           setWarpFlashOpacity(0);
           
-          // Complete fade-out and show fullscreen prompt after exactly 1.5 seconds
+          // Complete fade-out and show fullscreen prompt after exactly 1.0 second
           const endTimer = setTimeout(() => {
             setWarpFlashActive(false);
             if (document.fullscreenElement) {
               setShowFullscreenModal(true);
             }
-          }, 1500);
+          }, 1000);
 
           return () => clearTimeout(endTimer);
         }, 50);
 
         return () => clearTimeout(fadeOutTimer);
-      }, 4500);
+      }, 5000);
 
       return () => {
         clearTimeout(collapseStartTimer);
         clearTimeout(toWarpTimer);
       };
-    }, 5500);
+    }, 5000);
 
     return () => {
       if (typingTimer) clearTimeout(typingTimer);
@@ -315,7 +321,7 @@ export default function HomePage() {
     setWarpFlashActive(true);
     setWarpFlashOpacity(1);
 
-    // Fast 1.5-second fade-out on skip
+    // Fast 1.0-second fade-out on skip
     setTimeout(() => {
       setWarpFlashOpacity(0);
       
@@ -324,7 +330,7 @@ export default function HomePage() {
         if (document.fullscreenElement) {
           setShowFullscreenModal(true);
         }
-      }, 1500);
+      }, 1000);
     }, 50);
   };
 
@@ -498,13 +504,13 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.5 seconds) */}
+      {/* Volumetric Singularity Warp Flash Overlay (Fades from 100% to 0% over exactly 1.0 second, mimicking the site's natural background) */}
       {warpFlashActive && (
         <div 
-          className="fixed inset-0 bg-[#39ff14] z-[110] pointer-events-none transition-opacity ease-out"
+          className="fixed inset-0 bg-[#020617] z-[110] pointer-events-none transition-opacity ease-out"
           style={{
             opacity: warpFlashOpacity,
-            transitionDuration: "1500ms"
+            transitionDuration: "1000ms"
           }}
         />
       )}
