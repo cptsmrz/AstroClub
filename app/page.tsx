@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
-import GargantuaCanvas from "@/components/GargantuaCanvas";
+import MatrixRainCanvas from "@/components/GargantuaCanvas";
 
 // --- Type Definitions ---
 interface ApodData {
@@ -151,10 +151,9 @@ export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [screenHeight, setScreenHeight] = useState(1080);
 
-  // --- State: TARS CRT Intro Sequence (Sequential A+B) ---
-  // Default to "telemetry" to run on every refresh during testing.
-  const [introPhase, setIntroPhase] = useState<"telemetry" | "gargantua" | "warp" | "none">("telemetry");
-  const [printedLines, setPrintedLines] = useState<string[]>([]);
+  // --- State: Matrix Rain Intro Sequence ---
+  // Default to "matrix" to run on every refresh during testing.
+  const [introPhase, setIntroPhase] = useState<"matrix" | "none">("matrix");
   const [collapseProgress, setCollapseProgress] = useState(0);
   const [showSkip, setShowSkip] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
@@ -165,7 +164,7 @@ export default function HomePage() {
 
   // Auto-request browser Fullscreen when intro starts
   useEffect(() => {
-    if (introPhase === "telemetry") {
+    if (introPhase === "matrix") {
       const enterFullscreen = async () => {
         try {
           if (document.documentElement.requestFullscreen) {
@@ -193,100 +192,60 @@ export default function HomePage() {
   useEffect(() => {
     if (introPhase === "none") return;
 
-    // 1. Typewriter logs typing
-    const TELEMETRY_LINES = [
-      "CCASS COGNITIVE TELEMETRY FEED [SEC XI]",
-      "ESTABLISHING STELLARPORTAL COGNITIVE LINK...",
-      "==============================================",
-      "[ OK ] DETECTING APERTURE COORD: 27.6058 N, 77.5924 E",
-      "[ OK ] INTEGRATING NEWTONIAN OPTICAL GEOMETRIES",
-      "[ OK ] INGESTING MIRROR GRINDING ALIGNMENT DRAFT",
-      "[ OK ] MOUNT TRACKING STAGE: ENGAGED [BAUD: 9600]",
-      "[ INFO ] CONNECTING TO SUPABASE MATRIX DATABASE...",
-      "[ OK ] CONSTRAINTS VERIFIED: [hosteler / day_scholar]",
-      "[ INFO ] RETRIEVING ASTR 101 CURRICULUM ARTIFACTS",
-      "[ OK ] LOADED DUAL-TAB ROADMAP CONSOLE",
-      "==============================================",
-      "ASTRONOMY PROTOCOLS INITIATED.",
-      "UPLINK SECURE.",
-      "WELCOME TO ASTROCLUB PORTAL.",
-      "CLEAR SKIES."
-    ];
-
-    let currentLine = 0;
-    const typingInterval = setInterval(() => {
-      if (currentLine < TELEMETRY_LINES.length) {
-        setPrintedLines(prev => [...prev, TELEMETRY_LINES[currentLine]]);
-        currentLine++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 320);
-
-    // 2. Skip Button Delay Timer (shows skip after 5 seconds)
+    // 1. Skip Button Delay Timer (shows skip after 5 seconds)
     const skipButtonTimer = setTimeout(() => {
       setShowSkip(true);
     }, 5000);
 
-    // 3. Transition to Gargantua Accretion Disk at 7.5 seconds (extended by 0.5s)
-    const toGargantuaTimer = setTimeout(() => {
-      setIntroPhase("gargantua");
+    // 2. Start speed acceleration (gravitational code drop warp) at 13.0 seconds
+    const collapseStartTimer = setTimeout(() => {
+      let startTimestamp: number | null = null;
+      const duration = 1700;
 
-      // Start gravitational collapse animation at 13.0s (5.5s into Gargantua)
-      const collapseStartTimer = setTimeout(() => {
-        let startTimestamp: number | null = null;
-        const duration = 1700;
+      const animateCollapse = (timestamp: number) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const elapsed = timestamp - startTimestamp;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        setCollapseProgress(progress);
 
-        const animateCollapse = (timestamp: number) => {
-          if (!startTimestamp) startTimestamp = timestamp;
-          const elapsed = timestamp - startTimestamp;
-          const progress = Math.min(elapsed / duration, 1);
-          
-          setCollapseProgress(progress);
-
-          if (elapsed < duration) {
-            requestAnimationFrame(animateCollapse);
-          }
-        };
-        requestAnimationFrame(animateCollapse);
-      }, 5500);
-
-      // Transition to Singularity Warp Flash at 14.7s (7.2s into Gargantua)
-      const toWarpTimer = setTimeout(() => {
-        // Unmount intro telemetry and canvas immediately, and show the white overlay instantly
-        setIntroPhase("none");
-        setWarpFlashActive(true);
-        setWarpFlashOpacity(1);
-        localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
-
-        // Trigger the 2-second fade-out in the next frame
-        const fadeOutTimer = setTimeout(() => {
-          setWarpFlashOpacity(0);
-          
-          // Complete fade-out and show fullscreen prompt after exactly 2 seconds
-          const endTimer = setTimeout(() => {
-            setWarpFlashActive(false);
-            if (document.fullscreenElement) {
-              setShowFullscreenModal(true);
-            }
-          }, 2000);
-
-          return () => clearTimeout(endTimer);
-        }, 50);
-
-        return () => clearTimeout(fadeOutTimer);
-      }, 7200);
-
-      return () => {
-        clearTimeout(collapseStartTimer);
-        clearTimeout(toWarpTimer);
+        if (elapsed < duration) {
+          requestAnimationFrame(animateCollapse);
+        }
       };
-    }, 7500);
+      requestAnimationFrame(animateCollapse);
+    }, 13000);
+
+    // 3. Transition to Singularity Warp Flash at 14.7 seconds
+    const toWarpTimer = setTimeout(() => {
+      // Unmount canvas immediately, and show the white overlay instantly
+      setIntroPhase("none");
+      setWarpFlashActive(true);
+      setWarpFlashOpacity(1);
+      localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
+
+      // Trigger the 2-second fade-out in the next frame
+      const fadeOutTimer = setTimeout(() => {
+        setWarpFlashOpacity(0);
+        
+        // Complete fade-out and show fullscreen prompt after exactly 2 seconds
+        const endTimer = setTimeout(() => {
+          setWarpFlashActive(false);
+          if (document.fullscreenElement) {
+            setShowFullscreenModal(true);
+          }
+        }, 2000);
+
+        return () => clearTimeout(endTimer);
+      }, 50);
+
+      return () => clearTimeout(fadeOutTimer);
+    }, 14700);
 
     return () => {
-      clearInterval(typingInterval);
       clearTimeout(skipButtonTimer);
-      clearTimeout(toGargantuaTimer);
+      clearTimeout(collapseStartTimer);
+      clearTimeout(toWarpTimer);
     };
   }, [introPhase]);
 
@@ -438,32 +397,13 @@ export default function HomePage() {
 
   return (
     <>
-      {/* TARS Telemetry CRT Intro Overlay */}
+      {/* Matrix falling green code rain Intro Overlay */}
       {introPhase !== "none" && (
-        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
-          {/* CRT Screen Filters */}
-          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
-          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
-          
-          {/* Option A: Gargantua Accretion Disk Canvas (Renders behind the telemetry text during gargantua phase) */}
-          <GargantuaCanvas 
-            isActive={introPhase === "gargantua"} 
+        <div className="fixed inset-0 bg-black z-[100] overflow-hidden select-none">
+          <MatrixRainCanvas 
+            isActive={introPhase === "matrix"} 
             collapseProgress={collapseProgress} 
           />
-
-          {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Gargantua) */}
-          <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
-            introPhase === "gargantua" ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}>
-            {printedLines.map((line, idx) => (
-              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
-                <span>{line}</span>
-                {idx === printedLines.length - 1 && (
-                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
-                )}
-              </div>
-            ))}
-          </div>
 
           {/* Skip Button (shows after 5 seconds delay) */}
           {showSkip && (

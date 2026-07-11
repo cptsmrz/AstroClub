@@ -2,85 +2,94 @@
 
 import { useEffect, useRef } from "react";
 
-interface GargantuaCanvasProps {
+interface MatrixRainCanvasProps {
   isActive: boolean;
-  collapseProgress: number; // 0 (normal) to 1 (fully collapsed into singularity)
+  collapseProgress: number; // 0 (normal speed) to 1 (warp drop velocity)
 }
 
-class Particle {
-  radius: number;
-  initialRadius: number;
-  angle: number;
-  angularSpeed: number;
-  yOffset: number;
-  size: number;
-  color: string;
-  z: number = 0;
+class RainDrop {
+  x: number;
+  y: number;
+  speed: number;
+  chars: string[];
+  depth: number;
+  fontSize: number;
+  opacity: number;
+  nextChange: number;
 
-  constructor() {
-    // Radial band: 65px to 290px
-    this.initialRadius = 65 + Math.random() * 225;
-    this.radius = this.initialRadius;
-    this.angle = Math.random() * Math.PI * 2;
-    // Keplerian speed: closer orbits spin faster
-    this.angularSpeed = (0.012 + Math.random() * 0.01) * (110 / this.radius);
-    this.yOffset = (Math.random() - 0.5) * 8; // thicker gas plane
-    this.size = 1.3 + Math.random() * 2.8; // larger particles to overlap and blur
-
-    const heat = Math.max(0, 1 - (this.radius - 65) / 95);
-    if (heat > 0.78) {
-      this.color = `rgba(225, 245, 255, ${0.5 + Math.random() * 0.4})`; // blazing hot white-blue core
-    } else if (heat > 0.4) {
-      this.color = `rgba(255, 220, 110, ${0.45 + Math.random() * 0.4})`; // gold-yellow plasma
-    } else {
-      this.color = `rgba(240, 105, 30, ${0.3 + Math.random() * 0.45})`; // warm orange-red gas
+  constructor(canvasWidth: number) {
+    this.x = Math.random() * canvasWidth;
+    this.y = Math.random() * -800 - 50; // start off-screen
+    this.depth = 0.25 + Math.random() * 1.25; // 3D depth parallax scale
+    this.fontSize = Math.floor(10 + this.depth * 11);
+    this.speed = (1.8 + Math.random() * 3.2) * this.depth; // closer streams fall faster
+    this.opacity = 0.15 + this.depth * 0.65;
+    this.chars = [];
+    this.nextChange = 0;
+    
+    // Generate trail of characters
+    const trailLength = Math.floor(10 + Math.random() * 16);
+    for (let i = 0; i < trailLength; i++) {
+      this.chars.push(this.getRandomChar());
     }
   }
 
-  update(collapseProgress: number) {
-    // Gravitational collapse: pull particles closer and orbit faster as collapseProgress increases
-    this.radius = this.initialRadius * (1 - collapseProgress * 0.82);
-    this.angle += this.angularSpeed * (1 + collapseProgress * 3.5);
-    this.z = Math.sin(this.angle) * this.radius;
+  getRandomChar(): string {
+    const charPool = "ｦｧｨｩｪｫｬｭｮｯｰｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ0123456789ΘΞΦΨΩ";
+    return charPool[Math.floor(Math.random() * charPool.length)];
   }
 
-  draw(ctx: CanvasRenderingContext2D, cx: number, cy: number) {
-    const x = Math.cos(this.angle) * this.radius;
-    const y = this.yOffset;
-    const z = this.z;
+  update(canvasHeight: number, collapseProgress: number) {
+    // Warp speed drop: accelerate columns downward exponentially during warp phase
+    const currentSpeed = this.speed * (1 + collapseProgress * 22);
+    this.y += currentSpeed;
 
-    // 1. Einstein Ring (Bent background light wrapping around top and bottom)
-    if (z < 0) {
-      // Calculate lensed projection curve: squashed halo ring wrapping higher over the black hole
-      const lensY = Math.abs(x) * 0.12 + (this.radius - Math.abs(x)) * 0.45;
+    // Reset when stream tail clears the bottom
+    if (this.y - (this.chars.length * this.fontSize) > canvasHeight) {
+      this.y = Math.random() * -200 - 50;
+      this.speed = (1.8 + Math.random() * 3.2) * this.depth;
+    }
+
+    // Randomize trail characters periodically
+    this.nextChange++;
+    if (this.nextChange > 5) {
+      this.nextChange = 0;
+      for (let i = 0; i < this.chars.length; i++) {
+        if (Math.random() < 0.14) {
+          this.chars[i] = this.getRandomChar();
+        }
+      }
+    }
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
+    ctx.font = `bold ${this.fontSize}px monospace`;
+
+    for (let i = 0; i < this.chars.length; i++) {
+      const charY = this.y - i * this.fontSize;
+      if (charY < 0) continue;
+
+      const trailOpacity = this.opacity * (1 - i / this.chars.length);
       
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      // Upper lensed arc
-      ctx.arc(cx + x, cy - lensY + y, this.size * 0.85, 0, Math.PI * 2);
-      ctx.fill();
+      if (i === 0) {
+        // Blazing white/green leading character
+        ctx.fillStyle = `rgba(235, 255, 235, ${this.opacity})`;
+        ctx.shadowColor = "#10b981";
+        ctx.shadowBlur = this.depth * 9;
+      } else {
+        // Falling emerald green trail
+        ctx.fillStyle = `rgba(16, 185, 129, ${trailOpacity})`;
+        ctx.shadowBlur = 0;
+      }
 
-      ctx.beginPath();
-      // Lower lensed arc
-      ctx.arc(cx + x, cy + lensY + y, this.size * 0.85, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillText(this.chars[i], this.x, charY);
     }
-
-    // 2. Direct Accretion Disk (Foreground and un-lensed projection)
-    // Symmetrical perspective tilt (tilt ratio = 0.13)
-    const sx = cx + x;
-    const sy = cy + y + z * 0.13;
-
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(sx, sy, this.size, 0, Math.PI * 2);
-    ctx.fill();
   }
 }
 
-export default function GargantuaCanvas({ isActive, collapseProgress }: GargantuaCanvasProps) {
+export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixRainCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const particlesRef = useRef<Particle[]>([]);
+  const dropsRef = useRef<RainDrop[]>([]);
   const requestRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -89,7 +98,6 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Handle canvas resizing
     const resizeCanvas = () => {
       canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
       canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
@@ -97,83 +105,27 @@ export default function GargantuaCanvas({ isActive, collapseProgress }: Gargantu
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Instantiate particles with higher density
-    const particleCount = 2200;
-    const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+    // Densely populate streams for widescreen code drop immersion
+    const streamCount = Math.floor(canvas.width / 11);
+    const drops: RainDrop[] = [];
+    for (let i = 0; i < streamCount; i++) {
+      drops.push(new RainDrop(canvas.width));
     }
-    particlesRef.current = particles;
+    dropsRef.current = drops;
 
-    // Accretion disk center coordinates
     const render = () => {
-      const cx = canvas.width * 0.28;
-      const cy = canvas.height / 2;
-
-      // Draw faint background gravitational lensing fog
-      ctx.fillStyle = "rgba(0, 0, 0, 0.14)";
+      // Clear with slight alpha to preserve trailing glow
+      ctx.fillStyle = "rgba(0, 0, 0, 0.16)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Accretion background glow
-      const glowGrad = ctx.createRadialGradient(cx, cy, 35, cx, cy, 300);
-      glowGrad.addColorStop(0, "rgba(240, 110, 35, 0.05)");
-      glowGrad.addColorStop(0.3, "rgba(255, 215, 120, 0.02)");
-      glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 300, 0, Math.PI * 2);
-      ctx.fill();
+      // Reset shadows for background rendering
+      ctx.shadowBlur = 0;
 
-      // Sort particles by Z-depth (from back to front) to implement Painter's Algorithm
-      particles.forEach(p => p.update(collapseProgress));
-      particles.sort((a, b) => a.z - b.z);
-
-      // Enable blur filter for volumetric gaseous plasma look
-      ctx.filter = "blur(1.6px)";
-
-      // Render sorted particles
-      const horizonRadius = Math.max(8, 48 * (1 - collapseProgress * 0.75));
-
-      particles.forEach(p => {
-        // Once we cross from background (z < 0) to foreground (z >= 0),
-        // we render the solid black event horizon sphere blocking the background disk.
-        if (p.z >= 0 && p.z - p.angularSpeed * p.radius < 0) {
-          // Temporarily disable filter to keep event horizon sphere sharp
-          ctx.filter = "none";
-          ctx.fillStyle = "#000000";
-          ctx.beginPath();
-          ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Blazing corona glow directly surrounding the event horizon
-          const coronaGlow = ctx.createRadialGradient(cx, cy, horizonRadius, cx, cy, horizonRadius + 14);
-          coronaGlow.addColorStop(0, "rgba(255, 230, 160, 0.45)");
-          coronaGlow.addColorStop(0.3, "rgba(240, 110, 30, 0.2)");
-          coronaGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-          ctx.fillStyle = coronaGlow;
-          ctx.beginPath();
-          ctx.arc(cx, cy, horizonRadius + 14, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Event horizon outer gravitational lensing shadow boundary
-          ctx.strokeStyle = "rgba(255, 215, 120, 0.35)";
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.arc(cx, cy, horizonRadius + 0.8, 0, Math.PI * 2);
-          ctx.stroke();
-
-          // Re-enable blur filter for subsequent foreground particles
-          ctx.filter = "blur(1.6px)";
-        }
-        p.draw(ctx, cx, cy);
+      // Update and draw code drops
+      drops.forEach(drop => {
+        drop.update(canvas.height, collapseProgress);
+        drop.draw(ctx);
       });
-
-      // Event horizon final draw override to guarantee the center is solid black
-      ctx.filter = "none";
-      ctx.fillStyle = "#000000";
-      ctx.beginPath();
-      ctx.arc(cx, cy, horizonRadius, 0, Math.PI * 2);
-      ctx.fill();
 
       requestRef.current = requestAnimationFrame(render);
     };
