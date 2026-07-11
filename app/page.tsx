@@ -394,10 +394,10 @@ export default function HomePage() {
   const contentFadeStart = screenHeight * 0.30;
   const contentFadeEnd = screenHeight * 0.65;
   const contentOpacity = scrollOffset <= contentFadeStart
-    ? 0.15
+    ? 1
     : scrollOffset >= contentFadeEnd
       ? 1
-      : 0.15 + (0.85 * (scrollOffset - contentFadeStart)) / (contentFadeEnd - contentFadeStart);
+      : 1;
 
 
 
@@ -587,15 +587,9 @@ export default function HomePage() {
           
           {/* COLUMN 1: NASA APOD (7 Cols) */}
           <section className="lg:col-span-7 flex flex-col">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                Daily Cosmic Focus
-              </h2>
-              <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800">
-                NASA APOD
-              </span>
-            </div>
+            <SectionTitle>Daily Cosmic Focus
+              <span className="ml-auto text-[10px] font-bold tracking-widest text-slate-500 uppercase bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800 font-mono">NASA APOD</span>
+            </SectionTitle>
 
             {apodLoading ? (
               <SkeletonCard />
@@ -676,10 +670,7 @@ export default function HomePage() {
 
           {/* COLUMN 2: Stella Nocturna & Session Request (5 Cols) */}
           <section className="lg:col-span-5 flex flex-col h-full">
-            <h2 className="text-xl font-bold tracking-tight text-white mb-6 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-              Observation Deck
-            </h2>
+            <SectionTitle>Observation Deck</SectionTitle>
 
             <div className="rounded-xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-md shadow-xl shadow-black/20 flex flex-col justify-between flex-grow min-h-[340px] transition-all hover:border-slate-800/80">
               <div>
@@ -808,29 +799,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* SECTION 1.5: Mission Strip with expanded spacing */}
-        <section className="relative w-full mb-4">
-          <div className="rounded-2xl border border-slate-900 bg-slate-950/60 p-6 md:p-8 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl hover:border-slate-850 transition-all duration-300">
-            <div className="flex items-center gap-4">
-              <span className="text-3xl hidden sm:inline-block animate-pulse">✨</span>
-              <div className="text-left">
-                <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase block mb-1">
-                  Our Mandate
-                </span>
-                <p className="text-slate-200 text-sm md:text-base font-medium leading-relaxed">
-                  A student-run astronomy collective at GLA University, Mathura — custom engineering optical telescopes and cataloging deep space.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/about"
-              className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider group"
-            >
-              <span>Learn More About Us</span>
-              <span className="transition-transform group-hover:translate-x-1">→</span>
-            </Link>
-          </div>
-        </section>
+
 
         {/* SECTION 2: Core Leadership */}
         <section className="border-t border-slate-900 pt-10">
@@ -860,23 +829,18 @@ export default function HomePage() {
 
         {/* SECTION 3: Telescope Inventory */}
         <section className="border-t border-slate-900 pt-10">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight text-white mb-1 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                Handcrafted Instruments
-              </h2>
-              <p className="text-slate-400 text-xs md:text-sm">
+            <SectionTitle>Handcrafted Instruments</SectionTitle>
+              <p className="text-slate-400 text-xs md:text-sm -mt-4 mb-6">
                 AstroClub members custom-make our own high-precision telescopes and optical rigs.
               </p>
+            <div className="flex justify-end mb-2">
+              <Link
+                href="/equipment"
+                className="text-xs font-semibold text-slate-500 hover:text-slate-355 transition-colors uppercase tracking-wider"
+              >
+                Full Catalog →
+              </Link>
             </div>
-            <Link
-              href="/equipment"
-              className="text-xs font-semibold text-slate-500 hover:text-slate-355 transition-colors self-start md:self-auto uppercase tracking-wider"
-            >
-              Full Catalog →
-            </Link>
-          </div>
 
           {teleLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
