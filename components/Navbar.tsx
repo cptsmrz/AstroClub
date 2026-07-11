@@ -65,7 +65,7 @@ export default function Navbar() {
     <header className={`sticky top-0 z-50 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md transition-transform duration-300 ${
       visible ? "translate-y-0" : "-translate-y-full"
     }`}>
-      <nav className="mx-auto grid grid-cols-2 md:grid-cols-3 items-center max-w-6xl px-6 py-4">
+      <nav className="mx-auto grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center max-w-6xl px-6 py-4">
         {/* Left Column: Logo Brand */}
         <div className="flex justify-start">
           <Link
@@ -90,7 +90,7 @@ export default function Navbar() {
                 <li key={href}>
                   <Link
                     href={href}
-                    className={`text-sm transition-all duration-200 relative py-1 ${
+                    className={`text-sm transition-all duration-200 relative py-1 whitespace-nowrap ${
                       isActive
                         ? "text-cyan-400 font-medium"
                         : "text-slate-400 hover:text-white"
