@@ -1,22 +1,15 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { MILESTONES } from "../about/page";
 
 function RoadmapContent() {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<"archive" | "roadmap">("archive");
-
-  useEffect(() => {
-    const src = searchParams.get("src");
-    if (src === "about") {
-      setActiveTab("roadmap");
-    } else {
-      setActiveTab("archive");
-    }
-  }, [searchParams]);
+  const [activeTab, setActiveTab] = useState<"archive" | "roadmap">(() => {
+    return searchParams.get("src") === "about" ? "roadmap" : "archive";
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 font-space text-slate-800 relative overflow-hidden">

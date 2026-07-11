@@ -131,9 +131,88 @@ const EVENT_IMAGES = [
   }
 ];
 
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
+    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+    {children}
+  </h2>
+);
+
+const SkeletonCard = () => (
+  <div className="animate-pulse rounded-2xl border border-slate-900 bg-slate-900/30 p-6">
+    <div className="h-44 rounded-lg bg-slate-900 mb-4" />
+    <div className="h-4 bg-slate-900 rounded w-3/4 mb-2" />
+    <div className="h-3 bg-slate-900 rounded w-1/2" />
+  </div>
+);
+
 export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [screenHeight, setScreenHeight] = useState(1080);
+
+  // --- State: TARS CRT Intro Sequence ---
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !sessionStorage.getItem("astroclub_intro_played");
+    }
+    return false;
+  });
+  const [printedLines, setPrintedLines] = useState<string[]>([]);
+  const [isCollapsing, setIsCollapsing] = useState(false);
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    if (!showIntro) return;
+
+    const TELEMETRY_LINES = [
+      "CCASS COGNITIVE TELEMETRY FEED [SEC XI]",
+      "ESTABLISHING STELLARPORTAL COGNITIVE LINK...",
+      "==============================================",
+      "[ OK ] DETECTING APERTURE COORD: 27.6058 N, 77.5924 E",
+      "[ OK ] INTEGRATING NEWTONIAN OPTICAL GEOMETRIES",
+      "[ OK ] INGESTING MIRROR GRINDING ALIGNMENT DRAFT",
+      "[ OK ] MOUNT TRACKING STAGE: ENGAGED [BAUD: 9600]",
+      "[ INFO ] CONNECTING TO SUPABASE MATRIX DATABASE...",
+      "[ OK ] CONSTRAINTS VERIFIED: [hosteler / day_scholar]",
+      "[ INFO ] RETRIEVING ASTR 101 CURRICULUM ARTIFACTS",
+      "[ OK ] LOADED DUAL-TAB ROADMAP CONSOLE",
+      "==============================================",
+      "ASTRONOMY PROTOCOLS INITIATED.",
+      "UPLINK SECURE.",
+      "WELCOME TO ASTROCLUB PORTAL.",
+      "CLEAR SKIES."
+    ];
+
+    let currentLine = 0;
+    const interval = setInterval(() => {
+      if (currentLine < TELEMETRY_LINES.length) {
+        setPrintedLines(prev => [...prev, TELEMETRY_LINES[currentLine]]);
+        currentLine++;
+      } else {
+        clearInterval(interval);
+        
+        setTimeout(() => {
+          setIsCollapsing(true);
+          
+          setTimeout(() => {
+            setIsDone(true);
+            
+            setTimeout(() => {
+              sessionStorage.setItem("astroclub_intro_played", "true");
+              setShowIntro(false);
+            }, 250);
+          }, 350);
+        }, 1200);
+      }
+    }, 240);
+
+    return () => clearInterval(interval);
+  }, [showIntro]);
+
+  const skipIntro = () => {
+    sessionStorage.setItem("astroclub_intro_played", "true");
+    setShowIntro(false);
+  };
 
   // --- State: NASA APOD ---
   const [apod, setApod] = useState<ApodData | null>(null);
@@ -147,14 +226,13 @@ export default function HomePage() {
   // --- Data Fetching & Scroll Tracking ---
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setScreenHeight(window.innerHeight);
-      
       const handleResize = () => setScreenHeight(window.innerHeight);
-      window.addEventListener("resize", handleResize);
+      const handleScroll = () => setScrollOffset(window.scrollY);
 
-      const handleScroll = () => {
-        setScrollOffset(window.scrollY);
-      };
+      handleResize();
+      handleScroll();
+
+      window.addEventListener("resize", handleResize);
       window.addEventListener("scroll", handleScroll, { passive: true });
 
       return () => {
@@ -244,23 +322,40 @@ export default function HomePage() {
       ? 1
       : 0.15 + (0.85 * (scrollOffset - contentFadeStart)) / (contentFadeEnd - contentFadeStart);
 
-  const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
-      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-      {children}
-    </h2>
-  );
 
-  const SkeletonCard = () => (
-    <div className="animate-pulse rounded-2xl border border-slate-900 bg-slate-900/30 p-6">
-      <div className="h-44 rounded-lg bg-slate-900 mb-4" />
-      <div className="h-4 bg-slate-900 rounded w-3/4 mb-2" />
-      <div className="h-3 bg-slate-900 rounded w-1/2" />
-    </div>
-  );
 
   return (
     <>
+      {/* TARS Telemetry CRT Intro Overlay */}
+      {showIntro && (
+        <div className={`fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden transition-all duration-300 origin-center z-[100] ${
+          isDone ? "scale-x-0 opacity-0" : isCollapsing ? "scale-y-[0.003] opacity-100" : "scale-100 opacity-100"
+        }`}>
+          {/* CRT screen filters */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-30 z-20" />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
+          
+          <div className="max-w-xl w-full flex flex-col items-start gap-1 relative z-10">
+            {printedLines.map((line, idx) => (
+              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed">
+                <span>{line}</span>
+                {idx === printedLines.length - 1 && (
+                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Skip Button */}
+          <button 
+            onClick={skipIntro}
+            className="absolute bottom-6 right-6 px-4 py-1.5 rounded border border-emerald-900/60 bg-emerald-950/20 text-[10px] font-bold text-emerald-600 hover:text-emerald-400 hover:border-emerald-700/80 transition-all cursor-pointer select-none z-30"
+          >
+            [ SKIP ENTRY SEQUENCE ]
+          </button>
+        </div>
+      )}
+
       {/* Background Starfield Canvas */}
       <div
         className="fixed inset-0 pointer-events-none z-0 transition-transform duration-75 ease-out"
@@ -367,7 +462,7 @@ export default function HomePage() {
                           <div className="absolute inset-x-0 bottom-0 bg-slate-950/85 backdrop-blur-sm border-t border-slate-900 px-4 py-3 flex items-center justify-between z-20 text-[11px]">
                             <span className="text-slate-350 flex items-center gap-1.5 font-medium">
                               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                              📹 Today's NASA APOD is a video. Tap to view.
+                              📹 Today&apos;s NASA APOD is a video. Tap to view.
                             </span>
                             <span className="text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">
                               Watch Video →
