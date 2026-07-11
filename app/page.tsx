@@ -256,7 +256,7 @@ export default function HomePage() {
     const toMatrixTimer = setTimeout(() => {
       setIntroPhase("matrix");
 
-      // Transition to Darkness Fade at 10.0 seconds (5.0s into matrix phase)
+      // Transition to Darkness Fade at 11.0 seconds (6.0s into matrix phase)
       const toWarpTimer = setTimeout(() => {
         // Unmount intro overlay immediately and trigger instant darkness black overlay
         setIntroPhase("none");
@@ -280,7 +280,7 @@ export default function HomePage() {
         }, 50);
 
         return () => clearTimeout(fadeOutTimer);
-      }, 5000);
+      }, 6000);
 
       return () => {
         clearTimeout(toWarpTimer);

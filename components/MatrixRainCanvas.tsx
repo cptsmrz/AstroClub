@@ -24,7 +24,8 @@ export default function MatrixRainCanvas({ isActive }: MatrixRainCanvasProps) {
     window.addEventListener("resize", resizeCanvas);
 
     const fontSize = 16;
-    const columns = Math.floor(canvas.width / fontSize);
+    const spacing = 22; // 16px font + 6px empty gap between trails
+    const columns = Math.floor(canvas.width / spacing);
     
     // yPositions tracks the current row index (fractional for smooth speed variations)
     const yPositions = new Array(columns).fill(0).map(() => 
@@ -46,17 +47,17 @@ export default function MatrixRainCanvas({ isActive }: MatrixRainCanvasProps) {
       ctx.font = `bold ${fontSize}px monospace`;
 
       for (let i = 0; i < yPositions.length; i++) {
-        const x = i * fontSize;
+        const x = i * spacing;
         const currentYIndex = Math.floor(yPositions[i]);
         const y = currentYIndex * fontSize;
 
         if (y >= 0) {
-          // 1. Draw classic Matrix green character at the previous position to turn the white head green
+          // 1. Draw classic Matrix green character at the previous position to turn the light green head green
           ctx.fillStyle = "#00ff41"; // Original Matrix green
           ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y - fontSize);
 
-          // 2. Draw white highlight character at the new head position
-          ctx.fillStyle = "#ffffff"; // White head
+          // 2. Draw light green highlight character at the new head position
+          ctx.fillStyle = "#a7f3d0"; // Light green head (emerald-200)
           ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y);
         }
 
