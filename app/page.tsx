@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
-import MatrixRainCanvas from "@/components/GargantuaCanvas";
+import MatrixRainCanvas from "@/components/MatrixRainCanvas";
 
 // --- Type Definitions ---
 interface ApodData {
@@ -232,11 +232,11 @@ export default function HomePage() {
       setShowSkip(true);
     }, 5000);
 
-    // 3. Transition to Matrix Rain at 7.5 seconds
+    // 3. Transition to Matrix Rain at 5.0 seconds
     const toMatrixTimer = setTimeout(() => {
       setIntroPhase("matrix");
 
-      // Start speed acceleration (gravitational code drop warp) at 13.0 seconds (5.5s into matrix phase)
+      // Start speed acceleration (gravitational code drop warp) at 10.3 seconds (5.3s into matrix phase)
       const collapseStartTimer = setTimeout(() => {
         let startTimestamp: number | null = null;
         const duration = 1700;
@@ -253,9 +253,9 @@ export default function HomePage() {
           }
         };
         requestAnimationFrame(animateCollapse);
-      }, 5500);
+      }, 5300);
 
-      // Transition to Singularity Warp Flash at 14.7 seconds (7.2s into matrix phase)
+      // Transition to Singularity Warp Flash at 12.0 seconds (7.0s into matrix phase)
       const toWarpTimer = setTimeout(() => {
         // Unmount intro overlay immediately and trigger instant warp white flash
         setIntroPhase("none");
@@ -279,13 +279,13 @@ export default function HomePage() {
         }, 50);
 
         return () => clearTimeout(fadeOutTimer);
-      }, 7200);
+      }, 7000);
 
       return () => {
         clearTimeout(collapseStartTimer);
         clearTimeout(toWarpTimer);
       };
-    }, 7500);
+    }, 5000);
 
     return () => {
       if (typingInterval) clearInterval(typingInterval);

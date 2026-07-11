@@ -18,11 +18,24 @@ class RainDrop {
   nextChange: number;
 
   constructor(canvasWidth: number) {
-    this.x = Math.random() * canvasWidth;
+    // Restrict width to the center 75% of the screen (leaving 12.5% margins on left and right)
+    this.x = (canvasWidth * 0.125) + Math.random() * (canvasWidth * 0.75);
     this.y = Math.random() * -800 - 50; // start off-screen
     this.depth = 0.25 + Math.random() * 1.25; // 3D depth parallax scale
     this.fontSize = Math.floor(10 + this.depth * 11);
-    this.speed = (1.8 + Math.random() * 3.2) * this.depth; // closer streams fall faster
+    
+    // High-contrast speeds: some rain very slow, some very fast
+    if (this.depth < 0.65) {
+      // Slow background rain
+      this.speed = (0.8 + Math.random() * 1.2) * this.depth;
+    } else if (this.depth > 1.15) {
+      // Fast foreground rain
+      this.speed = (5.5 + Math.random() * 4.5) * this.depth;
+    } else {
+      // Medium rain
+      this.speed = (2.2 + Math.random() * 2.5) * this.depth;
+    }
+
     this.opacity = 0.15 + this.depth * 0.65;
     this.chars = [];
     this.nextChange = 0;
@@ -47,7 +60,15 @@ class RainDrop {
     // Reset when stream tail clears the bottom
     if (this.y - (this.chars.length * this.fontSize) > canvasHeight) {
       this.y = Math.random() * -200 - 50;
-      this.speed = (1.8 + Math.random() * 3.2) * this.depth;
+      
+      // Re-initialize speed with high-contrast properties
+      if (this.depth < 0.65) {
+        this.speed = (0.8 + Math.random() * 1.2) * this.depth;
+      } else if (this.depth > 1.15) {
+        this.speed = (5.5 + Math.random() * 4.5) * this.depth;
+      } else {
+        this.speed = (2.2 + Math.random() * 2.5) * this.depth;
+      }
     }
 
     // Randomize trail characters periodically
@@ -105,8 +126,8 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Densely populate streams for widescreen code drop immersion
-    const streamCount = Math.floor(canvas.width / 11);
+    // Stream count relative to 75% width coverage area
+    const streamCount = Math.floor((canvas.width * 0.75) / 11);
     const drops: RainDrop[] = [];
     for (let i = 0; i < streamCount; i++) {
       drops.push(new RainDrop(canvas.width));
