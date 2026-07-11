@@ -412,28 +412,12 @@ export default function HomePage() {
       <div
         className="fixed inset-0 z-[100] overflow-hidden"
         style={{
-          // rgba so CSS can interpolate smoothly between phases
-          // telemetry → solid slate-950 | matrix → transparent (same color, alpha 0) | black → pitch black
-          backgroundColor:
-            phase === "telemetry" ? "rgba(2,6,23,1)"
-            : phase === "matrix"  ? "rgba(2,6,23,0)"
-            : phase === "black"   ? "rgba(0,0,0,1)"
-            : "transparent",
-          // Smooth bg dissolve telemetry→matrix; opacity fade for the final black→none transition
-          transition:
-            phase === "black"
-              ? "opacity 0.9s ease-out"
-              : "background-color 1s ease-out",
+          backgroundColor: phase === "black" ? "#000000" : "#020617",
           opacity: overlayOpacity,
+          transition: phase === "black" ? "opacity 0.9s ease-out" : "none",
           pointerEvents: phase === "none" ? "none" : "all",
         }}
       >
-        {/* Stars-only blurred starfield — strictly during matrix rain phase only */}
-        {phase === "matrix" && (
-          <div style={{ filter: "blur(1.5px)", position: "absolute", inset: 0 }}>
-            <StarfieldCanvas starsOnly />
-          </div>
-        )}
 
         {/* Matrix rain canvas — always mounted, only draws when phase===matrix */}
         <IntroCanvas phase={phase} />
