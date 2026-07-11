@@ -1,38 +1,10 @@
 import type { Metadata } from "next";
-import { Orbitron, Dela_Gothic_One, Cinzel, Rajdhani, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import FullscreenPrompt from "@/components/FullscreenPrompt";
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  variable: "--font-orbitron",
-});
-
-const delaGothic = Dela_Gothic_One({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-dela",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-cinzel",
-});
-
-const rajdhani = Rajdhani({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-rajdhani",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
 
 export const metadata: Metadata = {
   title: "AstroClub — GLA University",
@@ -180,7 +152,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${orbitron.variable} ${delaGothic.variable} ${cinzel.variable} ${rajdhani.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased font-body`}
+        className="min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased font-body"
       >
         <Navbar />
         <SmoothScroll />
