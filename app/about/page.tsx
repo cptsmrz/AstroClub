@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 
 interface Milestone {
@@ -19,7 +20,7 @@ interface Member {
   photo_url?: string;
 }
 
-const MILESTONES: Milestone[] = [
+export const MILESTONES: Milestone[] = [
   {
     date: "Oct 2023",
     title: "Initial Department Link",
@@ -92,6 +93,13 @@ const MILESTONES: Milestone[] = [
     desc: "AstroClub adopts its first-ever constitution, standardizing operational guidelines, officer elections, and code of conduct.",
     icon: "📜"
   }
+];
+
+export const MAIN_MILESTONES: Milestone[] = [
+  MILESTONES[2], // Feb 2024 | First Telescope Builds
+  MILESTONES[3], // Feb 2024 | First Public Stargazing
+  MILESTONES[5], // Jan 2025 | ESA Feature
+  MILESTONES[9]  // Mar 2026 | University-Level Events
 ];
 
 const BATCH_24: Member[] = [
@@ -286,7 +294,7 @@ const BATCH_26: Member[] = [
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState<"all" | "25" | "26" | "24">("all");
 
-  const pathD = MILESTONES.reduce((acc, _, idx) => {
+  const pathD = MAIN_MILESTONES.reduce((acc, _, idx) => {
     if (idx === 0) return "M 160 225";
     const prevX = (idx - 1) * 320 + 160;
     const currX = idx * 320 + 160;
@@ -463,8 +471,8 @@ export default function AboutPage() {
               {/* Horizontal connecting Bezier line across the scroll track */}
               <svg 
                 className="absolute top-0 left-0 h-full pointer-events-none z-0" 
-                style={{ width: `${MILESTONES.length * 320}px` }}
-                viewBox={`0 0 ${MILESTONES.length * 320} 450`}
+                style={{ width: `${MAIN_MILESTONES.length * 320}px` }}
+                viewBox={`0 0 ${MAIN_MILESTONES.length * 320} 450`}
                 fill="none"
               >
                 <path 
@@ -482,7 +490,7 @@ export default function AboutPage() {
                 </defs>
               </svg>
 
-              {MILESTONES.map((m, idx) => {
+              {MAIN_MILESTONES.map((m, idx) => {
                 const isEven = idx % 2 === 0;
                 return (
                   <div 
@@ -552,6 +560,17 @@ export default function AboutPage() {
                 );
               })}
             </div>
+          </div>
+
+          {/* Detailed Roadmap Link Button */}
+          <div className="flex justify-center mt-6">
+            <Link 
+              href="/roadmap"
+              className="px-6 py-2.5 rounded-lg border border-slate-900 bg-slate-950 hover:bg-slate-900 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-all uppercase tracking-wider flex items-center gap-2 group shadow-lg cursor-pointer"
+            >
+              <span>View Detailed Roadmap</span>
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
           </div>
         </section>
 
