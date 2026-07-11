@@ -4,10 +4,9 @@ import { useEffect, useRef } from "react";
 
 interface MatrixRainCanvasProps {
   isActive: boolean;
-  collapseProgress: number; // 0 (normal speed) to 1 (warp drop velocity)
 }
 
-export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixRainCanvasProps) {
+export default function MatrixRainCanvas({ isActive }: MatrixRainCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const requestRef = useRef<number | null>(null);
 
@@ -41,29 +40,20 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
 
       ctx.font = `${fontSize}px monospace`;
 
-      // Warp speed drop: advance more steps per frame during collapse phase
-      const steps = 1 + Math.floor(collapseProgress * 7);
-
       for (let i = 0; i < yPositions.length; i++) {
-        // Draw the character sequence for the current step
-        for (let s = 0; s < steps; s++) {
-          const char = charPool[Math.floor(Math.random() * charPool.length)];
-          const x = i * fontSize;
-          const y = (yPositions[i] + s) * fontSize;
+        const x = i * fontSize;
+        const y = yPositions[i] * fontSize;
 
-          if (s === steps - 1) {
-            // Brighter leading character
-            ctx.fillStyle = "#d1fec3"; // light neon green tint
-          } else {
-            // Pure neon green trail
-            ctx.fillStyle = "#39ff14"; // neon green
-          }
+        // Draw green character at previous position to turn the white head green
+        ctx.fillStyle = "#39ff14"; // neon green
+        ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y - fontSize);
 
-          ctx.fillText(char, x, y);
-        }
+        // Draw white/light-green character at new head position
+        ctx.fillStyle = "#d1fec3"; // light green tint
+        ctx.fillText(charPool[Math.floor(Math.random() * charPool.length)], x, y);
 
-        // Update position
-        yPositions[i] += steps;
+        // Update position (uniform constant speed)
+        yPositions[i] += 1;
 
         // Reset column to the top once it goes off the bottom of the screen
         if (yPositions[i] * fontSize > canvas.height && Math.random() > 0.975) {
@@ -84,7 +74,7 @@ export default function MatrixRainCanvas({ isActive, collapseProgress }: MatrixR
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [isActive, collapseProgress]);
+  }, [isActive]);
 
   return (
     <canvas 

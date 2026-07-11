@@ -155,7 +155,6 @@ export default function HomePage() {
   // Default to "telemetry" to run on every refresh during testing.
   const [introPhase, setIntroPhase] = useState<"telemetry" | "matrix" | "none">("telemetry");
   const [printedLines, setPrintedLines] = useState<string[]>([]);
-  const [collapseProgress, setCollapseProgress] = useState(0);
   const [showSkip, setShowSkip] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
 
@@ -257,25 +256,6 @@ export default function HomePage() {
     const toMatrixTimer = setTimeout(() => {
       setIntroPhase("matrix");
 
-      // Start speed acceleration (gravitational code drop warp) at 8.3 seconds (3.3s into matrix phase)
-      const collapseStartTimer = setTimeout(() => {
-        let startTimestamp: number | null = null;
-        const duration = 1700;
-
-        const animateCollapse = (timestamp: number) => {
-          if (!startTimestamp) startTimestamp = timestamp;
-          const elapsed = timestamp - startTimestamp;
-          const progress = Math.min(elapsed / duration, 1);
-          
-          setCollapseProgress(progress);
-
-          if (elapsed < duration) {
-            requestAnimationFrame(animateCollapse);
-          }
-        };
-        requestAnimationFrame(animateCollapse);
-      }, 3300);
-
       // Transition to Darkness Fade at 10.0 seconds (5.0s into matrix phase)
       const toWarpTimer = setTimeout(() => {
         // Unmount intro overlay immediately and trigger instant darkness black overlay
@@ -303,7 +283,6 @@ export default function HomePage() {
       }, 5000);
 
       return () => {
-        clearTimeout(collapseStartTimer);
         clearTimeout(toWarpTimer);
       };
     }, 5000);
@@ -475,7 +454,6 @@ export default function HomePage() {
           {/* Option A: Matrix falling green code rain (Renders behind the telemetry logs during matrix phase) */}
           <MatrixRainCanvas 
             isActive={introPhase === "matrix" || (introPhase === "none" && warpFlashActive)} 
-            collapseProgress={collapseProgress} 
           />
 
           {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Matrix phase) */}
