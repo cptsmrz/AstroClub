@@ -565,13 +565,15 @@ export default function AboutPage() {
           {/* Detailed Roadmap Link Button */}
           <div className="flex justify-center mt-6">
             <Link 
-              href="/roadmap"
+              href="/roadmap?src=about"
               className="px-6 py-2.5 rounded-lg border border-slate-900 bg-slate-950 hover:bg-slate-900 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-all uppercase tracking-wider flex items-center gap-2 group shadow-lg cursor-pointer"
             >
               <span>View Detailed Roadmap</span>
               <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </div>
+
+
         </section>
 
         {/* 2. MEMBER DIRECTORY SECTION */}
