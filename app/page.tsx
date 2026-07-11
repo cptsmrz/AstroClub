@@ -151,9 +151,10 @@ export default function HomePage() {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [screenHeight, setScreenHeight] = useState(1080);
 
-  // --- State: Matrix Rain Intro Sequence ---
-  // Default to "matrix" to run on every refresh during testing.
-  const [introPhase, setIntroPhase] = useState<"matrix" | "none">("matrix");
+  // --- State: TARS Telemetry & Matrix Rain Intro Sequence (Sequential B+A) ---
+  // Default to "telemetry" to run on every refresh during testing.
+  const [introPhase, setIntroPhase] = useState<"telemetry" | "matrix" | "none">("telemetry");
+  const [printedLines, setPrintedLines] = useState<string[]>([]);
   const [collapseProgress, setCollapseProgress] = useState(0);
   const [showSkip, setShowSkip] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
@@ -164,7 +165,7 @@ export default function HomePage() {
 
   // Auto-request browser Fullscreen when intro starts
   useEffect(() => {
-    if (introPhase === "matrix") {
+    if (introPhase === "telemetry") {
       const enterFullscreen = async () => {
         try {
           if (document.documentElement.requestFullscreen) {
@@ -192,60 +193,104 @@ export default function HomePage() {
   useEffect(() => {
     if (introPhase === "none") return;
 
-    // 1. Skip Button Delay Timer (shows skip after 5 seconds)
+    // 1. Typewriter logs typing (active during telemetry phase)
+    const TELEMETRY_LINES = [
+      "CCASS COGNITIVE TELEMETRY FEED [SEC XI]",
+      "ESTABLISHING STELLARPORTAL COGNITIVE LINK...",
+      "==============================================",
+      "[ OK ] DETECTING APERTURE COORD: 27.6058 N, 77.5924 E",
+      "[ OK ] INTEGRATING NEWTONIAN OPTICAL GEOMETRIES",
+      "[ OK ] INGESTING MIRROR GRINDING ALIGNMENT DRAFT",
+      "[ OK ] MOUNT TRACKING STAGE: ENGAGED [BAUD: 9600]",
+      "[ INFO ] CONNECTING TO SUPABASE MATRIX DATABASE...",
+      "[ OK ] CONSTRAINTS VERIFIED: [hosteler / day_scholar]",
+      "[ INFO ] RETRIEVING ASTR 101 CURRICULUM ARTIFACTS",
+      "[ OK ] LOADED DUAL-TAB ROADMAP CONSOLE",
+      "==============================================",
+      "ASTRONOMY PROTOCOLS INITIATED.",
+      "UPLINK SECURE.",
+      "WELCOME TO ASTROCLUB PORTAL.",
+      "CLEAR SKIES."
+    ];
+
+    let currentLine = 0;
+    let typingInterval: NodeJS.Timeout | null = null;
+
+    if (introPhase === "telemetry") {
+      typingInterval = setInterval(() => {
+        if (currentLine < TELEMETRY_LINES.length) {
+          setPrintedLines(prev => [...prev, TELEMETRY_LINES[currentLine]]);
+          currentLine++;
+        } else {
+          if (typingInterval) clearInterval(typingInterval);
+        }
+      }, 320);
+    }
+
+    // 2. Skip Button Delay Timer (shows skip after 5 seconds)
     const skipButtonTimer = setTimeout(() => {
       setShowSkip(true);
     }, 5000);
 
-    // 2. Start speed acceleration (gravitational code drop warp) at 13.0 seconds
-    const collapseStartTimer = setTimeout(() => {
-      let startTimestamp: number | null = null;
-      const duration = 1700;
+    // 3. Transition to Matrix Rain at 7.5 seconds
+    const toMatrixTimer = setTimeout(() => {
+      setIntroPhase("matrix");
 
-      const animateCollapse = (timestamp: number) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const elapsed = timestamp - startTimestamp;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        setCollapseProgress(progress);
+      // Start speed acceleration (gravitational code drop warp) at 13.0 seconds (5.5s into matrix phase)
+      const collapseStartTimer = setTimeout(() => {
+        let startTimestamp: number | null = null;
+        const duration = 1700;
 
-        if (elapsed < duration) {
-          requestAnimationFrame(animateCollapse);
-        }
-      };
-      requestAnimationFrame(animateCollapse);
-    }, 13000);
+        const animateCollapse = (timestamp: number) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const elapsed = timestamp - startTimestamp;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          setCollapseProgress(progress);
 
-    // 3. Transition to Singularity Warp Flash at 14.7 seconds
-    const toWarpTimer = setTimeout(() => {
-      // Unmount canvas immediately, and show the white overlay instantly
-      setIntroPhase("none");
-      setWarpFlashActive(true);
-      setWarpFlashOpacity(1);
-      localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
-
-      // Trigger the 2-second fade-out in the next frame
-      const fadeOutTimer = setTimeout(() => {
-        setWarpFlashOpacity(0);
-        
-        // Complete fade-out and show fullscreen prompt after exactly 2 seconds
-        const endTimer = setTimeout(() => {
-          setWarpFlashActive(false);
-          if (document.fullscreenElement) {
-            setShowFullscreenModal(true);
+          if (elapsed < duration) {
+            requestAnimationFrame(animateCollapse);
           }
-        }, 2000);
+        };
+        requestAnimationFrame(animateCollapse);
+      }, 5500);
 
-        return () => clearTimeout(endTimer);
-      }, 50);
+      // Transition to Singularity Warp Flash at 14.7 seconds (7.2s into matrix phase)
+      const toWarpTimer = setTimeout(() => {
+        // Unmount intro overlay immediately and trigger instant warp white flash
+        setIntroPhase("none");
+        setWarpFlashActive(true);
+        setWarpFlashOpacity(1);
+        localStorage.setItem("astroclub_intro_last_played", Date.now().toString());
 
-      return () => clearTimeout(fadeOutTimer);
-    }, 14700);
+        // Trigger the 2-second fade-out in the next frame
+        const fadeOutTimer = setTimeout(() => {
+          setWarpFlashOpacity(0);
+          
+          // Complete fade-out and show fullscreen prompt after exactly 2 seconds
+          const endTimer = setTimeout(() => {
+            setWarpFlashActive(false);
+            if (document.fullscreenElement) {
+              setShowFullscreenModal(true);
+            }
+          }, 2000);
+
+          return () => clearTimeout(endTimer);
+        }, 50);
+
+        return () => clearTimeout(fadeOutTimer);
+      }, 7200);
+
+      return () => {
+        clearTimeout(collapseStartTimer);
+        clearTimeout(toWarpTimer);
+      };
+    }, 7500);
 
     return () => {
+      if (typingInterval) clearInterval(typingInterval);
       clearTimeout(skipButtonTimer);
-      clearTimeout(collapseStartTimer);
-      clearTimeout(toWarpTimer);
+      clearTimeout(toMatrixTimer);
     };
   }, [introPhase]);
 
@@ -397,13 +442,32 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Matrix falling green code rain Intro Overlay */}
+      {/* TARS Telemetry CRT + Matrix falling code rain Intro Overlay */}
       {introPhase !== "none" && (
-        <div className="fixed inset-0 bg-black z-[100] overflow-hidden select-none">
+        <div className="fixed inset-0 bg-black flex flex-col items-center justify-center p-6 text-emerald-500 font-mono select-none overflow-hidden z-[100]">
+          {/* CRT Screen Filters (Phosphor glow scanlines) */}
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[size:100%_4px] opacity-35 z-20" />
+          <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] z-25" />
+          
+          {/* Option A: Matrix falling green code rain (Renders behind the telemetry logs during matrix phase) */}
           <MatrixRainCanvas 
             isActive={introPhase === "matrix"} 
             collapseProgress={collapseProgress} 
           />
+
+          {/* Option B: Widescreen Typewriter printed logs (Fades out when transitioning to Matrix phase) */}
+          <div className={`w-full max-w-5xl px-8 md:px-16 flex flex-col items-start gap-1 relative z-10 transition-opacity duration-1000 ${
+            introPhase === "matrix" ? "opacity-0 pointer-events-none" : "opacity-100"
+          }`}>
+            {printedLines.map((line, idx) => (
+              <div key={idx} className="text-xs md:text-sm tracking-wider flex items-center leading-relaxed font-semibold">
+                <span>{line}</span>
+                {idx === printedLines.length - 1 && (
+                  <span className="w-1.5 h-3.5 bg-emerald-500 animate-[pulse_1s_infinite] ml-1.5 shrink-0" />
+                )}
+              </div>
+            ))}
+          </div>
 
           {/* Skip Button (shows after 5 seconds delay) */}
           {showSkip && (
