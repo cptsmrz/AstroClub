@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
@@ -51,63 +51,66 @@ interface Telescope {
 interface RoleInfo {
   title: string;
   name: string;
-  description: string;
+  year: string;
+  branch: string;
+  linkedin?: string;
+  nebula: string;
 }
 
 const CLUB_ROLES: RoleInfo[] = [
   {
     title: "President",
     name: "Aditi Sharma ☀️",
-    description: "3rd Year, B.Tech CS AIML. Serves as the official representative, provides strategic direction, co-approves membership applications, and holds final decision-making and equipment approval authority."
+    year: "Batch '25",
+    branch: "B.Tech CS AIML",
+    linkedin: "https://www.linkedin.com/in/aditi-sharma-6bb23133b/",
+    // Lagoon Nebula — vivid magenta/teal
+    nebula: "https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=600&auto=format&fit=crop"
   },
   {
     title: "Vice President",
     name: "Dhruv Tigunayak 🪐",
-    description: "3rd Year, B.Tech ECSE. Maintains internal operational stability, coordinates cross-functional activities, secures administrative permissions, manages conflict resolution, and co-approves membership/equipment access."
+    year: "Batch '25",
+    branch: "B.Tech ECSE",
+    linkedin: "https://www.linkedin.com/in/dhruv-tigunayak-349a82326/",
+    // Crab Nebula / deep blue-violet supernova
+    nebula: "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?q=80&w=600&auto=format&fit=crop"
   },
   {
     title: "General Secretary",
     name: "Paritosh Kumar Mishra 🌍",
-    description: "3rd Year, B.Tech CS. Maintains official club records and correspondence, tracks membership database and attendance, ensures policy compliance, and co-approves membership/equipment access."
+    year: "Batch '25",
+    branch: "B.Tech CS",
+    linkedin: "https://www.linkedin.com/in/paritosh-kumar-mishra-451484351/",
+    // Orion Nebula — amber/emerald gas clouds
+    nebula: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=600&auto=format&fit=crop"
   },
   {
     title: "Technical Head",
-    name: "Sarthak Rathore 🌙",
-    description: "3rd Year, B.Tech CS. Serves as the unified head of technical operations, coordinating the website, design, and content teams, and ensuring digital infrastructure maintenance and security."
+    name: "Sarthak Rathode 🌙",
+    year: "Batch '25",
+    branch: "B.Tech CS",
+    linkedin: "", // LinkedIn not provided
+    // Eagle Nebula / Pillars of Creation — purple-pink
+    nebula: "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=600&auto=format&fit=crop"
   }
 ];
 
-const getRoleBackground = (title: string) => {
-  let imageUrl = "";
-  switch (title) {
-    case "President":
-      imageUrl = "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=300"; // NASA Sun solar flare close-up
-      break;
-    case "Vice President":
-      imageUrl = "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=300"; // NASA Chandra supernova remnants (White Hole representation)
-      break;
-    case "General Secretary":
-      imageUrl = "https://images.unsplash.com/photo-1462332420958-a05d1e002413?q=80&w=300"; // NASA Hubble accretion disk (Black Hole representation)
-      break;
-    case "Technical Head":
-      imageUrl = "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=300"; // NASA Active galactic nucleus / Quasar jet
-      break;
-    default:
-      return null;
-  }
-
-  return (
-    <div className="absolute -right-2 -bottom-2 w-32 h-32 opacity-40 pointer-events-none select-none overflow-hidden rounded-br-xl">
-      <img 
-        src={imageUrl} 
-        alt="" 
-        loading="lazy"
-        className="w-full h-full object-cover" 
-      />
-      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-950/10 to-transparent" />
-    </div>
-  );
-};
+// Full-card nebula background component
+const NebulaBackground = ({ src }: { src: string }) => (
+  <div className="absolute inset-0 pointer-events-none select-none overflow-hidden rounded-xl">
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      className="w-full h-full object-cover opacity-25 scale-105 group-hover:opacity-35 group-hover:scale-110 transition-all duration-700"
+    />
+    {/* Heavy bottom gradient to protect text legibility */}
+    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/40" />
+    {/* Side vignette */}
+    <div className="absolute inset-0 bg-gradient-to-r from-slate-950/60 to-transparent" />
+  </div>
+);
 
 const EVENT_IMAGES = [
   { 
@@ -132,11 +135,14 @@ const EVENT_IMAGES = [
   }
 ];
 
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h2 className="text-2xl font-bold tracking-tight text-white mb-6 border-b border-slate-900 pb-3 flex items-center gap-2">
-    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-    {children}
-  </h2>
+const SectionTitle = ({ children, actions }: { children: React.ReactNode; actions?: React.ReactNode }) => (
+  <div className="flex items-center justify-between mb-6 border-b border-slate-900 pb-3">
+    <h2 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+      {children}
+    </h2>
+    {actions}
+  </div>
 );
 
 const SkeletonCard = () => (
@@ -156,34 +162,54 @@ export default function HomePage() {
   const [phase, setPhase] = useState<IntroPhase>("telemetry");
   const [printedLines, setPrintedLines] = useState<string[]>([]);
   const [showSkip, setShowSkip] = useState(false);
-  const [showFullscreenModal, setShowFullscreenModal] = useState(false);
   // overlayOpacity: 1 = fully black, 0 = fully transparent (homepage visible)
   const [overlayOpacity, setOverlayOpacity] = useState(1);
 
-  // Auto-request fullscreen on load
-  useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        if (document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch (err) {
-        console.log("Fullscreen deferred:", err);
-      }
-    };
-    enterFullscreen();
-  }, []);
+  // --- Club Work Scroll Ref ---
+  const clubWorkScrollRef = useRef<HTMLDivElement>(null);
 
-  // Production daily play tracking (commented out for testing — runs every refresh)
-  /*
+  // --- Leadership Collapsible State ---
+  const [expandedRoles, setExpandedRoles] = useState<Record<string, boolean>>({});
+
+  const toggleRole = (title: string) => {
+    setExpandedRoles(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
+
+  const scrollClubWork = (direction: "left" | "right") => {
+    if (clubWorkScrollRef.current) {
+      const offset = direction === "left" ? -350 : 350;
+      clubWorkScrollRef.current.scrollBy({ left: offset, behavior: "smooth" });
+    }
+  };
+
+  // Production daily play tracking (runs once a day, checks localStorage)
   useEffect(() => {
-    const lastPlayed = localStorage.getItem("astroclub_intro_last_played");
-    if (lastPlayed && Date.now() - parseInt(lastPlayed, 10) < 86400000) {
-      setPhase("none");
-      setOverlayOpacity(0);
+    if (typeof window !== "undefined") {
+      const lastPlayed = localStorage.getItem("astroclub_intro_last_played");
+      if (lastPlayed && Date.now() - parseInt(lastPlayed, 10) < 86400000) {
+        setPhase("none");
+        setOverlayOpacity(0);
+      }
     }
   }, []);
-  */
+
+  // Prevent scroll during intro sequence
+  useEffect(() => {
+    if (phase !== "none") {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [phase]);
 
   useEffect(() => {
     if (phase === "none") return;
@@ -245,7 +271,6 @@ export default function HomePage() {
         // After the 0.9 s fade → mark complete
         const t4 = setTimeout(() => {
           setPhase("none");
-          if (document.fullscreenElement) setShowFullscreenModal(true);
         }, 950);
 
         return () => clearTimeout(t4);
@@ -269,7 +294,6 @@ export default function HomePage() {
       setOverlayOpacity(0);
       setTimeout(() => {
         setPhase("none");
-        if (document.fullscreenElement) setShowFullscreenModal(true);
       }, 950);
     }, 600);
   };
@@ -480,43 +504,7 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Fullscreen Stay/Exit Selection Modal (Shown after the intro sequence finishes) */}
-      {showFullscreenModal && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 backdrop-blur-md">
-          <div className="bg-slate-950/90 border border-slate-900 rounded-xl p-8 max-w-md w-full text-center space-y-6 font-mono text-xs shadow-2xl">
-            <span className="text-cyan-400 font-bold uppercase tracking-widest text-[9px] bg-cyan-950/40 px-3 py-1 rounded-full border border-cyan-900/30">
-              Telemetry Uplink Complete
-            </span>
-            <h4 className="text-sm font-semibold text-white tracking-wide">AstroClub Portal Live</h4>
-            <p className="text-slate-400 leading-relaxed text-[11px]">
-              Uplink succeeded. Would you like to keep the immersive widescreen fullscreen telemetry mode active for this session?
-            </p>
-            <div className="flex gap-4 justify-center">
-              <button 
-                onClick={() => setShowFullscreenModal(false)}
-                className="px-4 py-2 border border-emerald-900 bg-emerald-950/20 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/40 rounded transition-all cursor-pointer font-bold"
-              >
-                [ KEEP FULLSCREEN ]
-              </button>
-              <button 
-                onClick={async () => {
-                  try {
-                    if (document.exitFullscreen) {
-                      await document.exitFullscreen();
-                    }
-                  } catch (err) {
-                    console.log("Exit fullscreen failed:", err);
-                  }
-                  setShowFullscreenModal(false);
-                }}
-                className="px-4 py-2 border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-white hover:bg-slate-900/60 rounded transition-all cursor-pointer font-bold"
-              >
-                [ EXIT FULLSCREEN ]
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Background Starfield Canvas */}
       <div
@@ -579,9 +567,29 @@ export default function HomePage() {
 
       {/* Dynamic Fading Container for lower page content */}
       <div 
-        className="transition-opacity duration-300 flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto"
+        className="transition-opacity duration-300 flex flex-col gap-16 py-16 relative z-10 px-4 md:px-6 max-w-7xl mx-auto w-full"
         style={{ opacity: contentOpacity }}
       >
+        {/* STATS STRIP */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full border border-slate-900 bg-slate-950/30 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-black/20">
+          <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:even:border-r-0 max-md:[&:nth-child(2)]:border-r-0 max-md:border-b max-md:pb-4 md:border-b-0">
+            <span className="text-3xl font-bold tracking-tight text-white mb-1 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">40+</span>
+            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">Active Members</span>
+          </div>
+          <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:border-b max-md:pb-4 md:border-b-0">
+            <span className="text-3xl font-bold tracking-tight text-white mb-1 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">12+</span>
+            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">Telemetry Sessions</span>
+          </div>
+          <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:even:border-r-0 max-md:pt-4 md:pt-4 md:border-b-0">
+            <span className="text-3xl font-bold tracking-tight text-white mb-1 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">3</span>
+            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">Telescopes Built</span>
+          </div>
+          <div className="flex flex-col items-center justify-center text-center p-4 last:border-0 max-md:pt-4 md:pt-4">
+            <span className="text-3xl font-bold tracking-tight text-white mb-1 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">2024</span>
+            <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono">Established Since</span>
+          </div>
+        </div>
+
         {/* TWO-COLUMN TELEMETRY GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
@@ -728,51 +736,42 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* AstroAcademy Card */}
-            <div className="mt-6 rounded-xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-md shadow-xl shadow-black/20 transition-all hover:border-slate-800/80">
-              <span className="text-[10px] font-bold tracking-[0.25em] text-cyan-400 uppercase">AstroAcademy Lectures</span>
-              <h3 className="text-lg font-bold text-white mt-1 mb-4">
-                Astronomy Class Deck
-              </h3>
-              
-              <div className="space-y-4 text-xs md:text-sm">
-                <div className="flex items-start gap-3 group">
-                  <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">📚</span>
-                  <div>
-                    <h4 className="font-semibold text-slate-200">ASTR 101 & ASTR 102</h4>
-                    <p className="text-[11px] text-slate-450 mt-0.5">
-                      Our core academic lecture curriculum covering deep space physics, coordinates, and optical mechanics.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-3 group">
-                  <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🎓</span>
-                  <div>
-                    <h4 className="font-semibold text-slate-200">Open to All</h4>
-                    <p className="text-[11px] text-slate-450 mt-0.5">
-                      Unconditional entry. From freshers taking their first steps to PhD scholars auditing celestial telemetry.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-900/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                <span>CURRICULUM: ACTIVE</span>
-                <span className="text-slate-400">Classroom: CCASS Lab</span>
-              </div>
-            </div>
           </section>
         </div>
 
-        {/* SECTION 1.8: Club Work Marquee/Slider */}
+        {/* SECTION 1.8: Club Work Grid Scroller */}
         <section className="w-full border-t border-slate-900 pt-10">
-          <SectionTitle>Club Work</SectionTitle>
-          <div className="flex gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x scroll-smooth">
+          <SectionTitle
+            actions={
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => scrollClubWork('left')}
+                  className="p-1.5 rounded-lg border border-slate-850 bg-slate-950/40 text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95 cursor-pointer hover:bg-slate-900/35"
+                  aria-label="Scroll left"
+                >
+                  ←
+                </button>
+                <button 
+                  onClick={() => scrollClubWork('right')}
+                  className="p-1.5 rounded-lg border border-slate-850 bg-slate-950/40 text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95 cursor-pointer hover:bg-slate-900/35"
+                  aria-label="Scroll right"
+                >
+                  →
+                </button>
+              </div>
+            }
+          >
+            Club Work
+          </SectionTitle>
+          <div 
+            ref={clubWorkScrollRef}
+            className="grid grid-flow-col auto-cols-[280px] sm:auto-cols-[340px] gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x scroll-smooth"
+          >
             {EVENT_IMAGES.map((img, i) => (
               <div 
                 key={i} 
-                className="min-w-[280px] sm:min-w-[340px] snap-start rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden group hover:border-slate-800 transition-all duration-300 flex flex-col justify-between"
+                className="snap-start rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden group hover:border-slate-800 transition-all duration-300 flex flex-col justify-between"
               >
                 <div className="relative h-44 w-full overflow-hidden bg-slate-900">
                   <img 
@@ -808,22 +807,94 @@ export default function HomePage() {
             {CLUB_ROLES.map((role) => (
               <div
                 key={role.title}
-                className="group rounded-xl border border-slate-900 bg-slate-950/40 p-5 transition-all hover:border-slate-800/80 hover:bg-slate-900/30 backdrop-blur-md flex flex-col justify-between relative overflow-hidden"
+                className="group rounded-xl border border-slate-900 bg-slate-950 p-5 transition-all hover:border-slate-700/60 backdrop-blur-md flex flex-col justify-between relative overflow-hidden min-h-[170px] shadow-lg shadow-black/30"
               >
-                {getRoleBackground(role.title)}
-                <div className="relative z-10">
-                  <h3 className="text-[10px] font-bold font-mono tracking-widest text-slate-500 mb-1.5 uppercase drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
+                {/* Full-card nebula background */}
+                <NebulaBackground src={role.nebula} />
+
+                <div className="relative z-10 flex flex-col gap-3">
+                  {/* Post badge */}
+                  <span className="text-[9px] font-bold font-mono tracking-[0.22em] text-cyan-400/80 uppercase">
                     {role.title}
-                  </h3>
-                  <p className="text-sm font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
+                  </span>
+
+                  {/* Name */}
+                  <p className="text-base font-bold text-white leading-tight group-hover:text-cyan-300 transition-colors drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
                     {role.name}
                   </p>
-                  <p className="text-[11px] text-slate-300 leading-relaxed drop-shadow-[0_1.5px_3px_rgba(2,6,23,0.9)]">
-                    {role.description}
-                  </p>
+
+                  {/* Year & Branch */}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[11px] text-slate-300 font-medium drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                      {role.year}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                      {role.branch}
+                    </span>
+                  </div>
+
+                  {/* LinkedIn — shown when URL is set */}
+                  {role.linkedin ? (
+                    <a
+                      href={role.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-cyan-400 transition-colors group/link"
+                      aria-label={`${role.name} on LinkedIn`}
+                    >
+                      <svg className="w-3 h-3 fill-current shrink-0" viewBox="0 0 24 24">
+                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                      </svg>
+                      <span className="group-hover/link:underline underline-offset-2">LinkedIn</span>
+                    </a>
+                  ) : null}
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* SECTION 2.5: AstroAcademy Full-Width Section */}
+        <section className="border-t border-slate-900 pt-10">
+          <div className="rounded-xl border border-indigo-900/40 bg-gradient-to-r from-slate-950/60 to-indigo-950/20 p-8 backdrop-blur-md shadow-xl shadow-indigo-950/10 transition-all hover:border-indigo-850/50 relative overflow-hidden">
+            {/* Indigo subtle radial highlight */}
+            <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 relative z-10">
+              <div className="max-w-2xl">
+                <span className="text-[10px] font-bold tracking-[0.25em] text-indigo-400 uppercase bg-indigo-950/50 px-3 py-1 rounded-full border border-indigo-900/30">
+                  AstroAcademy Lectures
+                </span>
+                <h3 className="text-2xl font-bold text-white mt-4 mb-3">
+                  Astronomy Class Deck
+                </h3>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  Our core academic lecture curriculum covering deep space physics, coordinates, and optical mechanics. Unconditional entry. From freshers taking their first steps to PhD scholars auditing celestial telemetry.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 shrink-0 w-full md:max-w-md">
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-slate-950/40 border border-slate-900">
+                  <span className="text-xl select-none shrink-0">📚</span>
+                  <div>
+                    <h4 className="font-semibold text-slate-200 text-xs">ASTR 101 & ASTR 102</h4>
+                    <p className="text-[11px] text-slate-450 mt-0.5 font-mono">Core academic lectures covering orbital physics and mirror alignment.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-slate-950/40 border border-slate-900">
+                  <span className="text-xl select-none shrink-0">🎓</span>
+                  <div>
+                    <h4 className="font-semibold text-slate-200 text-xs">Open to All</h4>
+                    <p className="text-[11px] text-slate-450 mt-0.5 font-mono">Unconditional entry for all undergraduate and graduate years.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-4 border-t border-indigo-950/40 flex items-center justify-between text-[10px] font-mono text-slate-500">
+              <span>CURRICULUM: ACTIVE</span>
+              <span className="text-indigo-400">Classroom: CCASS Lab</span>
+            </div>
           </div>
         </section>
 

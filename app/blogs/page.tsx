@@ -635,15 +635,23 @@ export default function BlogsPage() {
     }
 
     try {
-      await supabase
-        .from("blogs")
-        .update({ author_id: null })
-        .eq("author_id", user.id);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("No active session found.");
+      }
 
-      await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", user.id);
+      const res = await fetch("/api/auth/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        }
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete account.");
+      }
 
       await supabase.auth.signOut();
       setUser(null);

@@ -1,16 +1,31 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { rateLimitCheck, getClientIp } from "@/lib/rateLimit";
+import { GoogleGenAI } from "@google/genai";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabaseServer = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false }
-});
+
+let cachedServer: any = null;
+function getSupabaseServer() {
+  if (!cachedServer) {
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error("Supabase configuration is missing URL or Key.");
+    }
+    cachedServer = createClient(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false }
+    });
+  }
+  return cachedServer;
+}
+
+// Initialize Gemini if key is provided
+const geminiApiKey = process.env.GEMINI_API_KEY;
+const ai = geminiApiKey ? new GoogleGenAI({ apiKey: geminiApiKey }) : null;
 
 export async function POST(request: Request) {
   // Rate limit: max 10 blog submissions per minute per IP
-  const { allowed } = rateLimit(getClientIp(request), 10);
+  const { allowed } = await rateLimitCheck(getClientIp(request), 10);
   if (!allowed) {
     return NextResponse.json(
       { error: "You are submitting too quickly. Please wait a moment before trying again." },
@@ -19,6 +34,8 @@ export async function POST(request: Request) {
   }
 
   try {
+    const supabaseServer = getSupabaseServer();
+
     // Extract & Verify Auth JWT from Request Headers
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -47,14 +64,60 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    // 1. S.AI IMAGE CHECK: Nudity / Explicit content scan
-    const hasNudity = Array.isArray(images) && images.some((img: string) => 
-      img.toLowerCase().includes("nudity") || 
-      img.toLowerCase().includes("nsfw") || 
-      img.toLowerCase().includes("explicit")
-    );
+    let moderation = {
+      isSafe: true,
+      classification: "clean",
+      reason: "No moderation key present, defaulting to safe manual review."
+    };
 
-    if (hasNudity) {
+    if (ai) {
+      try {
+        const prompt = `
+          You are a strict, automated content moderation assistant for a university astronomy club blog.
+          Evaluate the following proposed post.
+
+          Post Title: "${title}"
+          Post Content: "${content}"
+          Image URLs: ${JSON.stringify(images || [])}
+
+          Classify this post into one of three classifications:
+          1. "clean": Suitable for a public student blog. Only educational, scientific, creative, or positive community-focused material.
+          2. "offensive": Contains political arguments, hate speech, racism, bullying, excessive profanity, spam, or controversial non-scientific topics.
+          3. "explicit": Contains clear sexual references, nudity, violence, self-harm, drug abuse, or dangerous illegal activities.
+
+          Return your response as a strict JSON object with this exact structure:
+          {
+            "isSafe": boolean,
+            "classification": "clean" | "offensive" | "explicit",
+            "reason": "Brief single-sentence explanation of your decision"
+          }
+        `;
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+          }
+        });
+
+        const rawText = response.text || "{}";
+        const parsed = JSON.parse(rawText.trim());
+        if (parsed && typeof parsed.isSafe === "boolean") {
+          moderation = parsed;
+        }
+      } catch (geminiErr) {
+        console.error("Gemini API call failed, falling back to manual review:", geminiErr);
+        moderation.classification = "offensive"; // force review fallback
+      }
+    } else {
+      // No API key: default fallback to flagged review if it looks suspicious,
+      // or force manual approval review for safety.
+      moderation.classification = "offensive"; 
+    }
+
+    // 1. EXPLICIT POST POLICY
+    if (moderation.classification === "explicit") {
       // Restrict user account immediately
       await supabaseServer
         .from("profiles")
@@ -62,7 +125,7 @@ export async function POST(request: Request) {
         .eq("id", authorId);
 
       // Write incident report to security log
-      const reportDetails = `Automated S.AI Scan Flagged Nudity. \nIncident occurred during blog submission: "${title}". \nUploaded image array contained explicit visual signatures.`;
+      const reportDetails = `Automated Gemini Moderation Flagged Explicit Content. Reason: ${moderation.reason}. \nIncident occurred during blog submission: "${title}".`;
       
       await supabaseServer
         .from("security_reports")
@@ -79,12 +142,35 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         status: "restricted",
-        report: "S.AI security scan flagged explicit visual material. Your account has been restricted immediately. A security report has been sent to the President and the Head of the Advisory Committee for review."
+        report: `Security scan flagged inappropriate/explicit material (${moderation.reason}). Your account has been restricted immediately. A security report has been sent to the President and the Head of the Advisory Committee for review.`
       });
     }
 
-    // 2. FIRST POST POLICY FOR GUEST SIGN-UPS
-    // If the frontend flags this as the guest's first post, force manual review (skip auto-publish)
+    // 2. OFFENSIVE / MANUAL REVIEW POLICY
+    if (moderation.classification === "offensive") {
+      const { error } = await supabaseServer
+        .from("blogs")
+        .insert([
+          {
+            title,
+            content,
+            author_id: authorId,
+            images: images || [],
+            status: "flagged_review"
+          }
+        ]);
+
+      if (error) throw error;
+
+      console.log(`[NOTIFICATION] Content flagged by Gemini/Fallback. Queued for review.`);
+
+      return NextResponse.json({
+        status: "flagged_review",
+        message: `Your post has been queued for manual review by the council due to content screening guidelines (${moderation.reason}). It will remain hidden until approved.`
+      });
+    }
+
+    // 3. FIRST POST POLICY FOR GUEST SIGN-UPS
     if (isFirstPost) {
       const { error } = await supabaseServer
         .from("blogs")
@@ -111,34 +197,6 @@ export async function POST(request: Request) {
       });
     }
 
-    // 3. S.AI TEXT CHECK: Offensive, political, racist, or indecent content scan
-    const offensiveKeywords = ["offensive", "political", "racist", "hate speech", "indecency", "violence"];
-    const textToScan = `${title.toLowerCase()} ${content.toLowerCase()}`;
-    const hasOffensiveText = offensiveKeywords.some(keyword => textToScan.includes(keyword));
-
-    if (hasOffensiveText) {
-      const { error } = await supabaseServer
-        .from("blogs")
-        .insert([
-          {
-            title,
-            content,
-            author_id: authorId,
-            images: images || [],
-            status: "flagged_review"
-          }
-        ]);
-
-      if (error) throw error;
-
-      console.log(`[NOTIFICATION] S.AI text flagged. Queued for review.`);
-
-      return NextResponse.json({
-        status: "flagged_review",
-        message: "Your post has been flagged by S.AI for manual review due to content screening guidelines. It will remain hidden from the live feed until a designated council approver evaluates it."
-      });
-    }
-
     // 4. CLEAN POST: Publish live immediately
     const { error } = await supabaseServer
       .from("blogs")
@@ -157,7 +215,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "published" });
 
   } catch (error: any) {
-    console.error("S.AI Moderation API Route Error:", error);
+    console.error("Moderation API Route Error:", error);
     return NextResponse.json({ error: error.message || "Internal server error." }, { status: 500 });
   }
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { rateLimit, getClientIp } from "@/lib/rateLimit";
+import { rateLimitCheck, getClientIp } from "@/lib/rateLimit";
 
 // Simple in-memory server cache
 let cachedApod: any = null;
@@ -7,7 +7,7 @@ let lastFetchedTime: number = 0;
 
 export async function GET(request: Request) {
   // Rate limit: 60 requests/min per IP (APOD is cached, so this is very generous)
-  const { allowed } = rateLimit(getClientIp(request), 60);
+  const { allowed } = await rateLimitCheck(getClientIp(request), 60);
   if (!allowed) {
     return NextResponse.json(
       { error: "Too many requests. Please try again in a minute." },

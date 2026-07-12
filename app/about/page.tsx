@@ -174,34 +174,28 @@ const BATCH_24: Member[] = [
     role: "President & Founder",
     bio: "Pioneered the establishment of AstroClub, setting up the foundation for optical instrumentation workshops and observation routines.",
     initials: "S",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/sameeraj-k/"
   },
   {
     name: "Madhav Gupta",
     role: "Astrophotography Head & Co-founder",
     bio: "Established the astrophotography division, introducing tracker mounts and deep-sky imaging pipelines to the club.",
     initials: "MG",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/madhav-gupta-71346b360/"
   },
   {
     name: "Prashant Chauhan",
     role: "Telescope Handler & Co-founder",
     bio: "Co-founded the club and oversaw the calibration, transport, and maintenance of all major optical components.",
     initials: "PC",
-    linkedin: "https://linkedin.com"
-  },
-  {
-    name: "Kanika Agarwal",
-    role: "Vice President",
-    bio: "Coordinated administrative permissions, public relations, and university relations during the club's inaugural year.",
-    initials: "KA",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/prashant-chauhan-15883a304/"
   },
   {
     name: "Aditya Dubey",
     role: "Event Management Team",
     bio: "Managed logistics and scheduling for our regular stargazing sessions and guest lectures.",
-    initials: "AD"
+    initials: "AD",
+    linkedin: "https://www.linkedin.com/in/aditya-dubey-659960291/"
   },
   {
     name: "Priyanshu Thakur",
@@ -213,7 +207,8 @@ const BATCH_24: Member[] = [
     name: "Bhavishya Sahu",
     role: "Event Management Team",
     bio: "Coordinated volunteer tasks and campus setup logistics for night observation events.",
-    initials: "BS"
+    initials: "BS",
+    linkedin: "https://www.linkedin.com/in/bhavishyasahu/"
   }
 ];
 
@@ -223,42 +218,35 @@ const BATCH_25: Member[] = [
     role: "President & Founder",
     bio: "Continues to guide the club's long-term vision, mentoring new leads on optical assembly and dark-sky expeditions.",
     initials: "S",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/sameeraj-k/"
   },
   {
     name: "Jatin Kumar",
     role: "Technical Head & Design Head",
     bio: "Spearheads telescope design and structural engineering for custom-built mount systems.",
     initials: "JK",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/jatinkumar2704/"
   },
   {
     name: "Madhav Gupta",
     role: "Astrophotography Head & Co-founder",
     bio: "Leads deep-space capturing sessions, specializing in narrow-band filtering and nebula stacking.",
     initials: "MG",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/madhav-gupta-71346b360/"
   },
   {
     name: "Prashant Chauhan",
     role: "Telescope Lead, Handler & Co-founder",
     bio: "Manages our active instrument catalog, specializing in optical alignment and mirror testing.",
     initials: "PC",
-    linkedin: "https://linkedin.com"
-  },
-  {
-    name: "Kanika Agarwal",
-    role: "Vice President",
-    bio: "Supervises team actions, plans budget requests, and coordinates speaker programs.",
-    initials: "KA",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/prashant-chauhan-15883a304/"
   },
   {
     name: "Aditya Raj",
     role: "General Secretary",
     bio: "Manages active student memberships, calendars, correspondence, and institutional documentation.",
     initials: "AR",
-    linkedin: "https://linkedin.com"
+    linkedin: "https://www.linkedin.com/in/aditya-raj-b1ba9729a/"
   },
   {
     name: "Pawan Kumar",
@@ -276,7 +264,8 @@ const BATCH_25: Member[] = [
     name: "Aditya Dubey",
     role: "Event Management Co-head",
     bio: "Supports the management operations, leading team deployment and equipment setups.",
-    initials: "AD"
+    initials: "AD",
+    linkedin: "https://www.linkedin.com/in/aditya-dubey-659960291/"
   },
   {
     name: "Manu Kumar",
@@ -288,7 +277,8 @@ const BATCH_25: Member[] = [
     name: "Hemang Shikhar Rai",
     role: "Event Management Team",
     bio: "Handles field operations, crowd management, and alignment of visual aids for guests.",
-    initials: "HR"
+    initials: "HR",
+    linkedin: "https://www.linkedin.com/in/hemang-shikhar-rai-089208254/"
   },
   {
     name: "Ayush",
@@ -300,60 +290,167 @@ const BATCH_25: Member[] = [
     name: "Paritosh Kumar Mishra",
     role: "Management Team",
     bio: "Assists with logistical setup, power distribution, and alignment aids on observation nights.",
-    initials: "PK"
+    initials: "PK",
+    linkedin: "https://www.linkedin.com/in/paritosh-kumar-mishra-451484351/"
   },
   {
     name: "Dhruv Tigunayak",
     role: "Management Team",
     bio: "Coordinates team briefings and manages visitor registration desks during open-house nights.",
-    initials: "DT"
+    initials: "DT",
+    linkedin: "https://www.linkedin.com/in/dhruv-tigunayak-349a82326/"
   },
   {
     name: "Devansh Goyal",
     role: "Management Team",
     bio: "Assists in transportation of heavy mount systems and calibration of public viewing stations.",
-    initials: "DG"
+    initials: "DG",
+    linkedin: "https://www.linkedin.com/in/goyaldevansh/"
   },
   {
-    name: "Sarthak Mishra",
+    name: "Alex Vyas",
+    role: "Management Team",
+    bio: "Contributes to operational planning and on-ground coordination during club observation events.",
+    initials: "AV",
+    linkedin: "https://www.linkedin.com/in/alex-vyas-587437327/"
+  },
+  {
+    name: "Sarthak Rathode",
     role: "Management Team",
     bio: "Manages setup checklists and supports digital media promotion for weekly observation runs.",
-    initials: "SM"
+    initials: "SR"
   },
   {
     name: "Kartik Goel",
     role: "Management Team",
     bio: "Coordinates volunteer assignments and ensures smooth operational flow for campus observations.",
     initials: "KG"
+  },
+  {
+    name: "Aditi Sharma",
+    role: "Member",
+    bio: "2nd Year · B.Tech CS AIML · Member since Sep '25",
+    initials: "AS"
+  },
+  {
+    name: "Anya Singh",
+    role: "Member",
+    bio: "1st Year · B.Tech ECSE · Member since Sep '25",
+    initials: "AnS"
+  },
+  {
+    name: "Teeya Saraswat",
+    role: "Member",
+    bio: "1st Year · B.Tech CS AIML · Member since Sep '25",
+    initials: "TS"
+  },
+  {
+    name: "Ishika Gupta",
+    role: "Member",
+    bio: "1st Year · B.Tech CS · Member since Sep '25",
+    initials: "IG"
+  },
+  {
+    name: "Yashashvi Gupta",
+    role: "Member",
+    bio: "1st Year · B.Tech CS AIML · Member since Sep '25",
+    initials: "YG"
+  },
+  {
+    name: "Manas Singh",
+    role: "Member",
+    bio: "1st Year · B.Tech CS · Member since Sep '25",
+    initials: "MS"
+  },
+  {
+    name: "Tanay Upadhyay",
+    role: "Member",
+    bio: "1st Year · B.Tech CS · Member since Sep '25",
+    initials: "TU"
+  },
+  {
+    name: "Atharva Mishra",
+    role: "Member",
+    bio: "1st Year · B.Tech CS · Member since Sep '25",
+    initials: "AtM"
+  },
+  {
+    name: "Shagun Gupta",
+    role: "Member",
+    bio: "2nd Year · B.Tech CS · Member since Sep '25",
+    initials: "SG"
+  },
+  {
+    name: "Nishant",
+    role: "Member",
+    bio: "2nd Year · B.Tech CS AIML · Member since Sep '25",
+    initials: "N"
+  },
+  {
+    name: "Naman Mehrotra",
+    role: "Member",
+    bio: "3rd Year · B.Tech CS · Member since Sep '25",
+    initials: "NM"
+  },
+  {
+    name: "Adamya Verma",
+    role: "Member",
+    bio: "3rd Year · B.Pharma · Member since Sep '25",
+    initials: "AdV"
+  },
+  {
+    name: "Divyanshu Pratap Singh",
+    role: "Member",
+    bio: "3rd Year · B.Pharma · Member since Sep '25",
+    initials: "DPS"
+  },
+  {
+    name: "Akash",
+    role: "Member",
+    bio: "3rd Year · B.Pharma · Member since Sep '25",
+    initials: "Ak"
+  },
+  {
+    name: "Aditya Pratap",
+    role: "Member",
+    bio: "2nd Year · B.Tech CS AIML · Member since Sep '25",
+    initials: "AP"
+  },
+  {
+    name: "Hit Agarwal",
+    role: "Member",
+    bio: "2nd Year · B.Tech CS · Member since Sep '25",
+    initials: "HA"
   }
 ];
 
 const BATCH_26: Member[] = [
   {
-    name: "Aditya Varma",
-    role: "Observatory Assistant",
-    bio: "Focuses on deep-sky astrophotography, capturing nebulae and globular clusters using DSLR tracker mounts.",
-    initials: "AV",
-    linkedin: "https://linkedin.com"
+    name: "Aditi Sharma",
+    role: "President",
+    bio: "Led AstroClub's next chapter from Feb 1, 2026 — overseeing the university quiz, the third stargazing night, and official constitutional adoption.",
+    initials: "AS",
+    linkedin: "https://www.linkedin.com/in/aditi-sharma-6bb23133b/"
   },
   {
-    name: "Meera Joshi",
-    role: "Operations Coordinator",
-    bio: "Plans site layouts, schedules equipment logistics, and ensures safety checklists are followed during field observations.",
-    initials: "MJ",
-    linkedin: "https://linkedin.com"
+    name: "Dhruv Tigunayak",
+    role: "Vice President",
+    bio: "Maintains internal stability, manages cross-functional coordination, and co-approves membership and equipment access.",
+    initials: "DT",
+    linkedin: "https://www.linkedin.com/in/dhruv-tigunayak-349a82326/"
   },
   {
-    name: "Varun Das",
-    role: "Technical Associate",
-    bio: "Developing custom automated tracking systems using Arduino and stepper motors to trace stars precisely.",
-    initials: "VD"
+    name: "Paritosh Kumar Mishra",
+    role: "General Secretary",
+    bio: "Maintains official records and correspondence, tracks membership database, and ensures policy compliance.",
+    initials: "PK",
+    linkedin: "https://www.linkedin.com/in/paritosh-kumar-mishra-451484351/"
   },
   {
-    name: "Riya Bansal",
-    role: "Digital Content Lead",
-    bio: "Curates astronomy facts for newsletters, manages the website blogs editor, and produces digital media.",
-    initials: "RB"
+    name: "Sarthak Rathode",
+    role: "Technical Head",
+    bio: "Unified head of technical operations — coordinating the website, design, and content teams across all digital infrastructure.",
+    initials: "SR"
   }
 ];
 
@@ -574,50 +671,163 @@ export default function AboutPage() {
               <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </div>
-
-
         </section>
 
         {/* 2. MEMBER DIRECTORY SECTION */}
         <section className="border-t border-slate-900 pt-10">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+
+          {/* — Era Selector (landing) — */}
+          {activeTab === "all" && (
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                Member Directory
-              </h2>
-              <p className="text-slate-500 text-xs mt-1">The active crew, alumni pioneers, and core organizers.</p>
-            </div>
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  Member Directory
+                </h2>
+                <p className="text-slate-500 text-xs mt-1">Select a council era to explore its members.</p>
+              </div>
 
-            {/* Filter Tabs */}
-            <div className="flex flex-wrap gap-2 bg-slate-950 border border-slate-900 p-1 rounded-lg self-start">
-              {(["all", "26", "25", "24"] as const).map((tab) => (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+                {/* BATCH_24 bundle */}
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wider uppercase transition-all ${
-                    activeTab === tab 
-                      ? "bg-slate-900 text-white border border-slate-800" 
-                      : "text-slate-500 hover:text-slate-300"
-                  }`}
+                  onClick={() => setActiveTab("24")}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-900 bg-slate-950 p-7 text-left transition-all duration-300 hover:border-cyan-900/60 hover:shadow-xl hover:shadow-cyan-950/20 cursor-pointer"
                 >
-                  {tab === "all" ? "All Batches" : `'${tab} Batch`}
-                </button>
-              ))}
-            </div>
-          </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-cyan-500/5 blur-2xl pointer-events-none group-hover:bg-cyan-500/10 transition-all duration-500" />
 
-          {/* Directory Rendering */}
-          <div className="flex flex-col gap-6">
-            {(activeTab === "all" || activeTab === "26") && 
-              renderMemberSection(BATCH_26, "Batch of 2026", "emerald", "Rising Juniors")}
-            
-            {(activeTab === "all" || activeTab === "25") && 
-              renderMemberSection(BATCH_25, "Batch of 2025", "indigo", "Senior Leadership")}
-            
-            {(activeTab === "all" || activeTab === "24") && 
-              renderMemberSection(BATCH_24, "Batch of 2024", "cyan", "Alumni Pioneers")}
-          </div>
+                  <span className="text-[9px] font-bold tracking-[0.22em] uppercase text-cyan-400/70 mb-4 block">Council Era I</span>
+
+                  <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">Batch '24</h3>
+                  <p className="text-xs text-slate-500 mb-5">Oct 2023 – Jul 2025</p>
+
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold text-cyan-400 font-mono">S</div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-200">Sameeraj</p>
+                      <p className="text-[10px] text-slate-500">President &amp; Founder</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-slate-500">{BATCH_24.length} members</span>
+                    <span className="text-xs text-cyan-400 font-bold group-hover:translate-x-1 transition-transform inline-block">View →</span>
+                  </div>
+                </button>
+
+                {/* BATCH_25 bundle */}
+                <button
+                  onClick={() => setActiveTab("25")}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-900 bg-slate-950 p-7 text-left transition-all duration-300 hover:border-indigo-900/60 hover:shadow-xl hover:shadow-indigo-950/20 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-indigo-500/5 blur-2xl pointer-events-none group-hover:bg-indigo-500/10 transition-all duration-500" />
+
+                  <span className="text-[9px] font-bold tracking-[0.22em] uppercase text-indigo-400/70 mb-4 block">Council Era II</span>
+
+                  <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-indigo-300 transition-colors">Batch '25</h3>
+                  <p className="text-xs text-slate-500 mb-5">Aug 2025 – Jan 2026</p>
+
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold text-indigo-400 font-mono">S</div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-200">Sameeraj</p>
+                      <p className="text-[10px] text-slate-500">Continuing President</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-slate-500">{BATCH_25.length} members</span>
+                    <span className="text-xs text-indigo-400 font-bold group-hover:translate-x-1 transition-transform inline-block">View →</span>
+                  </div>
+                </button>
+
+                {/* BATCH_26 bundle */}
+                <button
+                  onClick={() => setActiveTab("26")}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-900 bg-slate-950 p-7 text-left transition-all duration-300 hover:border-violet-900/60 hover:shadow-xl hover:shadow-violet-950/20 cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className="absolute -right-8 -bottom-8 w-40 h-40 rounded-full bg-violet-500/5 blur-2xl pointer-events-none group-hover:bg-violet-500/10 transition-all duration-500" />
+
+                  {/* Active badge */}
+                  <div className="absolute top-4 right-4 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+                    <span className="text-[9px] font-bold text-violet-400 uppercase tracking-wider">Active</span>
+                  </div>
+
+                  <span className="text-[9px] font-bold tracking-[0.22em] uppercase text-violet-400/70 mb-4 block">Council Era III</span>
+
+                  <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-violet-300 transition-colors">Batch '26</h3>
+                  <p className="text-xs text-slate-500 mb-5">Feb 2026 – Present</p>
+
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-xs font-bold text-violet-400 font-mono">AS</div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-200">Aditi Sharma</p>
+                      <p className="text-[10px] text-slate-500">President</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono text-slate-500">{BATCH_26.length} members</span>
+                    <span className="text-xs text-violet-400 font-bold group-hover:translate-x-1 transition-transform inline-block">View →</span>
+                  </div>
+                </button>
+
+              </div>
+            </div>
+          )}
+
+          {/* — Batch Detail View — */}
+          {activeTab !== "all" && (() => {
+            const batchMap = {
+              "24": { members: BATCH_24, label: "Batch '24", period: "Oct 2023 – Jul 2025", accent: "cyan",  badge: "Council Era I",   color: "text-cyan-400",   border: "border-cyan-900/40",   bg: "bg-cyan-500/5"   },
+              "25": { members: BATCH_25, label: "Batch '25", period: "Aug 2025 – Jan 2026", accent: "indigo", badge: "Council Era II",  color: "text-indigo-400", border: "border-indigo-900/40", bg: "bg-indigo-500/5" },
+              "26": { members: BATCH_26, label: "Batch '26", period: "Feb 2026 – Present",  accent: "violet", badge: "Council Era III", color: "text-violet-400", border: "border-violet-900/40", bg: "bg-violet-500/5"  },
+            } as const;
+
+            const b = batchMap[activeTab as "24" | "25" | "26"];
+            const textAccent = b.color;
+            const bgAccentGlow = b.bg;
+            const borderAccent = b.border;
+
+            return (
+              <div>
+                {/* Back button + header */}
+                <div className="flex items-center gap-4 mb-8">
+                  <button
+                    onClick={() => setActiveTab("all")}
+                    className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-colors group cursor-pointer"
+                  >
+                    <span className="group-hover:-translate-x-0.5 transition-transform inline-block">←</span>
+                    All Eras
+                  </button>
+                  <div className="w-px h-4 bg-slate-800" />
+                  <div>
+                    <span className={`text-[9px] font-bold tracking-[0.22em] uppercase ${textAccent}`}>{b.badge}</span>
+                    <h2 className="text-xl font-bold text-white tracking-tight leading-tight">{b.label} <span className="text-slate-500 text-sm font-normal">· {b.period}</span></h2>
+                  </div>
+                </div>
+
+                {/* Member grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {b.members.map((member, idx) => (
+                    <div key={`${member.name}-${activeTab}-${idx}`}>
+                      <MemberCard
+                        member={member}
+                        textAccent={textAccent}
+                        bgAccentGlow={bgAccentGlow}
+                        borderAccent={borderAccent}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
         </section>
 
       </div>

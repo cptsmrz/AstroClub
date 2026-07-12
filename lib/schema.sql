@@ -100,3 +100,11 @@ CREATE TRIGGER tr_elevate_user_role
   BEFORE INSERT OR UPDATE OF email ON public.profiles
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_user_role_elevation();
+
+-- 10. Database-backed rate limits fallback table
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+  ip TEXT PRIMARY KEY,
+  count INT DEFAULT 1,
+  window_start BIGINT NOT NULL
+);
+

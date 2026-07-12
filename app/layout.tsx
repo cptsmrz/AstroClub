@@ -4,7 +4,6 @@ import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
-import FullscreenPrompt from "@/components/FullscreenPrompt";
 
 export const metadata: Metadata = {
   title: "AstroClub — GLA University",
@@ -157,7 +156,6 @@ export default function RootLayout({
       >
         <Navbar />
         <SmoothScroll />
-        <FullscreenPrompt />
 
         <main className="mx-auto max-w-6xl px-6 py-12 w-full flex-grow relative z-10">
           {children}
