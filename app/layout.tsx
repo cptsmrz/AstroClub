@@ -4,6 +4,7 @@ import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "AstroClub — GLA University",
@@ -163,6 +164,7 @@ export default function RootLayout({
 
         <Footer />
         <CookieBanner />
+        <SpeedInsights />
       </body>
     </html>
   );
