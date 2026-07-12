@@ -451,6 +451,119 @@ const BATCH_26: Member[] = [
     role: "Technical Head",
     bio: "Unified head of technical operations — coordinating the website, design, and content teams across all digital infrastructure.",
     initials: "SR"
+  },
+  {
+    name: "Sameeraj",
+    role: "Head of Advisory Committee",
+    bio: "Pioneered the establishment of AstroClub, now advising the core council on operations and astronomy curriculum.",
+    initials: "S",
+    linkedin: "https://www.linkedin.com/in/sameeraj-k/"
+  },
+  {
+    name: "Jatin Kumar",
+    role: "Member of Advisory Committee",
+    bio: "Provides advisory guidance on structural setups and technical operations.",
+    initials: "JK",
+    linkedin: "https://www.linkedin.com/in/jatinkumar2704/"
+  },
+  {
+    name: "Madhav Gupta",
+    role: "Astrophotography Head & Co-founder",
+    bio: "Continues to head deep-space captures, narrow-band filtering, and nebula stacking coordinates.",
+    initials: "MG",
+    linkedin: "https://www.linkedin.com/in/madhav-gupta-71346b360/"
+  },
+  {
+    name: "Aditya Raj",
+    role: "Member of Advisory Committee",
+    bio: "Advises the council on institutional records and membership workflow compliance.",
+    initials: "AR",
+    linkedin: "https://www.linkedin.com/in/aditya-raj-b1ba9729a/"
+  },
+  {
+    name: "Priyanshu Thakur",
+    role: "Member of Advisory Committee",
+    bio: "Mentors the operations team on workshop execution and crowd staging logistics.",
+    initials: "PT"
+  },
+  {
+    name: "Devansh Goyal",
+    role: "Treasurer",
+    bio: "Manages the club financial ledger, equipment budgets, and workshop procurement records.",
+    initials: "DG",
+    linkedin: "https://www.linkedin.com/in/goyaldevansh/"
+  },
+  {
+    name: "Anya Singh",
+    role: "Core Member",
+    bio: "B.Tech ECSE · Core operations support",
+    initials: "AnS"
+  },
+  {
+    name: "Teeya Saraswat",
+    role: "Core Member",
+    bio: "B.Tech CS AIML · Core operations support",
+    initials: "TS"
+  },
+  {
+    name: "Manas Singh",
+    role: "Core Member",
+    bio: "B.Tech CS · Core operations support",
+    initials: "MS"
+  },
+  {
+    name: "Tanay Upadhyay",
+    role: "Core Member",
+    bio: "B.Tech CS · Core operations support",
+    initials: "TU"
+  },
+  {
+    name: "Atharva Mishra",
+    role: "Core Member",
+    bio: "B.Tech CS · Core operations support",
+    initials: "AtM"
+  },
+  {
+    name: "Shagun Gupta",
+    role: "Core Member & Web Dev Team",
+    bio: "B.Tech CS · Actively contributing to digital portals",
+    initials: "SG"
+  },
+  {
+    name: "Nishant",
+    role: "Core Member & Web Dev Team",
+    bio: "B.Tech CS AIML · Actively contributing to digital portals",
+    initials: "N"
+  },
+  {
+    name: "Naman Mehrotra",
+    role: "Content Head",
+    bio: "B.Tech CS · Leading newsletters, content, and blog moderation checks",
+    initials: "NM"
+  },
+  {
+    name: "Adamya Verma",
+    role: "Design Team & Core Member",
+    bio: "B.Pharma · Graphic content and layout designer",
+    initials: "AdV"
+  },
+  {
+    name: "Divyanshu Pratap Singh",
+    role: "Design Head",
+    bio: "B.Pharma · Spearheading brand graphics and digital artwork layouts",
+    initials: "DPS"
+  },
+  {
+    name: "Akash",
+    role: "Editor",
+    bio: "B.Pharma · Editor for news, blog entries, and publications",
+    initials: "Ak"
+  },
+  {
+    name: "Aditya Pratap",
+    role: "Web Dev Team",
+    bio: "B.Tech CS AIML · Maintaining the StellarPortal codebases",
+    initials: "AP"
   }
 ];
 
