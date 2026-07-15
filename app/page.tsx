@@ -196,18 +196,21 @@ export default function HomePage() {
     }
   }, []);
 
-  // Prevent scroll during intro sequence
+  // Prevent scroll and hide header during intro sequence
   useEffect(() => {
     if (phase !== "none") {
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
+      document.documentElement.setAttribute("data-intro-active", "true");
     } else {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
+      document.documentElement.removeAttribute("data-intro-active");
     }
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
+      document.documentElement.removeAttribute("data-intro-active");
     };
   }, [phase]);
 
