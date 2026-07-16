@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const securityHeaders = [
   // Prevent clickjacking — no one can embed your site in an iframe
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -16,8 +18,8 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js needs 'unsafe-inline' and 'unsafe-eval' for dev; Supabase + NASA for data
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // Next.js needs 'unsafe-inline'; 'unsafe-eval' is only needed for dev
+      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""}`.trim(),
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       // Images: self, Supabase storage, NASA, Unsplash

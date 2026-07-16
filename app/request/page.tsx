@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 
 // --- Type Definitions ---
@@ -49,10 +48,7 @@ export default function RequestPage() {
     setFormError(null);
     setIsSuccess(false);
 
-    // Honeypot anti-spam check
-    if (honeypot) return;
-
-    // Validate 10-digit Indian mobile number
+    // Client-side phone validation for fast UX feedback
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(formData.phone.replace(/\s+/g, ""))) {
       setFormError("Please enter a valid 10-digit Indian mobile number.");
@@ -63,31 +59,28 @@ export default function RequestPage() {
 
     const refCode = `AC-REQ-${Math.floor(100000 + Math.random() * 900000)}`;
 
-    const payload = {
-      name: formData.name,
-      roll_no: formData.roll_no,
-      phone: formData.phone,
-      course_branch: formData.course_branch,
-      academic_year: parseInt(formData.academic_year, 10),
-      accommodation: formData.accommodation,
-      preferred_date: formData.preferred_date || null,
-      group_size: formData.group_size || null,
-      purpose: formData.purpose || null,
-    };
-
     try {
-      const { error } = await supabase
-        .from("session_requests")
-        .insert([payload]);
-      
-      if (error) throw error;
-      
+      const res = await fetch("/api/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          website: honeypot, // honeypot field
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "An unexpected error occurred.");
+      }
+
       setReferenceId(refCode);
       setIsSuccess(true);
       setFormData(EMPTY_FORM);
     } catch (error: unknown) {
       setFormError(
-        error instanceof Error ? error.message : "An unexpected database error occurred."
+        error instanceof Error ? error.message : "An unexpected error occurred."
       );
     } finally {
       setIsSubmitting(false);

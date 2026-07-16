@@ -25,34 +25,34 @@ interface RoleInfo {
 const CLUB_ROLES: RoleInfo[] = [
   {
     title: "President",
-    name: "Sameeraj S.",
-    year: "3rd Year",
-    branch: "B.Tech CSE",
+    name: "Aditi Sharma",
+    year: "Batch '26",
+    branch: "B.Tech CS AIML",
     nebula: "/images/observatory_silhouette_1782850434886.png",
-    linkedin: "https://www.linkedin.com/in/sambi-s-125026197/"
+    linkedin: "https://www.linkedin.com/in/aditi-sharma-6bb23133b/"
   },
   {
     title: "Vice President",
-    name: "Riddhi Gupta",
-    year: "3rd Year",
+    name: "Dhruv Tigunayak",
+    year: "Batch '26",
     branch: "B.Tech CSE",
-    nebula: "/images/satellite_1782850416840.png"
+    nebula: "/images/satellite_1782850416840.png",
+    linkedin: "https://www.linkedin.com/in/dhruv-tigunayak-349a82326/"
   },
   {
     title: "General Secretary",
-    name: "Rishabh K.",
-    year: "3rd Year",
+    name: "Paritosh Kumar Mishra",
+    year: "Batch '26",
     branch: "B.Tech CSE",
     nebula: "/images/pinterest_pin.jpg",
-    github: "https://github.com/rishabh"
+    linkedin: "https://www.linkedin.com/in/paritosh-kumar-mishra-451484351/"
   },
   {
-    title: "Astrophotography Head",
-    name: "Madhav Gupta",
-    year: "3rd Year",
+    title: "Technical Head",
+    name: "Sarthak Rathode",
+    year: "Batch '26",
     branch: "B.Tech CSE",
-    nebula: "/images/media__1782735749757.jpg",
-    instagram: "https://instagram.com/madhav"
+    nebula: "/images/media__1782735749757.jpg"
   }
 ];
 
