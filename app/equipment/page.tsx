@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 
@@ -236,12 +237,12 @@ export default function EquipmentPage() {
                     {getStatusBadge(telescope.availability_status)}
 
                     {telescope.image_url ? (
-                      <img
+                      <Image
                         src={telescope.image_url}
                         alt={telescope.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-700">
@@ -312,11 +313,12 @@ export default function EquipmentPage() {
               >
                 {/* Photo container */}
                 <div className="relative h-48 w-full overflow-hidden bg-slate-900">
-                  <img
+                  <Image
                     src={capture.image_url}
                     alt={capture.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none" />
                 </div>
@@ -345,10 +347,12 @@ export default function EquipmentPage() {
           >
             {/* Modal Image container */}
             <div className="relative aspect-video w-full bg-slate-900">
-              <img
+              <Image
                 src={activeCapture.image_url}
                 alt={activeCapture.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="100vw"
+                className="object-cover"
               />
               <button
                 onClick={() => setActiveCapture(null)}

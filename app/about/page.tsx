@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -117,11 +118,15 @@ const MemberCard = ({
           <div className="flex items-center gap-3">
             {/* Monogram/Avatar Photo Fallback */}
             {member.photo_url ? (
-              <img
-                src={member.photo_url}
-                alt={member.name}
-                className="h-11 w-11 rounded-xl object-cover border border-slate-800"
-              />
+              <div className="relative h-11 w-11 shrink-0">
+                <Image
+                  src={member.photo_url}
+                  alt={member.name}
+                  fill
+                  sizes="44px"
+                  className="rounded-xl object-cover border border-slate-800"
+                />
+              </div>
             ) : (
               <div className="flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold border border-slate-800 bg-slate-900 text-slate-350 group-hover:text-white group-hover:border-slate-750 transition-all duration-300 font-mono">
                 {member.initials}
