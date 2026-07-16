@@ -89,6 +89,7 @@ export default function BlogDetailPage() {
           .from("blogs")
           .select("id, title, content, created_at, author_id, profiles(full_name)")
           .eq("id", slug)
+          .eq("status", "published")
           .single();
 
         if (error || !data) {
@@ -197,16 +198,21 @@ export default function BlogDetailPage() {
               </p>
             ),
             // Links
-            a: ({ href, children }) => (
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white underline underline-offset-2 decoration-slate-500 hover:decoration-white transition-colors"
-              >
-                {children}
-              </a>
-            ),
+            a: ({ href, children }) => {
+              const isValid = href && (href.startsWith("https://") || href.startsWith("/") || href.startsWith("#"));
+              return isValid ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white underline underline-offset-2 decoration-slate-500 hover:decoration-white transition-colors"
+                >
+                  {children}
+                </a>
+              ) : (
+                <span className="text-slate-500 line-through" title="Blocked link">{children}</span>
+              );
+            },
             // Lists
             ul: ({ children }) => (
               <ul className="list-disc list-outside pl-6 text-slate-300 mb-5 space-y-1.5">
@@ -277,13 +283,20 @@ export default function BlogDetailPage() {
               </td>
             ),
             // Images
-            img: ({ src, alt }) => (
-              <img
-                src={src}
-                alt={alt}
-                className="rounded-xl my-6 w-full object-cover border border-slate-800"
-              />
-            ),
+            img: ({ src, alt }) => {
+              const isValid = typeof src === 'string' && src.startsWith("https://");
+              return isValid ? (
+                <img
+                  src={src as string}
+                  alt={alt}
+                  className="rounded-xl my-6 w-full object-cover border border-slate-800"
+                />
+              ) : (
+                <div className="rounded-xl my-6 w-full p-4 border border-red-800 bg-red-900/20 text-red-400 text-sm flex items-center justify-center text-center">
+                  Blocked insecure image
+                </div>
+              );
+            },
           }}
         >
           {post.content}

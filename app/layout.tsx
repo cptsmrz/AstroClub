@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Cinzel, Dela_Gothic_One, Orbitron, Rajdhani, VT323, Share_Tech_Mono } from 'next/font/google';
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
 import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
+import CustomCursor from "@/components/CustomCursor";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+
+const cinzel = Cinzel({ subsets: ['latin'], variable: '--font-serif' });
+const delaGothic = Dela_Gothic_One({ weight: '400', subsets: ['latin'], variable: '--font-dela' });
+const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-mono' });
+const rajdhani = Rajdhani({ weight: ['300', '400', '500', '600', '700'], subsets: ['latin'], variable: '--font-body-custom' });
+const vt323 = VT323({ weight: '400', subsets: ['latin'], variable: '--font-crt' });
+const shareTechMono = Share_Tech_Mono({ weight: '400', subsets: ['latin'], variable: '--font-terminal' });
 
 export const metadata: Metadata = {
   title: "AstroClub — GLA University",
@@ -17,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "AstroClub GLA",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
+        url: "/images/nebula_core_1782850389800.png",
         width: 1200,
         height: 630,
         alt: "AstroClub Observatory Starry Night"
@@ -151,10 +160,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${cinzel.variable} ${delaGothic.variable} ${orbitron.variable} ${rajdhani.variable} ${vt323.variable} ${shareTechMono.variable}`}>
       <body
         className="min-h-screen flex flex-col bg-slate-950 text-slate-200 antialiased font-body"
       >
+        <CustomCursor />
         <Navbar />
         <SmoothScroll />
 

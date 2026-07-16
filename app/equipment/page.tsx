@@ -28,42 +28,42 @@ const STELLAR_CAPTURES: AstroCapture[] = [
     instrument: "8\" Newtonian Reflector",
     credit: "Madhav Gupta",
     date: "Oct 2025",
-    image_url: "https://images.unsplash.com/photo-1538370965046-79c0d6907d47?q=80&w=1200"
+    image_url: "/images/satellite_1782850416840.png"
   },
   {
     title: "The Lagoon Nebula (M8)",
     instrument: "Custom DSLR Star Tracker",
     credit: "Aditya Varma",
     date: "Aug 2025",
-    image_url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200"
+    image_url: "/images/observatory_silhouette_1782850434886.png"
   },
   {
     title: "Pleiades Star Cluster (M45)",
     instrument: "Galilean Refractor Calibrator",
     credit: "Hemang Shikhar Rai",
     date: "Nov 2025",
-    image_url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200"
+    image_url: "/images/saturn_real_1782856388535.png"
   },
   {
     title: "Lunar Crater Copernicus",
     instrument: "8\" Newtonian Reflector",
     credit: "Prashant Chauhan",
     date: "Sep 2025",
-    image_url: "https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?q=80&w=1200"
+    image_url: "/images/saturn_side_view_1782858094608.png"
   },
   {
     title: "The Heart Nebula (IC 1805)",
     instrument: "Custom DSLR Star Tracker",
     credit: "Madhav Gupta",
     date: "Dec 2025",
-    image_url: "https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=1200"
+    image_url: "/images/nebula_core_1782850389800.png"
   },
   {
     title: "Great Nebula in Orion (M42)",
     instrument: "8\" Newtonian Reflector",
     credit: "Sameeraj",
     date: "Jan 2026",
-    image_url: "https://images.unsplash.com/photo-1538370965046-79c0d6907d47?q=80&w=1200"
+    image_url: "/images/satellite_1782850416840.png"
   }
 ];
 

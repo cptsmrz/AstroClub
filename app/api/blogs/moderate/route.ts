@@ -60,8 +60,17 @@ export async function POST(request: Request) {
     const authorId = user.id;
     const authorEmail = user.email;
 
-    if (!title || !content) {
-      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
+    if (!title || typeof title !== "string" || title.length > 200) {
+      return NextResponse.json({ error: "Invalid title." }, { status: 400 });
+    }
+    if (!content || typeof content !== "string" || content.length > 50000) {
+      return NextResponse.json({ error: "Invalid content." }, { status: 400 });
+    }
+    if (images && (!Array.isArray(images) || images.length > 7 || !images.every(img => typeof img === "string" && img.startsWith("http")))) {
+      return NextResponse.json({ error: "Invalid images array." }, { status: 400 });
+    }
+    if (contributorName && (typeof contributorName !== "string" || contributorName.length > 100)) {
+      return NextResponse.json({ error: "Invalid contributor name." }, { status: 400 });
     }
 
     let moderation = {
@@ -72,30 +81,41 @@ export async function POST(request: Request) {
 
     if (ai) {
       try {
-        const prompt = `
-          You are a strict, automated content moderation assistant for a university astronomy club blog.
-          Evaluate the following proposed post.
+        const sanitize = (str: string) => str.replace(/[{}[\]]/g, "");
 
-          Post Title: "${title}"
-          Post Content: "${content}"
-          Image URLs: ${JSON.stringify(images || [])}
-
-          Classify this post into one of three classifications:
-          1. "clean": Suitable for a public student blog. Only educational, scientific, creative, or positive community-focused material.
-          2. "offensive": Contains political arguments, hate speech, racism, bullying, excessive profanity, spam, or controversial non-scientific topics.
-          3. "explicit": Contains clear sexual references, nudity, violence, self-harm, drug abuse, or dangerous illegal activities.
-
-          Return your response as a strict JSON object with this exact structure:
-          {
-            "isSafe": boolean,
-            "classification": "clean" | "offensive" | "explicit",
-            "reason": "Brief single-sentence explanation of your decision"
-          }
+        const promptText = `
+          Post Title: "${sanitize(title)}"
+          Post Content: "${sanitize(content)}"
+          Image URLs: ${JSON.stringify((images || []).map((img: string) => sanitize(img)))}
         `;
 
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
-          contents: prompt,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  text: `You are a strict, automated content moderation assistant for a university astronomy club blog.
+                  Evaluate the following proposed post.
+
+                  Classify this post into one of three classifications:
+                  1. "clean": Suitable for a public student blog. Only educational, scientific, creative, or positive community-focused material.
+                  2. "offensive": Contains political arguments, hate speech, racism, bullying, excessive profanity, spam, or controversial non-scientific topics.
+                  3. "explicit": Contains clear sexual references, nudity, violence, self-harm, drug abuse, or dangerous illegal activities.
+
+                  Return your response as a strict JSON object with this exact structure:
+                  {
+                    "isSafe": boolean,
+                    "classification": "clean" | "offensive" | "explicit",
+                    "reason": "Brief single-sentence explanation of your decision"
+                  }
+
+                  ${promptText}`
+                }
+              ]
+            }
+          ],
           config: {
             responseMimeType: "application/json",
           }
@@ -104,6 +124,9 @@ export async function POST(request: Request) {
         const rawText = response.text || "{}";
         const parsed = JSON.parse(rawText.trim());
         if (parsed && typeof parsed.isSafe === "boolean") {
+          if (!["clean", "offensive", "explicit"].includes(parsed.classification)) {
+            parsed.classification = "flagged_review";
+          }
           moderation = parsed;
         }
       } catch (geminiErr) {
@@ -216,6 +239,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("Moderation API Route Error:", error);
-    return NextResponse.json({ error: error.message || "Internal server error." }, { status: 500 });
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }

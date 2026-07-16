@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 
 interface Milestone {
@@ -639,7 +640,13 @@ export default function AboutPage() {
         </div>
 
         {/* 1. CLUB MILESTONES (Horizontal Winding S-Roadmap) */}
-        <section className="border-t border-slate-900 pt-10 relative overflow-hidden">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="border-t border-slate-900 pt-10 relative overflow-hidden"
+        >
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
@@ -784,10 +791,16 @@ export default function AboutPage() {
               <span className="transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </div>
-        </section>
+        </motion.section>
 
-        {/* 2. MEMBER DIRECTORY SECTION */}
-        <section className="border-t border-slate-900 pt-10">
+        {/* SECTION: BATCH 25 */}
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="border-t border-slate-900 pt-10"
+        >
 
           {/* — Era Selector (landing) — */}
           {activeTab === "all" && (
@@ -941,7 +954,7 @@ export default function AboutPage() {
             );
           })()}
 
-        </section>
+        </motion.section>
 
       </div>
     </>

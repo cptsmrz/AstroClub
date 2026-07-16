@@ -504,18 +504,28 @@ export default function BlogsPage() {
   };
 
   // --- Dashboard Actions ---
+  // --- Helper for Admin API calls ---
+  const adminApiCall = async (action: string, data: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Not authenticated");
+    const res = await fetch("/api/admin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({ action, ...data })
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Admin action failed");
+    }
+    return res.json();
+  };
+
   const handleApproveRole = async (appId: string, applicantUid: string, role: string) => {
     try {
-      await supabase
-        .from("role_applications")
-        .update({ status: "approved" })
-        .eq("id", appId);
-
-      await supabase
-        .from("profiles")
-        .update({ role, status: "approved" })
-        .eq("id", applicantUid);
-
+      await adminApiCall("approve_role", { appId, applicantUid, role });
       fetchAdminDashboardData();
     } catch (err) {
       console.error(err);
@@ -524,16 +534,7 @@ export default function BlogsPage() {
 
   const handleRejectRole = async (appId: string, applicantUid: string) => {
     try {
-      await supabase
-        .from("role_applications")
-        .update({ status: "rejected" })
-        .eq("id", appId);
-
-      await supabase
-        .from("profiles")
-        .update({ status: "approved" })
-        .eq("id", applicantUid);
-
+      await adminApiCall("reject_role", { appId, applicantUid });
       fetchAdminDashboardData();
     } catch (err) {
       console.error(err);
@@ -542,11 +543,7 @@ export default function BlogsPage() {
 
   const handleApproveBlog = async (blogId: string) => {
     try {
-      await supabase
-        .from("blogs")
-        .update({ status: "published", edit_allowed_until: null })
-        .eq("id", blogId);
-
+      await adminApiCall("approve_blog", { blogId });
       fetchAdminDashboardData();
       fetchPosts();
     } catch (err) {
@@ -555,13 +552,8 @@ export default function BlogsPage() {
   };
 
   const handleAllowEdit = async (blogId: string) => {
-    const editLimit = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
     try {
-      await supabase
-        .from("blogs")
-        .update({ edit_allowed_until: editLimit })
-        .eq("id", blogId);
-
+      await adminApiCall("allow_edit", { blogId });
       fetchAdminDashboardData();
     } catch (err) {
       console.error(err);
@@ -570,11 +562,7 @@ export default function BlogsPage() {
 
   const handleRejectBlog = async (blogId: string) => {
     try {
-      await supabase
-        .from("blogs")
-        .delete()
-        .eq("id", blogId);
-
+      await adminApiCall("reject_blog", { blogId });
       fetchAdminDashboardData();
     } catch (err) {
       console.error(err);
@@ -593,31 +581,17 @@ export default function BlogsPage() {
       return;
     }
 
-    if (!profile) return;
-
     try {
-      const { error: updateConfigError } = await supabase
-        .from("system_approvers")
-        .update({ designated_email: transferTargetEmail })
-        .eq("role", profile.role);
-
-      if (updateConfigError) throw updateConfigError;
-
-      const { error: updateProfileError } = await supabase
-        .from("profiles")
-        .update({ role: "member" })
-        .eq("id", user.id);
-
-      if (updateProfileError) throw updateProfileError;
-
+      await adminApiCall("transfer_ownership", { 
+        targetEmail: transferTargetEmail, 
+        currentRole: profile.role 
+      });
       setTransferSuccess(`Ownership of role '${profile.role}' successfully transferred.`);
       setTransferTargetEmail("");
       setTransferConfirmText("");
-      
       setTimeout(() => {
         handleSignOut();
       }, 2000);
-
     } catch (err: any) {
       setTransferError(err.message || "Failed to transfer ownership.");
     }

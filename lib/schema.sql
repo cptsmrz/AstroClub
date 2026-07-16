@@ -108,3 +108,43 @@ CREATE TABLE IF NOT EXISTS public.rate_limits (
   window_start BIGINT NOT NULL
 );
 
+-- =========================================================================
+-- 11. ROW LEVEL SECURITY (RLS) POLICIES
+-- =========================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE public.session_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.blogs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.system_approvers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.security_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.role_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.telescopes ENABLE ROW LEVEL SECURITY;
+
+-- session_requests: Public can insert, only admins/service role can view/modify
+CREATE POLICY "Allow public insert" ON public.session_requests FOR INSERT WITH CHECK (true);
+
+-- blogs: Public can view published, authenticated can insert, authors can update own
+CREATE POLICY "Allow public read published" ON public.blogs FOR SELECT USING (status = 'published');
+CREATE POLICY "Allow authenticated insert" ON public.blogs FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Allow author update" ON public.blogs FOR UPDATE USING (auth.uid() = author_id);
+
+-- profiles: Users can view and update their own profiles
+CREATE POLICY "Allow users read own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Allow users update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- system_approvers: Public can view to know who admins are (or just authenticated)
+CREATE POLICY "Allow read only" ON public.system_approvers FOR SELECT USING (true);
+
+-- security_reports: No public policies, service role only
+
+-- role_applications: Authenticated users can insert and view their own applications
+CREATE POLICY "Allow authenticated insert own" ON public.role_applications FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow read own" ON public.role_applications FOR SELECT USING (auth.uid() = user_id);
+
+-- rate_limits: No public policies, service role only
+
+-- telescopes: Public can view all telescopes
+CREATE POLICY "Allow public read telescopes" ON public.telescopes FOR SELECT USING (true);
+

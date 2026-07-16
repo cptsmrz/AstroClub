@@ -75,6 +75,6 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error("Account Deletion API Route Error:", error);
-    return NextResponse.json({ error: error.message || "Internal server error." }, { status: 500 });
+    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }

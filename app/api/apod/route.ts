@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
   try {
     // Check both server-only key and public key as fallback
-    const apiKey = process.env.NASA_API_KEY || process.env.NEXT_PUBLIC_NASA_API_KEY || "DEMO_KEY";
+    const apiKey = process.env.NASA_API_KEY || "DEMO_KEY";
     
     const res = await fetch(
       `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&thumbs=true`
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         title: "Vistas of the Deep Cosmos",
-        url: "https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?q=80&w=1200&auto=format&fit=crop",
+        url: "/images/nebula_core_1782850389800.png",
         explanation: "Exploring the cosmos from our own backyard. Our club connects stargazers and space enthusiasts to the beauty of the universe, bringing deep space closer through observations, discussions, and shared discovery.",
         media_type: "image"
       },

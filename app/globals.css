@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Dela+Gothic+One&family=Orbitron:wght@400..900&family=Rajdhani:wght@300..700&family=JetBrains+Mono:wght@100..800&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=VT323&family=Share+Tech+Mono&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -18,19 +17,19 @@
 }
 
 @theme {
-  --font-sans: 'Ambila', 'Dela Gothic One', sans-serif;
-  --font-body: 'Rajdhani', sans-serif;
-  --font-mono: 'Orbitron', monospace;
-  --font-serif: 'Cinzel', serif;
-  --font-crt: 'VT323', monospace;           /* Authentic CRT phosphor terminal font */
-  --font-terminal: 'Share Tech Mono', monospace; /* Clean modern terminal font */
+  --font-sans: 'Ambila', var(--font-dela), sans-serif;
+  --font-body: var(--font-body-custom), sans-serif;
+  --font-mono: var(--font-mono), monospace;
+  --font-serif: var(--font-serif), serif;
+  --font-crt: var(--font-crt), monospace;           /* Authentic CRT phosphor terminal font */
+  --font-terminal: var(--font-terminal), monospace; /* Clean modern terminal font */
   
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 }
 
 body {
-  font-family: 'Rajdhani', sans-serif;
+  font-family: var(--font-body-custom), sans-serif;
   background: var(--background);
   color: var(--foreground);
   min-height: 100vh;
@@ -38,7 +37,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Ambila', 'Dela Gothic One', sans-serif;
+  font-family: 'Ambila', var(--font-dela), sans-serif;
 }
 
 /* Premium Custom Scrollbars for Astro Cockpits */
