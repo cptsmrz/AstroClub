@@ -1,102 +1,93 @@
 "use client";
 
-import { useRef } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import SectionTitle from "@/components/home/SectionTitle";
 
-const EVENT_IMAGES = [
+const EVENTS = [
   { 
-    url: "/images/nebula_core_1782850389800.png", 
-    title: "Observatory Night Setup", 
-    desc: "Setting up our custom refractor rigs at the campus field." 
+    id: "stargazing-winter-arc-3",
+    url: "/images/events/stargazing-winter-arc-3.0/img-1.jpg", 
+    title: "Winter Arc Stargazing 3.0", 
+    desc: "Deep sky observations under peak winter visibility.",
+    tag: "Recent"
   },
   { 
-    url: "/images/observatory_silhouette_1782850434886.png", 
-    title: "Astrophotography Lab", 
-    desc: "Processing stellar coordinates and long-exposure deep space frames." 
+    id: "stellar-showdown",
+    url: "/images/events/stellar-showdown/img-1.jpg", 
+    title: "Stellar Showdown", 
+    desc: "Astro-trivia and telescope alignment competition.",
+    tag: "Competition"
   },
   { 
-    url: "/images/saturn_real_1782856388535.png", 
-    title: "Instrumentation Workshop", 
-    desc: "Grinding mirrors and calibrating Newtonian optical components." 
+    id: "stargazing-event-2024",
+    url: "/images/events/stargazing-event-2024/img-1.jpg", 
+    title: "Winter Arc Stargazing", 
+    desc: "Mapping the Orion nebula and Jovian moons.",
+    tag: "Observation"
   },
   { 
-    url: "/images/satellite_1782850416840.png", 
-    title: "Public Viewing Session", 
-    desc: "Inviting university freshmen to trace lunar craters and planet positions." 
+    id: "telescope-making-workshop",
+    url: "/images/events/telescope-making-workshop/img-1.jpg", 
+    title: "Telescope Making", 
+    desc: "Building Newtonians from scratch.",
+    tag: "Workshop"
   }
 ];
 
 export default function AstroGallery() {
-  const clubWorkScrollRef = useRef<HTMLDivElement>(null);
-
-  const scrollClubWork = (direction: "left" | "right") => {
-    if (clubWorkScrollRef.current) {
-      const offset = direction === "left" ? -350 : 350;
-      clubWorkScrollRef.current.scrollBy({ left: offset, behavior: "smooth" });
-    }
-  };
-
   return (
     <motion.section 
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="w-full border-t border-slate-900 pt-10"
+      className="w-full mt-8"
     >
-      <SectionTitle
-        actions={
-          <div className="flex gap-2">
-            <button 
-              onClick={() => scrollClubWork('left')}
-              className="p-1.5 rounded-lg border border-slate-850 bg-slate-950/40 text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95 cursor-pointer hover:bg-slate-900/35"
-              aria-label="Scroll left"
-            >
-              ←
-            </button>
-            <button 
-              onClick={() => scrollClubWork('right')}
-              className="p-1.5 rounded-lg border border-slate-850 bg-slate-950/40 text-slate-400 hover:text-white hover:border-slate-700 transition-all active:scale-95 cursor-pointer hover:bg-slate-900/35"
-              aria-label="Scroll right"
-            >
-              →
-            </button>
-          </div>
-        }
-      >
-        Club Work
-      </SectionTitle>
-      <div 
-        ref={clubWorkScrollRef}
-        className="grid grid-flow-col auto-cols-[280px] sm:auto-cols-[340px] gap-6 overflow-x-auto pb-4 custom-scrollbar snap-x scroll-smooth"
-      >
-        {EVENT_IMAGES.map((img, i) => (
-          <div 
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <SectionTitle>Event Archives</SectionTitle>
+          <p className="text-slate-400 text-sm md:text-base mt-2 font-body max-w-xl">
+            Explore thousands of photographs from our observation camps, workshops, and competitions.
+          </p>
+        </div>
+        <Link
+          href="/events"
+          className="group text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-500 transition-colors uppercase tracking-widest flex items-center gap-2 whitespace-nowrap px-5 py-2.5 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.4)]"
+        >
+          View All Events 
+          <span className="transform transition-transform group-hover:translate-x-1">→</span>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {EVENTS.map((event, i) => (
+          <Link
+            href={`/events#${event.id}`}
             key={i} 
-            className="snap-start rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden group hover:border-slate-800 transition-all duration-300 flex flex-col justify-between"
+            className="glass-panel group overflow-hidden flex flex-col cursor-pointer p-2"
           >
-            <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+            <div className="relative h-48 w-full overflow-hidden rounded-lg bg-slate-950">
               <img 
-                src={img.url} 
-                alt={img.title} 
+                src={event.url} 
+                alt={event.title} 
                 loading="lazy" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent pointer-events-none" />
-              <span className="absolute bottom-3 left-4 text-[9px] font-mono font-bold text-cyan-400 uppercase tracking-widest bg-slate-950/80 px-2.5 py-0.5 rounded border border-slate-900">
-                EVENT 0{i + 1}
-              </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80" />
+              <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded border border-white/10 z-10">
+                <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-widest">{event.tag}</span>
+              </div>
             </div>
-            <div className="p-4">
-              <h4 className="text-sm font-semibold text-white group-hover:text-cyan-400 transition-colors mb-1">
-                {img.title}
+            <div className="p-4 flex-grow flex flex-col justify-end">
+              <h4 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors mb-1.5 tracking-tight">
+                {event.title}
               </h4>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                {img.desc}
+              <p className="text-xs text-slate-400 leading-relaxed font-body">
+                {event.desc}
               </p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </motion.section>

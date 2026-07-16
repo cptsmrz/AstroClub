@@ -73,7 +73,7 @@ export async function POST(request: Request) {
       preferred_date: preferred_date || null,
       group_size: group_size || null,
       purpose: purpose?.trim() || null,
-    }]);
+    }] as any);
 
     if (error) throw error;
 

@@ -32,36 +32,45 @@ const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string
   }, [isInView, value]);
 
   return (
-    <span ref={ref} className="text-3xl font-bold tracking-tight text-white mb-1 bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+    <span ref={ref} className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-2 bg-gradient-to-br from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]">
       {displayValue}{suffix}
     </span>
   );
 };
 
 export default function StatsSection() {
+  const stats = [
+    { value: 40, suffix: "+", label: "Active Members" },
+    { value: 12, suffix: "+", label: "Telemetry Sessions" },
+    { value: 3, suffix: "", label: "Telescopes Built" },
+    { value: 2024, suffix: "", label: "Established Since" }
+  ];
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full border border-slate-900 bg-slate-950/30 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-black/20"
+      className="w-full glass-panel"
     >
-      <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:even:border-r-0 max-md:[&:nth-child(2)]:border-r-0 max-md:border-b max-md:pb-4 md:border-b-0">
-        <AnimatedNumber value={40} suffix="+" />
-        <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono mt-1">Active Members</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:border-b max-md:pb-4 md:border-b-0">
-        <AnimatedNumber value={12} suffix="+" />
-        <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono mt-1">Telemetry Sessions</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-center p-4 border-r border-slate-900/60 last:border-0 max-md:even:border-r-0 max-md:pt-4 md:pt-4 md:border-b-0">
-        <AnimatedNumber value={3} />
-        <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono mt-1">Telescopes Built</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-center p-4 last:border-0 max-md:pt-4 md:pt-4">
-        <AnimatedNumber value={2024} />
-        <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase font-mono mt-1">Established Since</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-0 w-full p-1 relative z-10">
+        {stats.map((stat, i) => (
+          <div 
+            key={stat.label} 
+            className={`flex flex-col items-center justify-center text-center p-6 md:p-8 
+              ${i !== 3 ? 'md:border-r border-white/5' : ''} 
+              ${(i === 0 || i === 1) ? 'max-md:border-b border-white/5' : ''}
+              ${(i % 2 === 0) ? 'max-md:border-r border-white/5' : ''}
+              hover:bg-white/[0.02] transition-colors duration-300
+            `}
+          >
+            <AnimatedNumber value={stat.value} suffix={stat.suffix} />
+            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase font-sans mt-2 group-hover:text-cyan-400 transition-colors">
+              {stat.label}
+            </span>
+          </div>
+        ))}
       </div>
     </motion.div>
   );

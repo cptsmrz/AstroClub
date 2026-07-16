@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import StarfieldCanvas from "@/components/StarfieldCanvas";
 import OrbitingPlanetCanvas from "@/components/OrbitingPlanetCanvas";
 import IntroCanvas, { type IntroPhase } from "@/components/IntroCanvas";
@@ -212,48 +213,73 @@ export default function HeroSection({ scrollOffset }: HeroSectionProps) {
         <StarfieldCanvas />
       </div>
 
-      <section className="relative w-full min-h-[85vh] py-8 md:py-12 overflow-hidden flex items-center border-b border-slate-900/40">
+      <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
         <div
-          className="relative w-full max-w-7xl mx-auto px-4 md:px-6 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-10 transition-all duration-75 ease-out"
+          className="relative w-full max-w-7xl mx-auto px-6 z-20 flex flex-col-reverse lg:flex-row items-center justify-between gap-12 transition-all duration-75 ease-out mt-16 lg:mt-0"
           style={{
             transform: `translateY(${scrollOffset * 0.22}px) scale(${Math.max(0.9, 1 - scrollOffset * 0.0006)})`,
             opacity: heroOpacity
           }}
         >
-          <div className="w-full lg:max-w-2xl text-left">
-            <span className="text-[10px] font-bold tracking-[0.4em] text-cyan-400 uppercase block mb-3">
+          <motion.div 
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="w-full lg:max-w-2xl text-left"
+          >
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-[11px] font-bold tracking-[0.3em] text-cyan-400 uppercase block mb-4 border-l-2 border-cyan-400 pl-3"
+            >
               Official Student Observatory Collective
-            </span>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.15]">
+            </motion.span>
+            
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6 leading-[1.1] font-sans">
               Witness the Unseen.<br />
-              <span className="bg-gradient-to-r from-slate-400 via-slate-100 to-slate-500 bg-clip-text text-transparent">Beyond the Stars.</span>
+              <span className="bg-gradient-to-r from-cyan-300 via-indigo-300 to-slate-100 bg-clip-text text-transparent">Beyond the Stars.</span>
             </h1>
-            <p className="text-sm md:text-base text-slate-400 leading-relaxed max-w-2xl mb-8">
-              A student collective trading sleep for photons. We grind mirrors, write tracking algorithms, and align optics to bring deep space down to campus rooftops. From nebulas to rocket launches, we explore it together.
+            
+            <p className="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-10 font-body opacity-90">
+              A student collective trading sleep for photons. We grind mirrors, write tracking algorithms, and align optics to bring deep space down to campus rooftops.
             </p>
 
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-5">
               <Link
                 href="/request"
-                className="rounded-lg bg-white px-5 py-3 text-xs font-semibold text-slate-950 transition-all hover:bg-slate-200 hover:scale-[1.02] shadow-lg shadow-white/5 active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-xl bg-white px-8 py-4 text-sm font-bold text-slate-950 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(255,255,255,0.15)]"
               >
-                Request Observation
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="relative z-10 flex items-center gap-2">
+                  Request Observation
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </span>
               </Link>
+              
               <Link
-                href="/about"
-                className="rounded-lg border border-slate-800 bg-slate-950/50 px-5 py-3 text-xs font-semibold text-slate-300 backdrop-blur-sm transition-all hover:border-slate-700 hover:text-white active:scale-[0.98]"
+                href="/events"
+                className="group rounded-xl border border-slate-700/50 bg-slate-900/30 backdrop-blur-md px-8 py-4 text-sm font-bold text-slate-200 transition-all hover:bg-slate-800/50 hover:border-cyan-500/30 active:scale-[0.98]"
               >
-                Meet The Crew
+                <span className="flex items-center gap-2">
+                  View Events Archive
+                </span>
               </Link>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="w-full lg:w-auto flex justify-center">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+            className="w-full lg:w-auto flex justify-center scale-90 lg:scale-100 pointer-events-none"
+          >
             <OrbitingPlanetCanvas />
-          </div>
+          </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-950 to-transparent z-10 pointer-events-none" />
+        {/* Cinematic gradient fade at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#020617] to-transparent z-10 pointer-events-none" />
       </section>
     </>
   );

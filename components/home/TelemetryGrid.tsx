@@ -23,12 +23,12 @@ interface CatalogItem {
 const CLUB_CATALOG: CatalogItem[] = [
   {
     title: "The Heart Nebula (IC 1805)",
-    desc: "Captured by Madhav Gupta using a custom aligned tracker rig at the CCASS observation camp. Explores the glowing ionized hydrogen emission fields in the constellation Cassiopeia.",
+    desc: "Captured by Madhav Gupta using a custom aligned tracker rig at the CCASS observation camp.",
     url: "/images/nebula_core_1782850389800.png"
   },
   {
     title: "Saturn Opposition",
-    desc: "Tracked during the planetary alignment phase. Features distinct Cassini division separation in the ring system.",
+    desc: "Tracked during the planetary alignment phase. Features distinct Cassini division separation.",
     url: "/images/saturn_real_1782856388535.png"
   },
   {
@@ -39,10 +39,10 @@ const CLUB_CATALOG: CatalogItem[] = [
 ];
 
 const SkeletonCard = () => (
-  <div className="animate-pulse rounded-2xl border border-slate-900 bg-slate-900/30 p-6">
-    <div className="h-44 rounded-lg bg-slate-900 mb-4" />
-    <div className="h-4 bg-slate-900 rounded w-3/4 mb-2" />
-    <div className="h-3 bg-slate-900 rounded w-1/2" />
+  <div className="glass-panel animate-pulse p-6 h-full min-h-[400px]">
+    <div className="h-44 rounded-xl bg-slate-800/50 mb-6" />
+    <div className="h-6 bg-slate-800/50 rounded-md w-3/4 mb-4" />
+    <div className="h-4 bg-slate-800/50 rounded-md w-1/2" />
   </div>
 );
 
@@ -108,160 +108,153 @@ export default function TelemetryGrid() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* COLUMN 1: NASA APOD (7 Cols) */}
-      <motion.section 
-        initial={{ opacity: 0, x: -30 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="lg:col-span-7 flex flex-col"
-      >
-        <SectionTitle>Daily Cosmic Focus
-          <span className="ml-auto text-[10px] font-bold tracking-widest text-slate-500 uppercase bg-slate-900/50 px-3 py-1 rounded-full border border-slate-800 font-mono">NASA APOD</span>
-        </SectionTitle>
-
-        {apodLoading ? (
-          <SkeletonCard />
-        ) : apod ? (
-          (() => {
-            const catalogIndex = new Date().getDate() % CLUB_CATALOG.length;
-            const catalogItem = CLUB_CATALOG[catalogIndex];
-            const isVideo = apod.media_type === "video";
-            return (
-              <div className="rounded-xl border border-slate-900 bg-slate-950/40 overflow-hidden shadow-xl shadow-black/20 backdrop-blur-md transition-all hover:border-slate-800/80">
-                <div className="relative h-60 md:h-80 w-full bg-slate-900/40">
-                  {isVideo ? (
-                    <a
-                      href={apod.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full h-full relative group cursor-pointer"
-                    >
+    <div className="w-full">
+      <SectionTitle>Global Telemetry</SectionTitle>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
+        {/* COLUMN 1: NASA APOD (7 Cols) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="lg:col-span-7 flex flex-col"
+        >
+          {apodLoading ? (
+            <SkeletonCard />
+          ) : apod ? (
+            (() => {
+              const catalogIndex = new Date().getDate() % CLUB_CATALOG.length;
+              const catalogItem = CLUB_CATALOG[catalogIndex];
+              const isVideo = apod.media_type === "video";
+              return (
+                <div className="glass-panel group overflow-hidden h-full flex flex-col">
+                  <div className="relative h-64 md:h-80 w-full overflow-hidden">
+                    {isVideo ? (
+                      <a
+                        href={apod.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full h-full relative cursor-pointer"
+                      >
+                        <img
+                          src={apod.thumbnail_url || catalogItem.url}
+                          alt={apod.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity opacity-0 group-hover:opacity-100">
+                           <div className="w-16 h-16 rounded-full bg-cyan-500/80 backdrop-blur-md flex items-center justify-center text-white font-bold tracking-widest text-xs uppercase shadow-[0_0_30px_rgba(6,182,212,0.6)]">
+                             PLAY
+                           </div>
+                        </div>
+                      </a>
+                    ) : (
                       <img
-                        src={apod.thumbnail_url || catalogItem.url}
+                        src={apod.url}
                         alt={apod.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-x-0 bottom-0 bg-slate-950/85 backdrop-blur-sm border-t border-slate-900 px-4 py-3 flex items-center justify-between z-20 text-[11px]">
-                        <span className="text-slate-350 flex items-center gap-1.5 font-medium">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                          📹 Today&apos;s NASA APOD is a video. Tap to view.
-                        </span>
-                        <span className="text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">
-                          Watch Video →
-                        </span>
-                      </div>
-                    </a>
-                  ) : (
-                    <img
-                      src={apod.url}
-                      alt={apod.title}
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                </div>
-                <div className="p-5 md:p-6">
-                  <h3 className="text-lg font-semibold text-white mb-2 leading-snug">
-                    {apod.title}
-                  </h3>
-                  
-                  {isVideo && (
-                    <div className="text-[10px] font-bold tracking-widest text-slate-500 uppercase mb-3">
-                      NASA Video Link
+                    )}
+                    <div className="absolute top-4 left-4">
+                      <span className="text-[10px] font-bold tracking-widest text-cyan-300 uppercase bg-slate-900/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-cyan-500/30 font-sans shadow-lg shadow-black/50">
+                        NASA APOD
+                      </span>
                     </div>
-                  )}
-
-                  <div className="relative">
-                    <p
-                      className={`text-xs md:text-sm text-slate-400 leading-relaxed transition-all duration-300 ${
-                        !isExpanded ? "line-clamp-3" : ""
-                      }`}
-                    >
-                      {apod.explanation}
-                    </p>
-                    <button
-                      onClick={() => setIsExpanded(!isExpanded)}
-                      className="mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
-                    >
-                      {isExpanded ? "Show less" : "Read more"}
-                      <span>{isExpanded ? "↑" : "↓"}</span>
-                    </button>
+                  </div>
+                  <div className="p-6 md:p-8 flex-grow flex flex-col">
+                    <h3 className="text-2xl font-bold text-white mb-3 font-sans tracking-tight">
+                      {apod.title}
+                    </h3>
+                    
+                    <div className="relative flex-grow">
+                      <p
+                        className={`text-sm text-slate-300 leading-relaxed font-body transition-all duration-300 ${
+                          !isExpanded ? "line-clamp-4" : ""
+                        }`}
+                      >
+                        {apod.explanation}
+                      </p>
+                      <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="mt-4 text-xs font-bold uppercase tracking-wider text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-2"
+                      >
+                        {isExpanded ? "Minimize" : "Read Database"}
+                        <span className={`transform transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>↓</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })()
-        ) : (
-          <p className="text-slate-500 text-xs">Failed to load Astronomy Picture of the Day.</p>
-        )}
-      </motion.section>
+              );
+            })()
+          ) : (
+            <div className="glass-panel p-8 flex items-center justify-center">
+              <p className="text-slate-500 text-sm">Telemetry feed offline.</p>
+            </div>
+          )}
+        </motion.div>
 
-      {/* COLUMN 2: Stella Nocturna & Session Request (5 Cols) */}
-      <motion.section 
-        initial={{ opacity: 0, x: 30 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-        className="lg:col-span-5 flex flex-col h-full"
-      >
-        <SectionTitle>Observation Deck</SectionTitle>
-
-        <div className="rounded-xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-md shadow-xl shadow-black/20 flex flex-col justify-between flex-grow min-h-[340px] transition-all hover:border-slate-800/80">
-          <div>
-            <span className="text-[10px] font-bold tracking-[0.25em] text-slate-500 uppercase">Weekend Sessions</span>
-            <h3 className="text-lg font-bold text-white mt-1 mb-4">
+        {/* COLUMN 2: Stella Nocturna & Session Request (5 Cols) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.15 }}
+          className="lg:col-span-5 flex flex-col"
+        >
+          <div className="glass-panel p-8 h-full flex flex-col relative overflow-hidden group">
+            {/* Background subtle glow */}
+            <div className="absolute -right-24 -top-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-cyan-500/10" />
+            
+            <span className="text-[10px] font-bold tracking-[0.3em] text-slate-400 uppercase font-sans">Public Sessions</span>
+            <h3 className="text-3xl font-bold text-white mt-2 mb-6 tracking-tight">
               Stella Nocturna
             </h3>
             
-            <div className="space-y-4 mb-6 text-xs md:text-sm">
-              <div className="flex items-start gap-3 group">
-                <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🌌</span>
+            <div className="space-y-6 mb-8 flex-grow">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-xl shrink-0">🌌</div>
                 <div>
-                  <h4 className="font-semibold text-slate-200">Zero Cost Stargazing</h4>
-                  <p className="text-[11px] text-slate-450 mt-0.5">Free public observation camps. Just bring curiosity.</p>
+                  <h4 className="font-bold text-slate-100 text-sm">Zero Cost Stargazing</h4>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">Free public observation camps. Just bring curiosity.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 group">
-                <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🔭</span>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-xl shrink-0">🔭</div>
                 <div>
-                  <h4 className="font-semibold text-slate-200">Handcrafted Gear Only</h4>
-                  <p className="text-[11px] text-slate-450 mt-0.5">Operate student-built Newtonian reflector scopes.</p>
+                  <h4 className="font-bold text-slate-100 text-sm">Handcrafted Gear</h4>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">Operate student-built Newtonian reflector scopes.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 group">
-                <span className="text-base select-none shrink-0 group-hover:scale-110 transition-transform">🛰️</span>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-xl shrink-0">🛰️</div>
                 <div>
-                  <h4 className="font-semibold text-slate-200">Satellite Tracking</h4>
-                  <p className="text-[11px] text-slate-450 mt-0.5">Map constellations and trace live satellite trains.</p>
+                  <h4 className="font-bold text-slate-100 text-sm">Satellite Tracking</h4>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">Map constellations and trace live satellite trains.</p>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3.5 text-xs md:text-sm mb-8 pt-4 border-t border-slate-900/60">
-              <div className="flex items-start gap-3">
-                <span className="text-xs text-slate-500 shrink-0 select-none">📍</span>
-                <div>
-                  <p className="text-[11px] text-slate-400">Basketball Court, GLA University Campus</p>
-                </div>
+            <div className="space-y-3 mb-8 pt-6 border-t border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                <p className="text-xs text-slate-300 font-medium">Basketball Court, GLA University</p>
               </div>
-              <div className="flex items-start gap-3">
-                <span className="text-xs text-slate-500 shrink-0 select-none">⏰</span>
-                <div>
-                  <p className="text-[11px] text-slate-400">Fridays & Saturdays, 5:00 PM onwards</p>
-                </div>
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-indigo-400" />
+                <p className="text-xs text-slate-300 font-medium">Fridays & Saturdays, 5:00 PM</p>
               </div>
             </div>
+
+            <Link
+              href="/request"
+              className="w-full relative overflow-hidden rounded-xl bg-white px-6 py-4 text-sm font-bold text-slate-950 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center group/btn"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 to-white opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300" />
+              <span className="relative z-10">Book Session Ticket</span>
+            </Link>
           </div>
-
-          <Link
-            href="/request"
-            className="w-full text-center rounded-lg bg-white px-4 py-2.5 text-xs font-semibold text-slate-950 transition-all hover:bg-slate-200 active:scale-[0.99] hover:scale-[1.01]"
-          >
-            Book Session Ticket
-          </Link>
-        </div>
-      </motion.section>
+        </motion.div>
+      </div>
     </div>
   );
 }
