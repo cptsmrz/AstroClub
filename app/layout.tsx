@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll";
 import CustomCursor from "@/components/CustomCursor";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 
 const cinzel = Cinzel({ subsets: ['latin'], variable: '--font-serif' });
 const delaGothic = Dela_Gothic_One({ weight: '400', subsets: ['latin'], variable: '--font-dela' });
@@ -62,6 +63,7 @@ export default function RootLayout({
         <Footer />
         <CookieBanner />
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
