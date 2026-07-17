@@ -32,7 +32,7 @@ const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string
   }, [isInView, value]);
 
   return (
-    <span ref={ref} className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-2 bg-gradient-to-br from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+    <span ref={ref} className="text-4xl md:text-5xl font-bold tracking-tighter text-slate-900 dark:text-white mb-2 bg-gradient-to-br from-cyan-600 via-indigo-600 to-slate-900 dark:from-white dark:via-slate-200 dark:to-cyan-400 bg-clip-text text-transparent drop-shadow-sm dark:drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]">
       {displayValue}{suffix}
     </span>
   );
@@ -41,9 +41,9 @@ const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string
 export default function StatsSection() {
   const stats = [
     { value: 40, suffix: "+", label: "Active Members" },
-    { value: 12, suffix: "+", label: "Telemetry Sessions" },
-    { value: 3, suffix: "", label: "Telescopes Built" },
-    { value: 2024, suffix: "", label: "Established Since" }
+    { value: 50, suffix: "+", label: "Telemetry Sessions" },
+    { value: 10, suffix: "+", label: "Astrophysics Events & Talks" },
+    { value: 2024, suffix: "", label: "Established Since", isStatic: true }
   ];
 
   return (
@@ -51,27 +51,28 @@ export default function StatsSection() {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-      className="w-full glass-panel"
+      transition={{ duration: 0.8 }}
+      className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-12 w-full"
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-0 w-full p-1 relative z-10">
-        {stats.map((stat, i) => (
-          <div 
-            key={stat.label} 
-            className={`flex flex-col items-center justify-center text-center p-6 md:p-8 
-              ${i !== 3 ? 'md:border-r border-white/5' : ''} 
-              ${(i === 0 || i === 1) ? 'max-md:border-b border-white/5' : ''}
-              ${(i % 2 === 0) ? 'max-md:border-r border-white/5' : ''}
-              hover:bg-white/[0.02] transition-colors duration-300
-            `}
-          >
-            <AnimatedNumber value={stat.value} suffix={stat.suffix} />
-            <span className="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase font-sans mt-2 group-hover:text-cyan-400 transition-colors">
-              {stat.label}
+      {stats.map((stat, i) => (
+        <motion.div 
+          key={i}
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: i * 0.1 }}
+          className="bg-white/50 dark:bg-slate-900/40 border border-slate-900/10 dark:border-slate-800/60 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center hover:bg-slate-100/50 dark:hover:bg-slate-900/60 transition-colors rounded-xl shadow-lg dark:shadow-none"
+        >
+          {stat.isStatic ? (
+            <span className="text-4xl md:text-5xl font-bold tracking-tighter text-slate-900 dark:text-white mb-2 bg-gradient-to-br from-cyan-600 via-indigo-600 to-slate-900 dark:from-white dark:via-slate-200 dark:to-cyan-400 bg-clip-text text-transparent drop-shadow-sm dark:drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+              {stat.value}{stat.suffix}
             </span>
-          </div>
-        ))}
-      </div>
+          ) : (
+            <AnimatedNumber value={stat.value} suffix={stat.suffix} />
+          )}
+          <span className="text-sm font-bold tracking-[0.2em] text-slate-600 dark:text-slate-500 uppercase font-mono">{stat.label}</span>
+        </motion.div>
+      ))}
     </motion.div>
   );
 }

@@ -13,7 +13,15 @@ const EVENTS_DATA = [
     description: "Deep sky observations under peak winter visibility. Members tracked Jovian moons, captured Orion nebula emissions, and explored deep space objects.",
     date: "March 24, 2026",
     pathPrefix: "/images/events/stargazing-winter-arc-3.0",
-    imageCount: 25,
+    imageCount: 24,
+  },
+  {
+    id: "stargazing-event-winter-arc",
+    title: "Stargazing Winter Arc",
+    description: "Late-night stargazing session observing deep sky objects and celestial mechanics.",
+    date: "Winter 2025",
+    pathPrefix: "/images/events/stargazing-event-winter-arc",
+    imageCount: 31,
   },
   {
     id: "stellar-showdown",

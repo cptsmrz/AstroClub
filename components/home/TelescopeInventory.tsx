@@ -82,15 +82,22 @@ export default function TelescopeInventory() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {telescopes.map((tele) => (
+          {telescopes.map((tele, index) => {
+            const fallbackImages = [
+              "/images/telescope1.jpg",
+              "/images/telescope2.jpg"
+            ];
+            const displayImage = tele.image_url || fallbackImages[index % fallbackImages.length];
+
+            return (
             <div
               key={tele.id}
               className="glass-panel group overflow-hidden flex flex-col"
             >
               <div className="h-56 w-full relative overflow-hidden bg-slate-950">
-                {tele.image_url ? (
+                {displayImage ? (
                   <img
-                    src={tele.image_url}
+                    src={displayImage}
                     alt={tele.name}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -117,7 +124,8 @@ export default function TelescopeInventory() {
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </motion.section>

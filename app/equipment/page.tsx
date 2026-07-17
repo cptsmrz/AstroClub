@@ -23,50 +23,7 @@ interface AstroCapture {
   image_url: string;
 }
 
-const STELLAR_CAPTURES: AstroCapture[] = [
-  {
-    title: "Andromeda Galaxy (M31)",
-    instrument: "8\" Newtonian Reflector",
-    credit: "Madhav Gupta",
-    date: "Oct 2025",
-    image_url: "/images/satellite_1782850416840.png"
-  },
-  {
-    title: "The Lagoon Nebula (M8)",
-    instrument: "Custom DSLR Star Tracker",
-    credit: "Aditya Varma",
-    date: "Aug 2025",
-    image_url: "/images/observatory_silhouette_1782850434886.png"
-  },
-  {
-    title: "Pleiades Star Cluster (M45)",
-    instrument: "Galilean Refractor Calibrator",
-    credit: "Hemang Shikhar Rai",
-    date: "Nov 2025",
-    image_url: "/images/saturn_real_1782856388535.png"
-  },
-  {
-    title: "Lunar Crater Copernicus",
-    instrument: "8\" Newtonian Reflector",
-    credit: "Prashant Chauhan",
-    date: "Sep 2025",
-    image_url: "/images/saturn_side_view_1782858094608.png"
-  },
-  {
-    title: "The Heart Nebula (IC 1805)",
-    instrument: "Custom DSLR Star Tracker",
-    credit: "Madhav Gupta",
-    date: "Dec 2025",
-    image_url: "/images/nebula_core_1782850389800.png"
-  },
-  {
-    title: "Great Nebula in Orion (M42)",
-    instrument: "8\" Newtonian Reflector",
-    credit: "Sameeraj",
-    date: "Jan 2026",
-    image_url: "/images/satellite_1782850416840.png"
-  }
-];
+// Captures will be loaded from API
 
 // --- Helpers ---
 function formatSpecKey(key: string): string {
@@ -118,6 +75,8 @@ export default function EquipmentPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCapture, setActiveCapture] = useState<AstroCapture | null>(null);
 
+  const [stellarCaptures, setStellarCaptures] = useState<AstroCapture[]>([]);
+
   const fetchTelescopes = async () => {
     setLoading(true);
     setErrorMsg(null);
@@ -138,8 +97,21 @@ export default function EquipmentPage() {
     }
   };
 
+  const fetchCaptures = async () => {
+    try {
+      const res = await fetch("/api/captures");
+      if (res.ok) {
+        const data = await res.json();
+        setStellarCaptures(data);
+      }
+    } catch (err) {
+      console.error("Error fetching captures:", err);
+    }
+  };
+
   useEffect(() => {
     fetchTelescopes();
+    fetchCaptures();
   }, []);
 
   const getStatusBadge = (status?: string) => {
@@ -226,7 +198,14 @@ export default function EquipmentPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {telescopes.map((telescope) => (
+              {telescopes.map((telescope, index) => {
+                const fallbackImages = [
+                  "/images/telescope1.jpg",
+                  "/images/telescope2.jpg"
+                ];
+                const displayImage = telescope.image_url || fallbackImages[index % fallbackImages.length];
+
+                return (
                 <div
                   key={telescope.id}
                   className="group rounded-2xl border border-slate-900 bg-slate-950/40 overflow-hidden transition-all duration-300 hover:border-slate-750 hover:bg-slate-900/20 hover:scale-[1.01] hover:shadow-xl hover:shadow-black/30 flex flex-col h-full"
@@ -236,9 +215,9 @@ export default function EquipmentPage() {
                     {/* Status Badge */}
                     {getStatusBadge(telescope.availability_status)}
 
-                    {telescope.image_url ? (
+                    {displayImage ? (
                       <Image
-                        src={telescope.image_url}
+                        src={displayImage}
                         alt={telescope.name}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -285,7 +264,8 @@ export default function EquipmentPage() {
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -305,7 +285,7 @@ export default function EquipmentPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {STELLAR_CAPTURES.map((capture, idx) => (
+            {stellarCaptures.map((capture, idx) => (
               <div
                 key={idx}
                 onClick={() => setActiveCapture(capture)}

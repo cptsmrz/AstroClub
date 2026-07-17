@@ -225,32 +225,33 @@ export default function HeroSection({ scrollOffset }: HeroSectionProps) {
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-            className="w-full lg:max-w-2xl text-left"
+            className="w-full lg:max-w-3xl text-left"
           >
             <motion.span 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-[11px] font-bold tracking-[0.3em] text-cyan-400 uppercase block mb-4 border-l-2 border-cyan-400 pl-3"
+              className="text-[11px] font-bold tracking-[0.3em] text-cyan-600 dark:text-cyan-400 uppercase block mb-4 border-l-2 border-cyan-600 dark:border-cyan-400 pl-3"
             >
               Official Student Observatory Collective
             </motion.span>
             
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-white mb-6 leading-[1.1] font-sans">
-              Witness the Unseen.<br />
-              <span className="bg-gradient-to-r from-cyan-300 via-indigo-300 to-slate-100 bg-clip-text text-transparent">Beyond the Stars.</span>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter text-slate-900 dark:text-white mb-6 leading-[1.1] font-sans">
+              Rage Against<br />
+              <span className="bg-gradient-to-r from-cyan-500 to-indigo-600 dark:from-cyan-300 dark:via-indigo-300 dark:to-slate-100 bg-clip-text text-transparent">The Dying of the Light.</span>
             </h1>
             
-            <p className="text-base md:text-lg text-slate-300 leading-relaxed max-w-xl mb-10 font-body opacity-90">
-              A student collective trading sleep for photons. We grind mirrors, write tracking algorithms, and align optics to bring deep space down to campus rooftops.
+            <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mb-10 font-body opacity-90">
+              <span className="italic block mb-3 font-serif">"I, a universe of atoms, an atom in the universe." — Richard Feynman.</span>
+              We are a collective trading sleep for photons, standing on a pale blue dot. We build optics to stare into the abyss of time and bring the majesty of the cosmos down to earth. We do not go gentle into that good night.
             </p>
 
             <div className="flex flex-wrap gap-5">
               <Link
                 href="/request"
-                className="group relative overflow-hidden rounded-xl bg-white px-8 py-4 text-sm font-bold text-slate-950 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                className="group relative overflow-hidden rounded-xl bg-slate-900 dark:bg-white px-8 py-4 text-sm font-bold text-white dark:text-slate-950 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg dark:shadow-[0_0_20px_rgba(255,255,255,0.15)]"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-slate-900 dark:from-cyan-200 dark:to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-2">
                   Request Observation
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -259,7 +260,7 @@ export default function HeroSection({ scrollOffset }: HeroSectionProps) {
               
               <Link
                 href="/events"
-                className="group rounded-xl border border-slate-700/50 bg-slate-900/30 backdrop-blur-md px-8 py-4 text-sm font-bold text-slate-200 transition-all hover:bg-slate-800/50 hover:border-cyan-500/30 active:scale-[0.98]"
+                className="group rounded-xl border border-slate-300 dark:border-slate-700/50 bg-slate-100/50 dark:bg-slate-900/30 backdrop-blur-md px-8 py-4 text-sm font-bold text-slate-900 dark:text-slate-200 transition-all hover:bg-slate-200 dark:hover:bg-slate-800/50 hover:border-cyan-500/30 active:scale-[0.98]"
               >
                 <span className="flex items-center gap-2">
                   View Events Archive
@@ -279,7 +280,7 @@ export default function HeroSection({ scrollOffset }: HeroSectionProps) {
         </div>
 
         {/* Cinematic gradient fade at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#020617] to-transparent z-10 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-50 dark:from-slate-950 to-transparent z-10 pointer-events-none transition-colors duration-500" />
       </section>
     </>
   );

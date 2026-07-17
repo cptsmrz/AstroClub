@@ -57,14 +57,20 @@ export default function OrbitingPlanetCanvas() {
       ctx.arc(cx, cy, 220, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Draw Saturn Real-Photo (rendered with Screen composite operation to blend dark backgrounds)
+      // 2. Draw Saturn Real-Photo 
       if (imgLoaded) {
         ctx.save();
-        ctx.globalCompositeOperation = "screen";
         ctx.translate(cx, cy);
         // Responsive tilt based on mouse coordinate shifts
         ctx.rotate(mouse.x * 0.05);
         const imgSize = 370;
+
+        // Draw a black circle behind Saturn to fill in transparent shadows
+        ctx.beginPath();
+        ctx.arc(0, 0, imgSize * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = "#000000";
+        ctx.fill();
+
         ctx.drawImage(saturnImg, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
         ctx.restore();
       }

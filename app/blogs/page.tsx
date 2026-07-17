@@ -1315,7 +1315,7 @@ export default function BlogsPage() {
       )}
 
       {/* WRITE BLOG POST PANEL */}
-      {showWrite && user && profile && profile.status !== "restricted" && !lockout.isLocked && (
+      {showWrite && user && !lockout.isLocked && (
         <div className="relative z-10 rounded-2xl border border-slate-900 bg-slate-950/85 p-6 md:p-8 mb-12 shadow-2xl backdrop-blur-md">
           <div className="flex items-center justify-between border-b border-slate-900 pb-4 mb-6">
             <div>
