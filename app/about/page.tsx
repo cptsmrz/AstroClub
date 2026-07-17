@@ -514,39 +514,61 @@ const MemberCard = ({
   colorTheme: "cyan" | "indigo" | "violet" | "emerald"; 
 }) => {
   const themes = {
-    cyan: { text: "text-cyan-400", border: "border-cyan-500/30", bgHover: "hover:bg-cyan-950/20", glow: "from-cyan-500/20" },
-    indigo: { text: "text-indigo-400", border: "border-indigo-500/30", bgHover: "hover:bg-indigo-950/20", glow: "from-indigo-500/20" },
-    violet: { text: "text-violet-400", border: "border-violet-500/30", bgHover: "hover:bg-violet-950/20", glow: "from-violet-500/20" },
-    emerald: { text: "text-emerald-400", border: "border-emerald-500/30", bgHover: "hover:bg-emerald-950/20", glow: "from-emerald-500/20" },
+    cyan: { text: "text-cyan-400", border: "group-hover:border-cyan-500/40", bgHover: "hover:bg-cyan-950/10", glow: "from-cyan-500/20", iconGlow: "shadow-[0_0_15px_rgba(34,211,238,0.3)]", dot: "bg-cyan-500" },
+    indigo: { text: "text-indigo-400", border: "group-hover:border-indigo-500/40", bgHover: "hover:bg-indigo-950/10", glow: "from-indigo-500/20", iconGlow: "shadow-[0_0_15px_rgba(129,140,248,0.3)]", dot: "bg-indigo-500" },
+    violet: { text: "text-violet-400", border: "group-hover:border-violet-500/40", bgHover: "hover:bg-violet-950/10", glow: "from-violet-500/20", iconGlow: "shadow-[0_0_15px_rgba(167,139,250,0.3)]", dot: "bg-violet-500" },
+    emerald: { text: "text-emerald-400", border: "group-hover:border-emerald-500/40", bgHover: "hover:bg-emerald-950/10", glow: "from-emerald-500/20", iconGlow: "shadow-[0_0_15px_rgba(52,211,153,0.3)]", dot: "bg-emerald-500" },
   };
   
   const t = themes[colorTheme] || themes.cyan;
 
   return (
-    <div className={`group relative h-full flex flex-col p-6 rounded-3xl border border-slate-900 bg-black/40 backdrop-blur-md transition-all duration-700 hover:border-slate-700 ${t.bgHover} overflow-hidden`}>
-      <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl ${t.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-3xl pointer-events-none`} />
+    <div className={`group relative h-full flex flex-col p-6 border border-white/5 bg-black/60 backdrop-blur-xl transition-all duration-700 ${t.border} ${t.bgHover} overflow-hidden rounded-2xl`}>
+      {/* Background ambient glow */}
+      <div className={`absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl ${t.glow} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 blur-[80px] pointer-events-none`} />
       
-      <div className="flex items-center gap-4 mb-5 z-10">
-        {member.photo_url ? (
-          <div className="relative w-14 h-14 rounded-full overflow-hidden border border-slate-800 shadow-xl">
-            <Image src={member.photo_url} alt={member.name} fill sizes="56px" className="object-cover" />
+      {/* Top tech accent line */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:via-white/30 transition-colors duration-700" />
+      
+      {/* Holographic grid overlay */}
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-screen pointer-events-none" />
+
+      <div className="flex items-start justify-between gap-4 mb-6 z-10">
+        <div className="flex items-center gap-4">
+          {member.photo_url ? (
+            <div className={`relative w-16 h-16 rounded-full overflow-hidden border border-white/10 grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:${t.iconGlow}`}>
+              <Image src={member.photo_url} alt={member.name} fill sizes="64px" className="object-cover" />
+            </div>
+          ) : (
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold font-terminal tracking-wider border border-white/10 bg-black text-slate-500 group-hover:${t.text} transition-colors duration-700 group-hover:${t.iconGlow}`}>
+              {member.initials}
+            </div>
+          )}
+          <div className="flex flex-col">
+            <h3 className="text-xl font-bold text-slate-200 tracking-tight group-hover:text-white transition-colors font-body">{member.name}</h3>
+            <p className={`text-[11px] uppercase tracking-[0.25em] font-bold ${t.text} font-mono mt-1`}>{member.role}</p>
           </div>
-        ) : (
-          <div className={`w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold font-mono border border-slate-800 bg-slate-950 text-slate-400 group-hover:${t.text} transition-colors shadow-inner`}>
-            {member.initials}
-          </div>
-        )}
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-white tracking-wide group-hover:text-slate-200 transition-colors">{member.name}</h3>
-          <p className={`text-[10px] uppercase tracking-[0.2em] font-bold ${t.text} mt-1`}>{member.role}</p>
         </div>
+        
         {member.linkedin && (
-          <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-white transition-colors" title="LinkedIn">
-             <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+          <a href={member.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-white transition-colors p-2" title="LinkedIn">
+             <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
           </a>
         )}
       </div>
-      <p className="text-slate-400 text-sm leading-relaxed z-10 flex-grow font-serif italic">{member.bio}</p>
+      
+      <div className="z-10 flex-grow flex flex-col justify-between">
+        <p className="text-slate-400 text-sm leading-relaxed font-serif italic mb-6">{member.bio}</p>
+        
+        {/* Datapad bottom strip */}
+        <div className="flex items-center justify-between border-t border-white/5 pt-4 mt-auto">
+          <div className="flex items-center gap-2">
+            <span className={`w-1.5 h-1.5 rounded-full ${t.dot} animate-pulse`} />
+            <span className="text-[9px] font-terminal uppercase tracking-widest text-slate-500 group-hover:text-slate-400 transition-colors">Astro.ID // Authorized</span>
+          </div>
+          <span className="text-[9px] font-terminal uppercase tracking-widest text-slate-600">SYS.ON</span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -584,7 +606,7 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.2, delay: 0.4 }}
-            className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-500 tracking-tighter mb-8 max-w-5xl"
+            className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-slate-500 tracking-tighter mb-16 max-w-5xl"
             style={{ lineHeight: 1.1 }}
           >
             We observe the abyss, and the abyss reveals its light.
@@ -594,7 +616,7 @@ export default function AboutPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5, delay: 0.8 }}
-            className="text-lg md:text-2xl text-slate-400 max-w-3xl font-serif italic leading-relaxed"
+            className="text-lg md:text-2xl text-slate-400 max-w-3xl font-serif italic leading-relaxed mb-12"
           >
             "For we are made of star-stuff. We are a way for the cosmos to know itself." 
             <br/><span className="text-sm font-sans not-italic text-slate-500 mt-4 block uppercase tracking-widest">— The AstroClub Collective</span>
@@ -638,7 +660,7 @@ export default function AboutPage() {
                   <h4 className="text-3xl font-bold text-white mb-2">The Founders</h4>
                   <p className="text-slate-500 font-serif italic mb-12">"Setting the cornerstone in the dark."</p>
                   <div className="flex items-end justify-between border-t border-white/10 pt-6">
-                    <span className="text-sm text-slate-400">Oct '23 - Jul '25</span>
+                    <span className="text-sm text-slate-400">Feb '24 - Jan '25</span>
                     <span className="text-cyan-400 group-hover:translate-x-2 transition-transform">Explore →</span>
                   </div>
                </button>
@@ -650,7 +672,7 @@ export default function AboutPage() {
                   <h4 className="text-3xl font-bold text-white mb-2">The Expansion</h4>
                   <p className="text-slate-500 font-serif italic mb-12">"Forging the structures of tomorrow."</p>
                   <div className="flex items-end justify-between border-t border-white/10 pt-6">
-                    <span className="text-sm text-slate-400">Aug '25 - Jan '26</span>
+                    <span className="text-sm text-slate-400">Feb '25 - Jan '26</span>
                     <span className="text-indigo-400 group-hover:translate-x-2 transition-transform">Explore →</span>
                   </div>
                </button>
@@ -675,8 +697,8 @@ export default function AboutPage() {
 
           {activeTab !== "all" && (() => {
             const batchMap = {
-              "24": { members: BATCH_24, label: "The Founders", subtitle: "Era I · Oct '23 – Jul '25", theme: "cyan" as const, quote: poeticQuotes[0] },
-              "25": { members: BATCH_25, label: "The Expansion", subtitle: "Era II · Aug '25 – Jan '26", theme: "indigo" as const, quote: poeticQuotes[2] },
+              "24": { members: BATCH_24, label: "The Founders", subtitle: "Era I · Feb '24 – Jan '25", theme: "cyan" as const, quote: poeticQuotes[0] },
+              "25": { members: BATCH_25, label: "The Expansion", subtitle: "Era II · Feb '25 – Jan '26", theme: "indigo" as const, quote: poeticQuotes[2] },
               "26": { members: BATCH_26, label: "The Legacy", subtitle: "Era III · Feb '26 – Present", theme: "violet" as const, quote: poeticQuotes[1] },
             };
             const b = batchMap[activeTab as "24" | "25" | "26"];
